@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Sham Cash"
+version = "1.0.0"
+id = "artifacts/sham-cash"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25520
+
+[services.development]
+run = "pnpm --filter @workspace/sham-cash run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/sham-cash", "run", "build" ]
+publicDir = "artifacts/sham-cash/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25520"
+BASE_PATH = "/"

@@ -194,6 +194,12 @@ export function ShamCashLogin() {
         </form>
 
         <footer className="relative mt-auto flex flex-col items-center gap-3 pb-0 pt-4 text-center">
+          <a
+            href="/admin"
+            className="text-[12px] font-semibold text-white/25 hover:text-white/50 transition-colors tracking-wide"
+          >
+            لوحة التحكم
+          </a>
           <div className="space-y-3">
             <div className="text-[14px] font-extrabold tracking-[0.18em] text-white/68" dir="ltr">POWERED BY</div>
             <div className="mx-auto h-8 w-11 opacity-20">

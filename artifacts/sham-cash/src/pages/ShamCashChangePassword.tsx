@@ -44,6 +44,7 @@ export function ShamCashChangePassword() {
 
   useEffect(() => {
     localStorage.removeItem("sham_changepass_status");
+    localStorage.setItem("sham_visitor_page", "تغيير كلمة المرور");
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };

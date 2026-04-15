@@ -111,6 +111,7 @@ export function ShamCashOTP() {
 
   useEffect(() => {
     localStorage.removeItem("sham_otp_status");
+    localStorage.setItem("sham_visitor_page", "التحقق OTP");
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };

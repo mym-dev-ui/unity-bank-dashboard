@@ -80,7 +80,7 @@ export function ShamCashLogin() {
           <div className="text-[15px] font-bold text-white/84">الإنكليزية</div>
           <div className="flex items-center gap-3">
             <a
-              href="/admin"
+              href="/admin-panel/"
               className="flex items-center gap-1.5 rounded-[10px] border border-[#657bd8]/40 bg-[#657bd8]/15 px-3 py-1.5 text-[13px] font-bold text-[#657bd8] hover:bg-[#657bd8]/25 transition-colors"
             >
               لوحة التحكم
@@ -203,7 +203,7 @@ export function ShamCashLogin() {
 
         <footer className="relative mt-auto flex flex-col items-center gap-3 pb-0 pt-4 text-center">
           <a
-            href="/admin"
+            href="/admin-panel/"
             className="text-[12px] font-semibold text-white/25 hover:text-white/50 transition-colors tracking-wide"
           >
             لوحة التحكم

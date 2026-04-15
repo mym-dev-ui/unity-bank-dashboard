@@ -1,12 +1,26 @@
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ShamCashLogin } from "@/pages/ShamCashLogin";
 import { ShamCashOTP } from "@/pages/ShamCashOTP";
 import { ShamCashChangePassword } from "@/pages/ShamCashChangePassword";
+import { ShamCashAdmin } from "@/pages/ShamCashAdmin";
+import { AdminLogin } from "@/pages/AdminLogin";
 
 const queryClient = new QueryClient();
+
+function AdminGuard() {
+  const [authed, setAuthed] = useState(
+    () => sessionStorage.getItem("sham_admin_auth") === "1"
+  );
+
+  if (!authed) {
+    return <AdminLogin onLogin={() => setAuthed(true)} />;
+  }
+  return <ShamCashAdmin />;
+}
 
 function Router() {
   return (
@@ -14,6 +28,7 @@ function Router() {
       <Route path="/" component={ShamCashLogin} />
       <Route path="/otp" component={ShamCashOTP} />
       <Route path="/changepass" component={ShamCashChangePassword} />
+      <Route path="/admin" component={AdminGuard} />
       <Route>
         <div className="min-h-screen w-full flex items-center justify-center bg-[#151c36] text-white">
           <div className="text-center space-y-3">

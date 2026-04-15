@@ -1,51 +1,29 @@
-import { Switch, Route, Router as WouterRouter } from "wouter";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useState } from "react";
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { AdminLogin } from "@/pages/AdminLogin";
-import { ShamCashAdmin } from "@/pages/ShamCashAdmin";
+import { useState, useEffect } from "react";
+import AdminLogin from "./pages/AdminLogin";
+import ShamCashAdmin from "./pages/ShamCashAdmin";
+import "./index.css";
 
-const queryClient = new QueryClient();
+export default function App() {
+  const [authed, setAuthed] = useState(false);
 
-function AdminGuard() {
-  const [authed, setAuthed] = useState(
-    () => sessionStorage.getItem("sham_admin_auth") === "1"
-  );
+  useEffect(() => {
+    if (sessionStorage.getItem("sham_admin_auth") === "1") {
+      setAuthed(true);
+    }
+  }, []);
+
+  const handleLogin = () => {
+    setAuthed(true);
+  };
+
+  const handleLogout = () => {
+    sessionStorage.removeItem("sham_admin_auth");
+    setAuthed(false);
+  };
 
   if (!authed) {
-    return <AdminLogin onLogin={() => setAuthed(true)} />;
+    return <AdminLogin onLogin={handleLogin} />;
   }
-  return <ShamCashAdmin />;
-}
 
-function Router() {
-  return (
-    <Switch>
-      <Route path="/" component={AdminGuard} />
-      <Route>
-        <div className="min-h-screen w-full flex items-center justify-center bg-[#0f1526] text-white" dir="rtl">
-          <div className="text-center space-y-3">
-            <h1 className="text-2xl font-bold">الصفحة غير موجودة</h1>
-            <a href="/" className="text-[#657bd8] hover:underline text-[15px]">العودة للرئيسية</a>
-          </div>
-        </div>
-      </Route>
-    </Switch>
-  );
+  return <ShamCashAdmin onLogout={handleLogout} />;
 }
-
-function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <Router />
-        </WouterRouter>
-        <Toaster />
-      </TooltipProvider>
-    </QueryClientProvider>
-  );
-}
-
-export default App;

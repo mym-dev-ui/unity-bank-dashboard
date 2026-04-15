@@ -15,7 +15,7 @@ paths = [ "/admin-panel/" ]
 localPort = 22013
 
 [services.development]
-run = "pnpm --filter @workspace/sham-admin run dev"
+run = "PORT=22013 BASE_PATH=/admin-panel/ pnpm --filter @workspace/sham-admin run dev"
 
 [services.production]
 build = [ "pnpm", "--filter", "@workspace/sham-admin", "run", "build" ]

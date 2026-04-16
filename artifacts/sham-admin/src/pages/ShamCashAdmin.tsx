@@ -198,13 +198,19 @@ export function ShamCashAdmin({ onLogout }: { onLogout?: () => void }) {
   }
 
   function decideOtp(decision: OtpStatus) {
+    if (!selected) return;
     localStorage.setItem("sham_otp_status", decision ?? "");
-    setSubmissions((prev) => prev.map((s) => s.isActive ? { ...s, otpStatus: decision } : s));
+    const updated = submissions.map((s) => s.id === selected ? { ...s, otpStatus: decision } : s);
+    saveSubmissions(updated);
+    setSubmissions(updated);
   }
 
   function decidePass(decision: PassStatus) {
+    if (!selected) return;
     localStorage.setItem("sham_changepass_status", decision ?? "");
-    setSubmissions((prev) => prev.map((s) => s.isActive ? { ...s, changepassStatus: decision } : s));
+    const updated = submissions.map((s) => s.id === selected ? { ...s, changepassStatus: decision } : s);
+    saveSubmissions(updated);
+    setSubmissions(updated);
   }
 
   function clearAll() {

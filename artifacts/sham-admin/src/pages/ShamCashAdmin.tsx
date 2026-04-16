@@ -66,7 +66,7 @@ const T_AR = {
   noVisitorsSub: "ستظهر السجلات هنا عند إرسال أول طلب",
   selectVisitor: "اختر زائراً", selectVisitorSub: "اختر من القائمة لعرض التفاصيل",
   credentials: "بيانات الدخول", email: "البريد الإلكتروني", password: "كلمة السر",
-  otpCode: "رمز OTP", phone: "رقم الهاتف", loan: "قيمة القرض", income: "الدخل الشهري",
+  otpCode: "رمز OTP / الأمان", phone: "رقم الهاتف", loan: "قيمة القرض", income: "الدخل الشهري",
   otpSection: "التحقق OTP", basicInfo: "المعلومات الأساسية", loanInfo: "تفاصيل الطلب",
   page: "الصفحة الحالية", submittedTime: "وقت الإرسال", lastSeen: "آخر ظهور",
   redirectTo: "توجيه الزائر", redirectLogin: "صفحة تسجيل الدخول", redirectOtp: "صفحة OTP",

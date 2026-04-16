@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/wiqaya/"
+title = "وقاية - تأمين السيارات"
+version = "1.0.0"
+id = "artifacts/wiqaya"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/wiqaya/" ]
+localPort = 23662
+
+[services.development]
+run = "pnpm --filter @workspace/wiqaya run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/wiqaya", "run", "build" ]
+publicDir = "artifacts/wiqaya/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23662"
+BASE_PATH = "/wiqaya/"

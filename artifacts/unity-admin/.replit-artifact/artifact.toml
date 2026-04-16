@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/unity-admin/"
+title = "Unity Admin"
+version = "1.0.0"
+id = "artifacts/unity-admin"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/unity-admin/" ]
+localPort = 26001
+
+[services.development]
+run = "pnpm --filter @workspace/unity-admin run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/unity-admin", "run", "build" ]
+publicDir = "artifacts/unity-admin/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "26001"
+BASE_PATH = "/unity-admin/"

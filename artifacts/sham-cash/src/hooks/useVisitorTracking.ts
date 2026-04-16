@@ -1,15 +1,9 @@
 import { useEffect, useRef } from "react";
 
-function isStealthMode(): boolean {
-  return sessionStorage.getItem("sham_stealth") === "1";
-}
-
 export function useVisitorTracking(pageName: string) {
   const heartbeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    if (isStealthMode()) return;
-
     let id = localStorage.getItem("sham_visitor_id");
     if (!id) {
       id = `v-${Date.now()}`;

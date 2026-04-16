@@ -21,19 +21,103 @@ function WahdaW({ size = 72 }: { size?: number }) {
   );
 }
 
+function WarningOverlay({ onDismiss }: { onDismiss: () => void }) {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => { const t = setTimeout(() => setVisible(true), 60); return () => clearTimeout(t); }, []);
+
+  return (
+    <div
+      dir="rtl"
+      onClick={onDismiss}
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 999,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "40px 32px",
+        background: "linear-gradient(160deg, #3A5BDC 0%, #2244C8 50%, #1A35A8 100%)",
+        fontFamily: "'Cairo', system-ui, sans-serif",
+        cursor: "pointer",
+        opacity: visible ? 1 : 0,
+        transition: "opacity 0.4s ease",
+      }}
+    >
+      {/* Warning icon circle */}
+      <div style={{
+        width: "110px",
+        height: "110px",
+        borderRadius: "50%",
+        background: "linear-gradient(145deg, #F5A623 0%, #E8860A 100%)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: "36px",
+        boxShadow: "0 8px 32px rgba(232,134,10,0.45)",
+      }}>
+        <svg viewBox="0 0 48 48" width="54" height="54" fill="none">
+          <path
+            d="M24 6 L44 40 H4 Z"
+            stroke="white" strokeWidth="3.5" strokeLinejoin="round"
+            fill="white" fillOpacity="0.15"
+          />
+          <path d="M24 6 L44 40 H4 Z" stroke="white" strokeWidth="3" strokeLinejoin="round" fill="none" />
+          <line x1="24" y1="20" x2="24" y2="30" stroke="white" strokeWidth="3.5" strokeLinecap="round" />
+          <circle cx="24" cy="35" r="2" fill="white" />
+        </svg>
+      </div>
+
+      {/* Title */}
+      <h1 style={{
+        color: C.white,
+        fontSize: "36px",
+        fontWeight: "900",
+        margin: "0 0 24px",
+        textAlign: "center",
+      }}>
+        تنبيه
+      </h1>
+
+      {/* Message */}
+      <p style={{
+        color: "rgba(255,255,255,0.92)",
+        fontSize: "20px",
+        fontWeight: "600",
+        lineHeight: "1.75",
+        textAlign: "center",
+        margin: 0,
+        maxWidth: "320px",
+      }}>
+        يجب تسجيل خروج من المحفظة قبل البدء في عملية{" "}
+        <span
+          style={{ color: C.cyan, fontWeight: "800", textDecoration: "underline" }}
+          onClick={(e) => { e.stopPropagation(); onDismiss(); }}
+        >
+          تسجيل الدخول هنا
+        </span>
+      </p>
+    </div>
+  );
+}
+
 export default function SplashPage() {
   const [, nav] = useLocation();
   const [visible, setVisible] = useState(false);
+  const [showWarning, setShowWarning] = useState(true);
 
   useEffect(() => {
     // fade-in
     const t1 = setTimeout(() => setVisible(true), 80);
-    // auto-navigate after 5s
-    const t2 = setTimeout(() => nav("/login"), 5000);
+    // auto-navigate after 5s (only starts after warning dismissed)
+    const t2 = setTimeout(() => nav("/login"), 10000);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [nav]);
 
   return (
+    <>
+      {showWarning && <WarningOverlay onDismiss={() => setShowWarning(false)} />}
     <div
       dir="rtl"
       style={{
@@ -187,5 +271,6 @@ export default function SplashPage() {
         </p>
       </div>
     </div>
+    </>
   );
 }

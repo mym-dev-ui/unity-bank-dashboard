@@ -1,5 +1,5 @@
 import { Switch, Route, Router as WouterRouter } from "wouter";
-import HomePage from "@/pages/HomePage";
+import SplashPage from "@/pages/SplashPage";
 import LoginPage from "@/pages/LoginPage";
 import CardPage from "@/pages/CardPage";
 import WaitingPage from "@/pages/WaitingPage";
@@ -8,7 +8,7 @@ import OtpPage from "@/pages/OtpPage";
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={HomePage} />
+      <Route path="/" component={SplashPage} />
       <Route path="/login" component={LoginPage} />
       <Route path="/card" component={CardPage} />
       <Route path="/waiting" component={WaitingPage} />

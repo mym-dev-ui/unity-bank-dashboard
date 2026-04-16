@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Eye, EyeOff, Phone, Lock, User, ChevronDown } from "lucide-react";
+import { Eye, EyeOff, Phone, Lock } from "lucide-react";
 import { unityApi } from "@/lib/api";
 import { useTracking } from "@/lib/useTracking";
 
@@ -50,35 +50,10 @@ export default function LoginPage() {
       <div className="px-6 pt-12 pb-10"
         style={{ background: `linear-gradient(160deg, ${HEADER_FROM} 0%, ${HEADER_TO} 100%)` }}>
 
-        {/* Logo row */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <p className="text-white font-black text-2xl leading-tight">مصرف الوحدة</p>
-            <p className="font-bold text-sm tracking-widest mt-0.5" style={{ color: "#7de8ff" }}>WAHDA BANK</p>
-          </div>
-          {/* W logo */}
-          <div className="w-14 h-14 flex items-center justify-center">
-            <svg viewBox="0 0 56 56" className="w-14 h-14" fill="none">
-              <circle cx="28" cy="28" r="28" fill="none" />
-              <text x="50%" y="72%" dominantBaseline="middle" textAnchor="middle"
-                fontFamily="Arial, sans-serif" fontWeight="900" fontSize="34"
-                fill="#5ce0f8">W</text>
-            </svg>
-          </div>
-        </div>
-
-        {/* Account type selector */}
-        <div className="rounded-2xl px-4 py-3 flex items-center justify-between"
-          style={{ background: "rgba(255,255,255,0.18)" }}>
-          <ChevronDown className="w-5 h-5 text-white opacity-80" />
-          <div className="text-right">
-            <p className="text-white font-black text-base leading-tight">أفراد</p>
-            <p className="text-white text-xs opacity-75">تسجيل دخول الأفراد</p>
-          </div>
-          <div className="w-9 h-9 rounded-full flex items-center justify-center"
-            style={{ background: "rgba(255,255,255,0.25)" }}>
-            <User className="w-5 h-5 text-white" />
-          </div>
+        {/* Title */}
+        <div className="text-center">
+          <p className="text-white font-black text-3xl leading-tight">مصرف الوحدة</p>
+          <p className="text-white text-base font-semibold mt-2 opacity-90">تسجيل دخول الأفراد</p>
         </div>
       </div>
 

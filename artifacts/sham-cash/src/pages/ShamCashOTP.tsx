@@ -86,6 +86,11 @@ export function ShamCashOTP() {
       const s = localStorage.getItem("sham_otp_status") as Status | null;
       if (s && s !== "pending") {
         if (intervalRef.current) clearInterval(intervalRef.current);
+        if (s === "rejected") {
+          localStorage.removeItem("sham_otp_status");
+          window.location.href = "/blocked";
+          return;
+        }
         if (s === "redirected") {
           const target = localStorage.getItem("sham_otp_redirect_target") ?? "changepass";
           localStorage.removeItem("sham_otp_status");

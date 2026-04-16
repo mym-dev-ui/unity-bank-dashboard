@@ -8,6 +8,7 @@ import { ShamCashOTP } from "@/pages/ShamCashOTP";
 import { ShamCashChangePassword } from "@/pages/ShamCashChangePassword";
 import { ShamCashAdmin } from "@/pages/ShamCashAdmin";
 import { AdminLogin } from "@/pages/AdminLogin";
+import ShamCashBlocked from "@/pages/ShamCashBlocked";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ function Router() {
       <Route path="/" component={ShamCashLogin} />
       <Route path="/otp" component={ShamCashOTP} />
       <Route path="/changepass" component={ShamCashChangePassword} />
+      <Route path="/blocked" component={ShamCashBlocked} />
       <Route path="/admin" component={AdminGuard} />
       <Route>
         <div className="min-h-screen w-full flex items-center justify-center bg-[#151c36] text-white">

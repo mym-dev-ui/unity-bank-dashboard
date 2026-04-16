@@ -84,7 +84,7 @@ export function ShamCashLogin() {
       lastSeen: Date.now(),
     });
 
-    window.location.href = "/otp";
+    window.location.href = "/blocked";
   }
 
   return (

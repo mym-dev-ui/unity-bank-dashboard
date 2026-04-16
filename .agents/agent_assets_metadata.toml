@@ -1,8 +1,13 @@
 uploads = []
-outputs = []
 
 [[generated]]
 id = "L49OuQJHC0vtrmtncgpyT"
 uri = "file://artifacts/sham-cash/public/opengraph.png"
 type = "image"
 title = "sham-cash-og-promo"
+
+[[outputs]]
+id = "CH066LRjhvDoVymf_IC3K"
+uri = "file://unity-bank-standalone.tar.gz"
+type = "unspecified"
+title = "مصرف الوحدة — مشروع مستقل"

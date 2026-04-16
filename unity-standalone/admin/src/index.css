@@ -1,0 +1,7 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+* { box-sizing: border-box; }
+body { font-family: 'Cairo', system-ui, -apple-system, Arial, sans-serif; }

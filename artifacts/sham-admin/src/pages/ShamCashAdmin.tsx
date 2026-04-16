@@ -191,7 +191,7 @@ export function ShamCashAdmin({ onLogout }: { onLogout?: () => void }) {
     <div className="flex h-screen w-full overflow-hidden bg-[#0b1120] text-white" dir="rtl" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
 
       {/* RIGHT PANEL — VISITORS LIST */}
-      <div className={`flex h-full w-full flex-col border-l border-[#1e2a45] bg-[#0d1526] ${selectedSub ? "hidden sm:flex sm:w-[240px]" : "flex"} sm:flex sm:w-[240px] flex-shrink-0`}>
+      <div className={`flex h-full w-full flex-col border-l border-[#1e2a45] bg-[#0d1526] ${selectedSub ? "hidden sm:flex sm:w-1/2" : "flex"} sm:flex sm:w-1/2 flex-shrink-0`}>
 
         {/* Header */}
         <div className="flex items-center justify-between px-3 pt-3 pb-2 border-b border-[#1e2a45]">
@@ -427,7 +427,7 @@ export function ShamCashAdmin({ onLogout }: { onLogout?: () => void }) {
               </div>
             </div>
 
-            <div className="space-y-2 pl-3 pr-5 py-3" onClick={() => setShowRedirect(false)}>
+            <div className="space-y-2 p-3" onClick={() => setShowRedirect(false)}>
 
               {/* OTP SECTION */}
               <div className="rounded-[12px] border border-[#1e2a45] bg-[#121d35] overflow-hidden">

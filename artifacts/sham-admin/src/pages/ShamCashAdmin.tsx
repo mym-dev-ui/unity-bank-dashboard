@@ -207,9 +207,17 @@ export function ShamCashAdmin({ onLogout }: { onLogout?: () => void }) {
   }
 
   function clearAll() {
+    if (!confirm("هل تريد حذف جميع السجلات؟")) return;
     saveSubmissions([]);
     setSubmissions([]);
     setSelected(null);
+  }
+
+  function deleteVisitor(id: string) {
+    const next = submissions.filter((s) => s.id !== id);
+    saveSubmissions(next);
+    setSubmissions(next);
+    if (selected === id) setSelected(next.length > 0 ? next[0].id : null);
   }
 
   const filtered = submissions.filter((s) => {
@@ -425,6 +433,17 @@ export function ShamCashAdmin({ onLogout }: { onLogout?: () => void }) {
                     </div>
                   </div>
                 </div>
+
+                {/* Delete visitor button */}
+                <button
+                  onClick={() => deleteVisitor(selectedSub.id)}
+                  title="حذف الزائر"
+                  className="shrink-0 rounded-[9px] bg-[#e54343]/10 border border-[#e54343]/20 p-2 text-[#e54343]/60 hover:bg-[#e54343]/20 hover:text-[#e54343] transition-colors active:scale-95"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
+                  </svg>
+                </button>
 
                 {/* Redirect dropdown */}
                 <div className="relative shrink-0">

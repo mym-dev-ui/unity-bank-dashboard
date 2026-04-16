@@ -1,0 +1,8 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "L49OuQJHC0vtrmtncgpyT"
+uri = "file://artifacts/sham-cash/public/opengraph.png"
+type = "image"
+title = "sham-cash-og-promo"

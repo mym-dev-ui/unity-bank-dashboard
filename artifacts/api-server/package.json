@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "node --enable-source-maps ./dist/index.mjs",
-    "build": "node ./build.mjs",
+    "build": "BASE_PATH=/unity-bank/ PORT=3000 pnpm --filter @workspace/unity-bank run build && BASE_PATH=/unity-admin/ PORT=3001 pnpm --filter @workspace/unity-admin run build && node ./build.mjs",
     "start": "node --enable-source-maps ./dist/index.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },

@@ -128,15 +128,29 @@ export default function Landing() {
 
       {/* HERO */}
       <section className="bg-white overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 py-8 md:py-12 grid md:grid-cols-2 gap-8 items-center min-h-[400px]">
-          {/* Right: text */}
-          <div className="space-y-5 text-right">
-            <h1 className="text-[36px] md:text-[46px] font-black leading-tight" style={{ color: "#0d1c3b" }}>
-              أول منصة لتأمين<br />السيارات في<br />السعودية
+        <div className="max-w-7xl mx-auto px-4 py-6 md:py-10 flex flex-col md:flex-row-reverse gap-6 md:gap-10 items-center">
+
+          {/* Photo — shows on both mobile and desktop */}
+          <div className="w-full md:w-[48%] flex-shrink-0">
+            <div className="rounded-3xl overflow-hidden" style={{ background: "#e8f4fd" }}>
+              <img
+                src="/tameeni/hero.jpeg"
+                alt="رجل سعودي يقف بجانب سيارة"
+                className="w-full object-cover"
+                style={{ maxHeight: "420px", objectPosition: "center top" }}
+              />
+            </div>
+          </div>
+
+          {/* Text */}
+          <div className="w-full md:w-[52%] space-y-4 text-right">
+            <h1 className="text-[32px] md:text-[44px] font-black leading-snug" style={{ color: "#0d1c3b" }}>
+              أول منصة لتأمين السيارات في{" "}
+              <span style={{ color: "#0d6efd" }}>السعودية</span>
             </h1>
-            <p className="text-[15px] text-gray-600 leading-relaxed max-w-md">
-              جميع شركات التأمين في مكان واحد ... مجموعة واسعة<br />
-              من الخيارات وإصدار فوري لوثائق التأمين
+            <p className="text-[15px] text-gray-600 leading-relaxed">
+              جميع شركات التأمين في مكان واحد، مجموعة واسعة<br />
+              من الخيارات وأسعار فوري لوثائق التأمين
             </p>
             <button
               onClick={() => window.location.href = "/tameeni/quote"}
@@ -145,64 +159,17 @@ export default function Landing() {
             >
               ابدأ الآن
             </button>
-            <div className="flex items-center gap-2 text-[13px] text-gray-500">
-              <div className="w-6 h-6 rounded-full bg-orange-100 flex items-center justify-center">
+            <div className="flex items-center gap-2 text-[13px] text-gray-500 pt-1">
+              <div className="w-6 h-6 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
                 <span className="text-[11px]">م</span>
               </div>
               <span>
-                هل تود شراء سيارة و ترغب في معرفة كل شيء عنها قبل الشراء؟{" "}
+                هل تود شراء سيارة وترغب في معرفة كل شيء عنها قبل الشراء؟{" "}
                 <a href="#" className="text-[#0d1c3b] font-bold hover:underline">تقرير موجز</a>
               </span>
             </div>
           </div>
 
-          {/* Left: hero image / illustration */}
-          <div className="hidden md:flex justify-center items-end relative">
-            <div className="relative w-full max-w-[480px] h-[320px]">
-              {/* Car background shape */}
-              <div className="absolute inset-0 rounded-3xl overflow-hidden" style={{ background: "linear-gradient(135deg, #e8f4fd 0%, #f0faf6 100%)" }}>
-                {/* Silhouette car */}
-                <div className="absolute bottom-0 right-0 left-0 flex justify-center items-end">
-                  <div className="relative w-full">
-                    {/* Car SVG */}
-                    <svg viewBox="0 0 400 200" className="w-full" fill="none">
-                      <ellipse cx="200" cy="185" rx="180" ry="15" fill="#d1dae8" opacity="0.4"/>
-                      {/* Car body */}
-                      <rect x="40" y="130" width="320" height="55" rx="12" fill="#1a3a6b"/>
-                      {/* Roof */}
-                      <path d="M100 130 L130 85 L270 85 L300 130Z" fill="#1a4a8a"/>
-                      {/* Windows */}
-                      <path d="M140 128 L155 95 L215 95 L215 128Z" fill="#7ecfff" opacity="0.7"/>
-                      <path d="M220 128 L220 95 L265 95 L280 128Z" fill="#7ecfff" opacity="0.7"/>
-                      {/* Wheels */}
-                      <circle cx="105" cy="185" r="28" fill="#222"/>
-                      <circle cx="105" cy="185" r="16" fill="#999"/>
-                      <circle cx="295" cy="185" r="28" fill="#222"/>
-                      <circle cx="295" cy="185" r="16" fill="#999"/>
-                      {/* Headlights */}
-                      <rect x="340" y="145" width="18" height="10" rx="3" fill="#fff" opacity="0.8"/>
-                      <rect x="42" y="145" width="18" height="10" rx="3" fill="#ffe066" opacity="0.7"/>
-                    </svg>
-                    {/* Person silhouette */}
-                    <div className="absolute bottom-16 right-10 w-[80px] h-[160px] opacity-80">
-                      <svg viewBox="0 0 80 160" className="w-full h-full" fill="none">
-                        {/* Head */}
-                        <circle cx="40" cy="20" r="16" fill="#c8a882"/>
-                        {/* Thobe */}
-                        <path d="M20 42 Q40 38 60 42 L68 120 L12 120Z" fill="white"/>
-                        {/* Shmagh */}
-                        <path d="M24 20 Q40 10 56 20 L58 30 Q40 40 22 30Z" fill="#cc0000"/>
-                        <rect x="22" y="14" width="36" height="8" rx="4" fill="#cc0000"/>
-                        {/* Legs */}
-                        <rect x="22" y="120" width="16" height="36" rx="6" fill="white"/>
-                        <rect x="42" y="120" width="16" height="36" rx="6" fill="white"/>
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 

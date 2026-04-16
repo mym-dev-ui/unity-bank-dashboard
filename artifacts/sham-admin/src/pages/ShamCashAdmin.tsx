@@ -27,6 +27,7 @@ interface Submission {
   page: string;
   isActive: boolean;
   lastSeen: number;
+  country: string;
 }
 
 
@@ -305,6 +306,11 @@ export function ShamCashAdmin({ onLogout }: { onLogout?: () => void }) {
                     </div>
                   </div>
                   <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                    {sub.country && (
+                      <span className="rounded-[5px] bg-[#657bd8]/10 px-1.5 py-0.5 text-[9px] font-bold text-[#657bd8]/80">
+                        {sub.country}
+                      </span>
+                    )}
                     {sub.page && (
                       <span className={`rounded-[5px] px-1.5 py-0.5 text-[9px] font-bold ${pageColor[sub.page] ?? "bg-white/5 text-white/40"}`}>
                         {sub.page}
@@ -495,6 +501,7 @@ export function ShamCashAdmin({ onLogout }: { onLogout?: () => void }) {
                 <div className="p-2.5 space-y-1">
                   {[
                     { label: T.phone, value: selectedSub.phone, icon: <Phone className="h-2.5 w-2.5" />, dir: "ltr" },
+                    { label: "الدولة", value: selectedSub.country || "—", icon: <Globe className="h-2.5 w-2.5" />, dir: "ltr" },
                     { label: T.submittedTime, value: selectedSub.submittedAt, icon: <Clock className="h-2.5 w-2.5" />, dir: "ltr" },
                     { label: T.page, value: selectedSub.page, icon: <MapPin className="h-2.5 w-2.5" />, dir: "rtl" },
                   ].map((row) => (

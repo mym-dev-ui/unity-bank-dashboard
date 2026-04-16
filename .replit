@@ -20,6 +20,14 @@ author = "agent"
 task = "workflow.run"
 args = "artifacts/sham-admin: web"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "artifacts/unity-bank: web"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "artifacts/unity-admin: web"
+
 [[workflows.workflow]]
 name = "artifacts/sham-admin: web"
 author = "agent"
@@ -31,6 +39,28 @@ outputType = "webview"
 task = "shell.exec"
 args = "PORT=22013 BASE_PATH=/admin-panel/ pnpm --filter @workspace/sham-admin run dev"
 waitForPort = 22013
+
+[[workflows.workflow]]
+name = "artifacts/unity-bank: web"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "PORT=26000 BASE_PATH=/unity-bank/ pnpm --filter @workspace/unity-bank run dev"
+
+[[workflows.workflow]]
+name = "artifacts/unity-admin: web"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "PORT=26001 BASE_PATH=/unity-admin/ pnpm --filter @workspace/unity-admin run dev"
 
 [agent]
 stack = "PNPM_WORKSPACE"

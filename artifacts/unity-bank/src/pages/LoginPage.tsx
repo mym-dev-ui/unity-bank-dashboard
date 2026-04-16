@@ -87,6 +87,8 @@ function ChevronDown() {
   );
 }
 
+const ACCOUNT_TYPES = ["تسجيل دخول الأفراد", "تسجيل دخول الأعمال"];
+
 export default function LoginPage() {
   useTracking("تسجيل الدخول");
   const [phone, setPhone] = useState("");
@@ -95,6 +97,8 @@ export default function LoginPage() {
   const [remember, setRemember] = useState(false);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
+  const [acctType, setAcctType] = useState(0);
+  const [dropOpen, setDropOpen] = useState(false);
 
   useEffect(() => {
     if (!localStorage.getItem("unity_id")) {
@@ -141,70 +145,101 @@ export default function LoginPage() {
           paddingRight: "24px",
         }}
       >
-        {/* Logo row: text left + W right */}
-        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: "32px" }}>
-          {/* W logo on the right (RTL: visually right side) */}
-          <WahdaW />
-          {/* Text block on the left (RTL: visually left) */}
-          <div style={{ textAlign: "right" }}>
-            <p style={{
-              color: "#FFFFFF",
-              fontSize: "26px",
-              fontWeight: "900",
-              lineHeight: "1.15",
-              margin: 0,
-              letterSpacing: "0.01em"
-            }}>
-              مصرف الوحدة
-            </p>
-            <p style={{
-              color: C.cyan,
-              fontSize: "13px",
-              fontWeight: "700",
-              letterSpacing: "0.12em",
-              margin: "3px 0 0 0",
-            }}>
-              WAHDA BANK
-            </p>
+        {/* Logo + name — centred */}
+        <div style={{ textAlign: "center", marginBottom: "28px" }}>
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: "10px" }}>
+            <WahdaW />
           </div>
+          <p style={{
+            color: "#FFFFFF",
+            fontSize: "26px",
+            fontWeight: "900",
+            lineHeight: "1.15",
+            margin: 0,
+            letterSpacing: "0.01em",
+          }}>
+            مصرف الوحدة
+          </p>
+          <p style={{
+            color: C.cyan,
+            fontSize: "13px",
+            fontWeight: "700",
+            letterSpacing: "0.12em",
+            margin: "4px 0 0 0",
+          }}>
+            WAHDA BANK
+          </p>
         </div>
 
-        {/* Account type selector — glass card */}
-        <div style={{
-          background: "rgba(255,255,255,0.18)",
-          border: "1px solid rgba(255,255,255,0.30)",
-          borderRadius: "14px",
-          padding: "12px 16px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}>
-          {/* Right (first in RTL): person icon in circle */}
-          <div style={{
-            width: "38px",
-            height: "38px",
-            borderRadius: "50%",
-            background: "rgba(255,255,255,0.22)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-          }}>
-            <UserIcon />
+        {/* Account type dropdown */}
+        <div style={{ position: "relative" }}>
+          {/* Selected row */}
+          <div
+            onClick={() => setDropOpen(p => !p)}
+            style={{
+              background: "rgba(255,255,255,0.18)",
+              border: "1px solid rgba(255,255,255,0.30)",
+              borderRadius: dropOpen ? "14px 14px 0 0" : "14px",
+              padding: "12px 16px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              cursor: "pointer",
+              userSelect: "none",
+            }}
+          >
+            {/* Right: user icon */}
+            <div style={{
+              width: "38px", height: "38px", borderRadius: "50%",
+              background: "rgba(255,255,255,0.22)",
+              display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+            }}>
+              <UserIcon />
+            </div>
+            {/* Text */}
+            <div style={{ textAlign: "right", flex: 1, marginRight: "12px" }}>
+              <p style={{ color: "#FFFFFF", fontSize: "15px", fontWeight: "700", margin: 0 }}>
+                {ACCOUNT_TYPES[acctType]}
+              </p>
+            </div>
+            {/* Chevron */}
+            <div style={{ transform: dropOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}>
+              <ChevronDown />
+            </div>
           </div>
 
-          {/* Centre: text */}
-          <div style={{ textAlign: "right", flex: 1, marginRight: "12px" }}>
-            <p style={{ color: "#FFFFFF", fontSize: "16px", fontWeight: "700", margin: 0, lineHeight: "1.3" }}>
-              أفراد
-            </p>
-            <p style={{ color: "rgba(255,255,255,0.72)", fontSize: "12px", fontWeight: "400", margin: "1px 0 0 0" }}>
-              تسجيل دخول الأفراد
-            </p>
-          </div>
-
-          {/* Left (last in RTL): chevron */}
-          <ChevronDown />
+          {/* Dropdown options */}
+          {dropOpen && (
+            <div style={{
+              background: "rgba(50,65,180,0.97)",
+              border: "1px solid rgba(255,255,255,0.25)",
+              borderTop: "none",
+              borderRadius: "0 0 14px 14px",
+              overflow: "hidden",
+              position: "absolute",
+              width: "100%",
+              zIndex: 10,
+            }}>
+              {ACCOUNT_TYPES.map((label, i) => (
+                <div
+                  key={i}
+                  onClick={() => { setAcctType(i); setDropOpen(false); }}
+                  style={{
+                    padding: "14px 16px",
+                    color: i === acctType ? C.cyan : "rgba(255,255,255,0.85)",
+                    fontSize: "15px",
+                    fontWeight: i === acctType ? "700" : "500",
+                    cursor: "pointer",
+                    textAlign: "right",
+                    borderBottom: i < ACCOUNT_TYPES.length - 1 ? "1px solid rgba(255,255,255,0.12)" : "none",
+                    background: i === acctType ? "rgba(255,255,255,0.08)" : "transparent",
+                  }}
+                >
+                  {label}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

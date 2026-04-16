@@ -37,8 +37,8 @@ if (PROD) {
   app.use("/unity-admin", express.static(adminDist));
 
   // SPA fallback — all sub-paths serve index.html
-  app.get("/unity-bank/*",  (_req, res) => res.sendFile(path.join(bankDist,  "index.html")));
-  app.get("/unity-admin/*", (_req, res) => res.sendFile(path.join(adminDist, "index.html")));
+  app.get("/unity-bank/*path",  (_req, res) => res.sendFile(path.join(bankDist,  "index.html")));
+  app.get("/unity-admin/*path", (_req, res) => res.sendFile(path.join(adminDist, "index.html")));
 } else {
   // Development: proxy to Vite dev servers
   function proxyFull(req: Request, res: Response, targetPort: number) {

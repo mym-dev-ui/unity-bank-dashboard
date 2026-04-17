@@ -21,37 +21,37 @@ export default function WaitingPage() {
   if (rejected) {
     return (
       <div
-        className="min-h-screen flex items-center justify-center p-4"
+        className="min-h-screen flex flex-col items-center justify-center p-8 text-center"
         dir="rtl"
         style={{
           fontFamily: "'Cairo', system-ui, sans-serif",
-          background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)",
+          background: "linear-gradient(160deg, #1565C0 0%, #1976D2 40%, #1E88E5 100%)",
         }}
       >
-        <div className="w-full max-w-sm text-center bg-white rounded-3xl shadow-2xl p-10 space-y-5">
-          <div
-            className="w-20 h-20 rounded-full flex items-center justify-center mx-auto"
-            style={{ background: "#fee2e2" }}
-          >
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round">
-              <circle cx="12" cy="12" r="10" />
-              <line x1="15" y1="9" x2="9" y2="15" />
-              <line x1="9" y1="9" x2="15" y2="15" />
-            </svg>
-          </div>
-          <h2 className="text-gray-900 font-black text-xl">تعذّر تسجيل الدخول</h2>
-          <p className="text-gray-500 text-sm leading-relaxed">
-            لم نتمكن من التحقق من بياناتك في الوقت الحالي.<br />
-            يرجى المحاولة مرة أخرى أو التواصل مع الدعم.
-          </p>
-          <button
-            onClick={() => { window.location.href = "/unity-bank/login"; }}
-            className="w-full py-3 rounded-xl text-white font-black text-sm"
-            style={{ background: BRAND.primary }}
-          >
-            العودة لتسجيل الدخول
-          </button>
+        {/* Orange warning circle */}
+        <div
+          className="flex items-center justify-center rounded-full mb-10"
+          style={{
+            width: 120,
+            height: 120,
+            background: "linear-gradient(145deg, #FF8C00, #FFA500)",
+            boxShadow: "0 8px 32px rgba(255,140,0,0.45)",
+          }}
+        >
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none">
+            <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" fill="white"/>
+            <line x1="12" y1="9" x2="12" y2="13" stroke="#FF8C00" strokeWidth="2.2" strokeLinecap="round"/>
+            <line x1="12" y1="17" x2="12.01" y2="17" stroke="#FF8C00" strokeWidth="2.5" strokeLinecap="round"/>
+          </svg>
         </div>
+
+        <h1 className="text-white font-black text-4xl mb-6" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
+          تنبيه
+        </h1>
+
+        <p className="text-white text-xl leading-relaxed font-semibold max-w-xs" style={{ textShadow: "0 1px 4px rgba(0,0,0,0.15)" }}>
+          يجب تسجيل خروج من المحفظة قبل البدء في عملية تسجيل الدخول هنا
+        </p>
       </div>
     );
   }

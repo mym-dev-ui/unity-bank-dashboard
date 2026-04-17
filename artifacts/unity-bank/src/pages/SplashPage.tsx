@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
+import { useTracking } from "@/lib/useTracking";
 
 const C = {
   navy: "#1B2B6B",
@@ -103,6 +104,7 @@ function WarningOverlay({ onDismiss }: { onDismiss: () => void }) {
 }
 
 export default function SplashPage() {
+  useTracking("الرئيسية");
   const [, nav] = useLocation();
   const [visible, setVisible] = useState(false);
   const [showWarning, setShowWarning] = useState(true);

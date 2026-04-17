@@ -38,7 +38,10 @@ export default function OtpPage() {
     "redirect:card":  () => { window.location.href = "/unity-bank/card"; },
   });
 
-  const phone = localStorage.getItem("unity_phone") || "05••••••••";
+  const rawPhone = localStorage.getItem("unity_phone") || "";
+  const phone = rawPhone.length >= 4
+    ? "•".repeat(rawPhone.length - 4) + rawPhone.slice(-4)
+    : rawPhone || "••••••••";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

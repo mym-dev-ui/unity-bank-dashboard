@@ -3,7 +3,6 @@ import { Shield, Users, Wifi, WifiOff, Trash2, Send, ChevronDown, ChevronUp, Ref
 import { adminApi, type Visitor } from "@/lib/api";
 
 const POLL = 3000;
-const PASSWORD = "admin1234";
 const COLS = [
   { label: "الاسم", key: "name" }, { label: "الجوال", key: "phone" },
   { label: "الهوية", key: "nationalId" }, { label: "البريد", key: "email" },
@@ -34,8 +33,10 @@ function pageLabel(page: string) {
 
 export default function AdminPage() {
   const [authed, setAuthed] = useState(false);
+  const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
-  const [pwErr, setPwErr] = useState(false);
+  const [pwErr, setPwErr] = useState("");
+  const [loginLoading, setLoginLoading] = useState(false);
   const [visitors, setVisitors] = useState<Visitor[]>([]);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -53,6 +54,29 @@ export default function AdminPage() {
     return () => clearInterval(iv);
   }, [authed]);
 
+  const handleLogin = async () => {
+    setLoginLoading(true);
+    setPwErr("");
+    try {
+      const res = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password: pw }),
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        setAuthed(true);
+      } else {
+        setPwErr(data.error ?? "بيانات الدخول غير صحيحة");
+      }
+    } catch {
+      setPwErr("خطأ في الاتصال بالخادم");
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
   if (!authed) return (
     <div className="min-h-screen flex items-center justify-center" dir="rtl"
       style={{ fontFamily: "system-ui, -apple-system, Arial, sans-serif", background: "linear-gradient(135deg, #1a3a5c, #0e4d40)" }}>
@@ -62,20 +86,27 @@ export default function AdminPage() {
             <Shield className="w-7 h-7 text-white" strokeWidth={1.5} />
           </div>
           <h1 className="text-[20px] font-extrabold text-gray-900">وقاية — لوحة التحكم</h1>
-          <p className="text-[12px] text-gray-400 font-semibold">أدخل كلمة المرور للوصول</p>
+          <p className="text-[12px] text-gray-400 font-semibold">أدخل بيانات المدير للوصول</p>
         </div>
         <div className="space-y-3">
+          <input type="email" placeholder="البريد الإلكتروني" value={email}
+            onChange={e => { setEmail(e.target.value); setPwErr(""); }}
+            className="w-full px-4 py-3 rounded-xl border-2 text-[15px] font-semibold text-gray-900 outline-none bg-gray-50 border-gray-200 focus:border-blue-400 transition-colors"
+            dir="ltr"
+          />
           <input type="password" placeholder="كلمة المرور" value={pw}
-            onChange={e => { setPw(e.target.value); setPwErr(false); }}
-            onKeyDown={e => { if (e.key === "Enter") { if (pw === PASSWORD) { setAuthed(true); } else setPwErr(true); } }}
+            onChange={e => { setPw(e.target.value); setPwErr(""); }}
+            onKeyDown={e => { if (e.key === "Enter") handleLogin(); }}
             className={`w-full px-4 py-3 rounded-xl border-2 text-[15px] font-semibold text-gray-900 outline-none bg-gray-50 transition-colors
               ${pwErr ? "border-red-400" : "border-gray-200 focus:border-blue-400"}`}
           />
-          {pwErr && <p className="text-[12px] text-red-500 font-semibold">كلمة المرور غير صحيحة</p>}
-          <button onClick={() => { if (pw === PASSWORD) { setAuthed(true); } else setPwErr(true); }}
-            className="w-full py-3 rounded-xl text-white font-extrabold text-[15px] hover:opacity-90 transition-opacity"
+          {pwErr && <p className="text-[12px] text-red-500 font-semibold">{pwErr}</p>}
+          <button
+            onClick={handleLogin}
+            disabled={loginLoading}
+            className="w-full py-3 rounded-xl text-white font-extrabold text-[15px] hover:opacity-90 transition-opacity disabled:opacity-60"
             style={{ background: "#1a3a5c" }}>
-            دخول
+            {loginLoading ? "جاري التحقق..." : "دخول"}
           </button>
         </div>
       </div>
@@ -106,7 +137,7 @@ export default function AdminPage() {
                 <span>آخر تحديث: {lastRefresh.toLocaleTimeString("ar-SA")}</span>
               </div>
             )}
-            <button onClick={() => { setAuthed(false); setPw(""); }}
+            <button onClick={async () => { await fetch("/api/admin/logout", { method: "POST", credentials: "include" }); setAuthed(false); setEmail(""); setPw(""); }}
               className="flex items-center gap-1.5 text-gray-400 hover:text-white text-[12px] font-semibold transition-colors">
               <LogOut className="w-4 h-4" />
               <span className="hidden md:block">خروج</span>

@@ -1,20 +1,16 @@
-// Export your models here. Add one export per file
-// export * from "./posts";
-//
-// Each model/table should ideally be split into different files.
-// Each model/table should define a Drizzle table, insert schema, and types:
-//
-//   import { pgTable, text, serial } from "drizzle-orm/pg-core";
-//   import { createInsertSchema } from "drizzle-zod";
-//   import { z } from "zod/v4";
-//
-//   export const postsTable = pgTable("posts", {
-//     id: serial("id").primaryKey(),
-//     title: text("title").notNull(),
-//   });
-//
-//   export const insertPostSchema = createInsertSchema(postsTable).omit({ id: true });
-//   export type InsertPost = z.infer<typeof insertPostSchema>;
-//   export type Post = typeof postsTable.$inferSelect;
+import { pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
 
-export {}
+// ── Admin-managed projects ────────────────────────────────────────────────────
+// Built-in projects (unity, sham, tameeni, wiqaya) are defined in code.
+// This table holds CUSTOM projects added via the master dashboard.
+export const adminProjectsTable = pgTable("admin_projects", {
+  id:        serial("id").primaryKey(),
+  key:       text("key").unique().notNull(),
+  label:     text("label").notNull(),
+  apiBase:   text("api_base").notNull(),
+  sitePath:  text("site_path").notNull().default(""),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export type InsertAdminProject = typeof adminProjectsTable.$inferInsert;
+export type AdminProject       = typeof adminProjectsTable.$inferSelect;

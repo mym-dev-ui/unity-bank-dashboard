@@ -1,23 +1,36 @@
 import { useState } from "react";
 import { Eye, EyeOff, Lock, UserRound } from "lucide-react";
 
-const ADMIN_EMAIL = "admin@shamcash.com";
-const ADMIN_PASS = "admin1234";
-
 export function AdminLogin({ onLogin }: { onLogin: () => void }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (email === ADMIN_EMAIL && password === ADMIN_PASS) {
-      sessionStorage.setItem("sham_admin_auth", "1");
-      onLogin();
-    } else {
+    setLoading(true);
+    setError(false);
+    try {
+      const res = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+        credentials: "include",
+      });
+      if (res.ok) {
+        sessionStorage.setItem("sham_admin_auth", "1");
+        onLogin();
+      } else {
+        setError(true);
+        setTimeout(() => setError(false), 2500);
+      }
+    } catch {
       setError(true);
       setTimeout(() => setError(false), 2500);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -73,7 +86,8 @@ export function AdminLogin({ onLogin }: { onLogin: () => void }) {
 
           <button
             type="submit"
-            className="w-full h-[58px] rounded-[15px] bg-[#657bd8] text-[18px] font-extrabold text-white shadow-[0_16px_35px_rgba(101,123,216,0.22)] hover:bg-[#7089e0] active:scale-[0.98] transition-all"
+            disabled={loading}
+            className="w-full h-[58px] rounded-[15px] bg-[#657bd8] text-[18px] font-extrabold text-white shadow-[0_16px_35px_rgba(101,123,216,0.22)] hover:bg-[#7089e0] active:scale-[0.98] transition-all disabled:opacity-60"
           >
             دخول
           </button>

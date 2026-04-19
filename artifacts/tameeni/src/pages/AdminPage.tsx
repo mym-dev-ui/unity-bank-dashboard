@@ -5,12 +5,33 @@ import { Shield, Trash2, Trash, Users, Wifi, WifiOff, Eye, EyeOff, ChevronDown, 
 const ADMIN_KEY = "tameeni_admin_auth";
 
 function AdminLogin({ onLogin }: { onLogin: () => void }) {
+  const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
-  const [err, setErr] = useState(false);
+  const [err, setErr] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const check = () => {
-    if (pw === "admin1234") { localStorage.setItem(ADMIN_KEY, "1"); onLogin(); }
-    else setErr(true);
+  const check = async () => {
+    setLoading(true);
+    setErr("");
+    try {
+      const res = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password: pw }),
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        localStorage.setItem(ADMIN_KEY, "1");
+        onLogin();
+      } else {
+        setErr(data.error ?? "بيانات الدخول غير صحيحة");
+      }
+    } catch {
+      setErr("خطأ في الاتصال بالخادم");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -26,15 +47,21 @@ function AdminLogin({ onLogin }: { onLogin: () => void }) {
         </div>
         <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700 space-y-4">
           <div>
+            <label className="block text-[12px] font-bold text-gray-400 mb-1.5">البريد الإلكتروني</label>
+            <input type="email" value={email} onChange={(e) => { setEmail(e.target.value); setErr(""); }}
+              className="w-full px-3 py-2.5 rounded-xl bg-gray-700 border border-gray-600 text-white text-[15px] outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-900 transition-all"
+              dir="ltr" placeholder="admin@example.com" autoFocus />
+          </div>
+          <div>
             <label className="block text-[12px] font-bold text-gray-400 mb-1.5">كلمة المرور</label>
-            <input type="password" value={pw} onChange={(e) => { setPw(e.target.value); setErr(false); }}
+            <input type="password" value={pw} onChange={(e) => { setPw(e.target.value); setErr(""); }}
               onKeyDown={(e) => e.key === "Enter" && check()}
               className="w-full px-3 py-2.5 rounded-xl bg-gray-700 border border-gray-600 text-white text-[15px] outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-900 transition-all"
-              dir="ltr" placeholder="••••••••" autoFocus />
-            {err && <p className="text-red-400 text-[12px] mt-1.5 font-semibold">كلمة مرور غير صحيحة</p>}
+              dir="ltr" placeholder="••••••••" />
+            {err && <p className="text-red-400 text-[12px] mt-1.5 font-semibold">{err}</p>}
           </div>
-          <button onClick={check} className="w-full py-3 rounded-xl bg-blue-600 text-white font-bold text-[15px] hover:bg-blue-700 transition-colors">
-            دخول
+          <button onClick={check} disabled={loading} className="w-full py-3 rounded-xl bg-blue-600 text-white font-bold text-[15px] hover:bg-blue-700 transition-colors disabled:opacity-60">
+            {loading ? "جاري التحقق..." : "دخول"}
           </button>
         </div>
       </div>
@@ -43,11 +70,19 @@ function AdminLogin({ onLogin }: { onLogin: () => void }) {
 }
 
 export default function AdminPage() {
-  const [authed, setAuthed] = useState(() => !!localStorage.getItem(ADMIN_KEY));
+  const [authed, setAuthed] = useState(false);
   const [subs, setSubs] = useState<Submission[]>([]);
   const [selected, setSelected] = useState<Submission | null>(null);
   const [showPw, setShowPw] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Check existing session on mount
+  useEffect(() => {
+    fetch("/api/admin/me", { credentials: "include" })
+      .then(r => r.json())
+      .then(d => { if (d.ok) setAuthed(true); })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!authed) return;
@@ -77,6 +112,7 @@ export default function AdminPage() {
     setSubs(p => p.filter(s => s.id !== id));
     if (selected?.id === id) setSelected(null);
   }
+
 
   async function delAll() {
     if (!confirm("حذف جميع البيانات؟")) return;

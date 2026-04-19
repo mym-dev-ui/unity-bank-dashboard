@@ -10,19 +10,29 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-    setTimeout(() => {
-      if (email === "admin@shamcash.com" && password === "admin1234") {
+    try {
+      const res = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (res.ok && data.ok) {
         sessionStorage.setItem("sham_admin_auth", "1");
         onLogin();
       } else {
-        setError("بيانات الدخول غير صحيحة");
+        setError(data.error ?? "بيانات الدخول غير صحيحة");
       }
+    } catch {
+      setError("خطأ في الاتصال بالخادم");
+    } finally {
       setLoading(false);
-    }, 600);
+    }
   };
 
   return (

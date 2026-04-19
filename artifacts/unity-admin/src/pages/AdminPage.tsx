@@ -270,10 +270,12 @@ export default function AdminPage() {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className={activeProject ? "" : "max-w-7xl mx-auto px-4 py-6"}>
         {activeProject ? (
-          // ── Per-project view ────────────────────────────────────────────────
-          <ProjectDashboard project={activeProject} onBack={() => setActiveProject(null)} />
+          // ── Per-project view: full height, no padding ────────────────────────
+          <div style={{ height: "calc(100vh - 56px)", overflow: "hidden" }}>
+            <ProjectDashboard project={activeProject} onBack={() => setActiveProject(null)} />
+          </div>
         ) : (
           // ── Projects overview ───────────────────────────────────────────────
           <div className="space-y-6">

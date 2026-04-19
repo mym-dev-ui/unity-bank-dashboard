@@ -10,7 +10,7 @@ function getSecret(): string {
   return s;
 }
 
-/** Build a signed session token: base64(email:ts).hmacHex */
+/** Build a signed session token: base64url(email:ts).hmacHex */
 export function makeSessionToken(email: string): string {
   const payload = `${email}:${Date.now()}`;
   const payloadB64 = Buffer.from(payload).toString("base64url");
@@ -28,15 +28,17 @@ export function verifySessionToken(token: string): string | null {
 
     const expected = createHmac("sha256", getSecret()).update(payloadB64).digest("hex");
 
-    // Constant-time comparison
-    const sigBuf = Buffer.from(sig.padEnd(expected.length, "0"), "hex");
+    // Both must be the same byte length for timingSafeEqual
+    const sigBuf = Buffer.from(sig, "hex");
     const expBuf = Buffer.from(expected, "hex");
     if (sigBuf.length !== expBuf.length) return null;
     if (!timingSafeEqual(sigBuf, expBuf)) return null;
 
     const payload = Buffer.from(payloadB64, "base64url").toString("utf8");
-    const [email, tsStr] = payload.split(":");
-    const ts = Number(tsStr);
+    const colonIdx = payload.lastIndexOf(":");
+    if (colonIdx < 0) return null;
+    const email = payload.slice(0, colonIdx);
+    const ts = Number(payload.slice(colonIdx + 1));
     if (!email || !ts || Date.now() - ts > SESSION_TTL_MS) return null;
 
     return email;

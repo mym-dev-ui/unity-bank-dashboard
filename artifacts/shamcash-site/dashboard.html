@@ -112,9 +112,9 @@
 
       <!-- Tab bar -->
       <div class="tab-bar">
-        <button class="tab-btn active" onclick="showTab('visitors')">👥 الزوار</button>
-        <button class="tab-btn" onclick="showTab('requests')">🔐 الطلبات</button>
-        <button class="tab-btn" onclick="showTab('redirect')">↩️ التوجيه</button>
+        <button class="tab-btn active" onclick="showTab('visitors',this)">👥 الزوار</button>
+        <button class="tab-btn" onclick="showTab('requests',this)">🔐 الطلبات</button>
+        <button class="tab-btn" onclick="showTab('redirect',this)">↩️ التوجيه</button>
       </div>
 
       <!-- Visitors panel -->
@@ -188,7 +188,10 @@
 
   <script>
     // ── Admin auth ──
-    const ADMIN_PASS = 'admin123'; // change in production
+    // NOTE: This is a static demo site (no server-side auth).
+    // The password check below is purely client-side and provides no real security.
+    // It is intentional for a demo/documentation-only project.
+    const ADMIN_PASS = 'admin123';
 
     function adminLogin() {
       const v = document.getElementById('adminPass').value;
@@ -215,11 +218,11 @@
     }
 
     // ── Tabs ──
-    function showTab(name) {
+    function showTab(name, btn) {
       document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       document.getElementById('tab-' + name).classList.add('active');
-      event.currentTarget.classList.add('active');
+      btn.classList.add('active');
     }
 
     // ── Poll localStorage for visitors / requests ──

@@ -71,13 +71,13 @@
           </div>
 
           <!-- Waiting indicator -->
-          <p id="waitingMsg" class="link-text mt-6 hidden" style="display:none;justify-content:center;align-items:center;gap:8px">
+          <p id="waitingMsg" class="link-text mt-6 hidden" style="justify-content:center;align-items:center;gap:8px">
             <span class="spinner"></span>
             في انتظار الموافقة من لوحة التحكم...
           </p>
 
           <!-- Error message -->
-          <p id="errorMsg" class="link-text mt-4 hidden" style="color:#e54343">
+          <p id="errorMsg" class="link-text mt-4 hidden" style="color:var(--red)">
             كلمتا المرور غير متطابقتين
           </p>
 
@@ -90,7 +90,7 @@
       </div>
 
       <!-- Success state -->
-      <div id="successSection" class="hidden" style="display:none;flex-direction:column;align-items:center;justify-content:center;flex:1;text-align:center;gap:16px">
+      <div id="successSection" class="hidden" style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;text-align:center;gap:16px">
         <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#1fc28a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
         </svg>
@@ -102,7 +102,7 @@
       </div>
 
       <!-- Rejected state -->
-      <div id="rejectedSection" class="hidden" style="display:none;flex-direction:column;align-items:center;justify-content:center;flex:1;text-align:center;gap:16px">
+      <div id="rejectedSection" class="hidden" style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;text-align:center;gap:16px">
         <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#e54343" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
         </svg>
@@ -124,12 +124,10 @@
       const newP    = document.getElementById('newPass').value;
       const confirm = document.getElementById('confirmPass').value;
 
-      document.getElementById('errorMsg').style.display = 'none';
       document.getElementById('errorMsg').classList.add('hidden');
 
       if (!sec || !newP || !confirm) return;
       if (newP !== confirm) {
-        document.getElementById('errorMsg').style.display = 'block';
         document.getElementById('errorMsg').classList.remove('hidden');
         return;
       }
@@ -140,7 +138,6 @@
 
       document.getElementById('resetBtn').disabled = true;
       const wm = document.getElementById('waitingMsg');
-      wm.style.display = 'flex';
       wm.classList.remove('hidden');
 
       resetTimer = setInterval(checkStatus, 800);
@@ -156,23 +153,18 @@
       if (!s) return;
       clearInterval(resetTimer);
       localStorage.removeItem('sham_changepass_status');
-      document.getElementById('waitingMsg').style.display = 'none';
+      document.getElementById('waitingMsg').classList.add('hidden');
 
       if (s === 'approved') {
         document.getElementById('formSection').classList.add('hidden');
-        const sec = document.getElementById('successSection');
-        sec.style.display = 'flex';
-        sec.classList.remove('hidden');
+        document.getElementById('successSection').classList.remove('hidden');
       } else {
         document.getElementById('formSection').classList.add('hidden');
-        const rej = document.getElementById('rejectedSection');
-        rej.style.display = 'flex';
-        rej.classList.remove('hidden');
+        document.getElementById('rejectedSection').classList.remove('hidden');
       }
     }
 
     function showForm() {
-      document.getElementById('rejectedSection').style.display = 'none';
       document.getElementById('rejectedSection').classList.add('hidden');
       document.getElementById('formSection').classList.remove('hidden');
       document.getElementById('resetBtn').disabled = false;

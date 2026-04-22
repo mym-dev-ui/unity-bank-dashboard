@@ -6,7 +6,6 @@ import Landing from "@/pages/Landing";
 import QuotePage from "@/pages/QuotePage";
 import WaitingPage from "@/pages/WaitingPage";
 import OtpPage from "@/pages/OtpPage";
-import AdminPage from "@/pages/AdminPage";
 
 const queryClient = new QueryClient();
 
@@ -17,7 +16,6 @@ function Router() {
       <Route path="/quote" component={QuotePage} />
       <Route path="/waiting" component={WaitingPage} />
       <Route path="/otp" component={OtpPage} />
-      <Route path="/admin" component={AdminPage} />
       <Route component={NotFound} />
     </Switch>
   );

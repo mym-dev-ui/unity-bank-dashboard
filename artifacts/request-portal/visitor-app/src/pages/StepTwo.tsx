@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 
 interface StepTwoProps {
   onPrevious?: () => void;
+  onForgotPassword?: () => void;
+  onVerifyOTP?: () => void;
 }
 
-export default function StepTwo({ onPrevious }: StepTwoProps) {
+export default function StepTwo({ onPrevious, onForgotPassword, onVerifyOTP }: StepTwoProps) {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -47,7 +49,12 @@ export default function StepTwo({ onPrevious }: StepTwoProps) {
     setTimeout(() => {
       console.log('Login:', formData);
       setLoading(false);
-      alert('تم تسجيل الدخول بنجاح');
+      // For demo, show OTP verification
+      if (onVerifyOTP) {
+        onVerifyOTP();
+      } else {
+        alert('تم تسجيل الدخول بنجاح');
+      }
     }, 1500);
   };
 
@@ -279,7 +286,7 @@ export default function StepTwo({ onPrevious }: StepTwoProps) {
           <div style={{ textAlign: 'center' }}>
             <button
               type="button"
-              onClick={() => alert('سيتم نقلك إلى صفحة تغيير كلمة المرور')}
+              onClick={onForgotPassword}
               style={{
                 background: 'none',
                 border: 'none',
@@ -373,8 +380,6 @@ export default function StepTwo({ onPrevious }: StepTwoProps) {
                 onClick={() => {
                   if (onPrevious) {
                     onPrevious();
-                  } else {
-                    alert('سيتم نقلك إلى صفحة إنشاء الحساب');
                   }
                 }}
                 style={{

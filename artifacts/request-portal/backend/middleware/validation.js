@@ -1,5 +1,6 @@
 import { createRequestSchema, updateRequestDataSchema, updateRequestStatusSchema, addAdminNotesSchema, listRequestsQuerySchema, visitorProfileSchema } from '../validation/schemas.js';
 
+// Generic validation middleware factory
 export const validateBody = (schema) => {
   return (req, res, next) => {
     const { error, value } = schema.validate(req.body, {
@@ -20,6 +21,7 @@ export const validateBody = (schema) => {
   };
 };
 
+// Generic query validation middleware factory
 export const validateQuery = (schema) => {
   return (req, res, next) => {
     const { error, value } = schema.validate(req.query, {
@@ -40,6 +42,7 @@ export const validateQuery = (schema) => {
   };
 };
 
+// Safe request form validation middleware
 export const validateVisitorRequest = validateBody(createRequestSchema);
 export const validateRequestUpdate = validateBody(updateRequestDataSchema);
 export const validateRequestStatus = validateBody(updateRequestStatusSchema);

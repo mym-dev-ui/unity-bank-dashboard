@@ -20,7 +20,7 @@ export default function StepOne() {
       setError('الاسم الكامل مطلوب');
       return false;
     }
-    if (!formData.phoneNumber.trim() || formData.phoneNumber.length < 9) {
+    if (!formData.phoneNumber.trim() || formData.phoneNumber.length < 7) {
       setError('رقم الجوال غير صحيح');
       return false;
     }
@@ -215,51 +215,35 @@ export default function StepOne() {
             >
               رقم الجوال
             </label>
-            <div
+            <input
+              type="tel"
+              name="phoneNumber"
+              value={formData.phoneNumber}
+              onChange={handleChange}
+              placeholder="أدخل رقم الجوال"
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
                 background: 'rgba(30, 41, 59, 0.6)',
                 border: `2px solid ${error && !formData.phoneNumber ? '#ef4444' : 'rgba(148, 163, 184, 0.2)'}`,
                 borderRadius: '12px',
-                padding: '0 12px',
+                padding: '14px 16px',
+                color: '#ffffff',
+                fontSize: '15px',
+                outline: 'none',
                 transition: 'all 0.3s ease',
+                fontFamily: 'inherit',
+                textAlign: 'right',
               }}
-            >
-              <input
-                type="tel"
-                name="phoneNumber"
-                value={formData.phoneNumber}
-                onChange={handleChange}
-                placeholder="5xxxxxxxx"
-                maxLength="9"
-                style={{
-                  flex: 1,
-                  background: 'transparent',
-                  border: 'none',
-                  color: '#ffffff',
-                  fontSize: '15px',
-                  outline: 'none',
-                  padding: '14px 0',
-                  fontFamily: 'inherit',
-                  textAlign: 'right',
-                }}
-                onFocus={(e) => {
-                  e.currentTarget.parentElement!.style.borderColor = '#3b82f6';
-                  e.currentTarget.parentElement!.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.parentElement!.style.boxShadow = 'none';
-                  if (!error) {
-                    e.currentTarget.parentElement!.style.borderColor = 'rgba(148, 163, 184, 0.2)';
-                  }
-                }}
-              />
-              <span style={{ color: '#94a3b8', fontSize: '14px', fontWeight: '600', whiteSpace: 'nowrap' }}>
-                +966
-              </span>
-            </div>
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = '#3b82f6';
+                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.boxShadow = 'none';
+                if (!error) {
+                  e.currentTarget.style.borderColor = 'rgba(148, 163, 184, 0.2)';
+                }
+              }}
+            />
           </div>
 
           {/* ID Number Input */}

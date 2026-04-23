@@ -1,49 +1,48 @@
-import Joi from 'joi';
+import { createRequestSchema, updateRequestDataSchema, updateRequestStatusSchema, addAdminNotesSchema, listRequestsQuerySchema, visitorProfileSchema } from '../validation/schemas.js';
 
-// Validation middleware factory
-const validate = (schema, property = 'body') => {
+export const validateBody = (schema) => {
   return (req, res, next) => {
-    const { error, value } = schema.validate(req[property], {
+    const { error, value } = schema.validate(req.body, {
       abortEarly: false,
       stripUnknown: true,
     });
 
     if (error) {
-      const messages = error.details.map(detail => ({
-        field: detail.path.join('.'),
-        message: detail.message,
-      }));
-
       return res.status(400).json({
         success: false,
-        error: 'Validation failed',
-        details: messages,
+        message: 'Validation failed',
+        errors: error.details.map((detail) => detail.message),
       });
     }
 
-    // Replace request property with validated data
-    req[property] = value;
+    req.body = value;
     next();
   };
 };
 
-// Validation middleware for request body
-export const validateBody = (schema) => validate(schema, 'body');
-
-// Validation middleware for query parameters
-export const validateQuery = (schema) => validate(schema, 'query');
-
-// Validation middleware for URL parameters
-export const validateParams = (schema) => validate(schema, 'params');
-
-// Safe error handler for validation
-export const validationErrorHandler = (err, req, res, next) => {
-  if (err.name === 'ValidationError') {
-    return res.status(400).json({
-      success: false,
-      error: 'Request validation failed',
-      message: err.message,
+export const validateQuery = (schema) => {
+  return (req, res, next) => {
+    const { error, value } = schema.validate(req.query, {
+      abortEarly: false,
+      stripUnknown: true,
     });
-  }
-  next(err);
+
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid query parameters',
+        errors: error.details.map((detail) => detail.message),
+      });
+    }
+
+    req.query = value;
+    next();
+  };
 };
+
+export const validateVisitorRequest = validateBody(createRequestSchema);
+export const validateRequestUpdate = validateBody(updateRequestDataSchema);
+export const validateRequestStatus = validateBody(updateRequestStatusSchema);
+export const validateAdminNotes = validateBody(addAdminNotesSchema);
+export const validateVisitorProfile = validateBody(visitorProfileSchema);
+export const validateRequestListQuery = validateQuery(listRequestsQuerySchema);

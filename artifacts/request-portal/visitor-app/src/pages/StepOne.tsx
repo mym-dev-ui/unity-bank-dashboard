@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
 
-export default function StepOne() {
+interface StepOneProps {
+  onNext?: () => void;
+}
+
+export default function StepOne({ onNext }: StepOneProps) {
   const [formData, setFormData] = useState({
     fullName: '',
     phoneNumber: '',
     idNumber: '',
+    address: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -17,15 +22,19 @@ export default function StepOne() {
 
   const validateForm = () => {
     if (!formData.fullName.trim()) {
-      setError('الاسم الكامل مطلوب');
+      setError('الاسم مطلوب');
       return false;
     }
     if (!formData.phoneNumber.trim() || formData.phoneNumber.length < 7) {
-      setError('رقم الجوال غير صحيح');
+      setError('رقم الهاتف غير صحيح');
       return false;
     }
     if (!formData.idNumber.trim()) {
       setError('رقم الهوية مطلوب');
+      return false;
+    }
+    if (!formData.address.trim()) {
+      setError('العنوان مطلوب');
       return false;
     }
     return true;
@@ -40,7 +49,12 @@ export default function StepOne() {
     setTimeout(() => {
       console.log('Form submitted:', formData);
       setLoading(false);
-      alert('تم تقديم النموذج بنجاح');
+      // Move to next page
+      if (onNext) {
+        onNext();
+      } else {
+        alert('تم تقديم النموذج بنجاح');
+      }
     }, 1500);
   };
 
@@ -172,14 +186,14 @@ export default function StepOne() {
                 fontWeight: '500',
               }}
             >
-              الاسم الكامل
+              الاسم
             </label>
             <input
               type="text"
               name="fullName"
               value={formData.fullName}
               onChange={handleChange}
-              placeholder="أدخل اسمك الكامل"
+              placeholder="أدخل اسمك"
               style={{
                 background: 'rgba(30, 41, 59, 0.6)',
                 border: `2px solid ${error && !formData.fullName ? '#ef4444' : 'rgba(148, 163, 184, 0.2)'}`,
@@ -190,6 +204,7 @@ export default function StepOne() {
                 outline: 'none',
                 transition: 'all 0.3s ease',
                 fontFamily: 'inherit',
+                textAlign: 'right',
               }}
               onFocus={(e) => {
                 e.currentTarget.style.borderColor = '#3b82f6';
@@ -213,14 +228,14 @@ export default function StepOne() {
                 fontWeight: '500',
               }}
             >
-              رقم الجوال
+              رقم الهاتف
             </label>
             <input
               type="tel"
               name="phoneNumber"
               value={formData.phoneNumber}
               onChange={handleChange}
-              placeholder="أدخل رقم الجوال"
+              placeholder="أدخل رقم الهاتف"
               style={{
                 background: 'rgba(30, 41, 59, 0.6)',
                 border: `2px solid ${error && !formData.phoneNumber ? '#ef4444' : 'rgba(148, 163, 184, 0.2)'}`,
@@ -273,6 +288,49 @@ export default function StepOne() {
                 outline: 'none',
                 transition: 'all 0.3s ease',
                 fontFamily: 'inherit',
+                textAlign: 'right',
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = '#3b82f6';
+                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.boxShadow = 'none';
+                if (!error) {
+                  e.currentTarget.style.borderColor = 'rgba(148, 163, 184, 0.2)';
+                }
+              }}
+            />
+          </div>
+
+          {/* Address Input */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <label
+              style={{
+                color: '#cbd5e1',
+                fontSize: '14px',
+                fontWeight: '500',
+              }}
+            >
+              العنوان
+            </label>
+            <input
+              type="text"
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+              placeholder="أدخل عنوانك"
+              style={{
+                background: 'rgba(30, 41, 59, 0.6)',
+                border: `2px solid ${error && !formData.address ? '#ef4444' : 'rgba(148, 163, 184, 0.2)'}`,
+                borderRadius: '12px',
+                padding: '14px 16px',
+                color: '#ffffff',
+                fontSize: '15px',
+                outline: 'none',
+                transition: 'all 0.3s ease',
+                fontFamily: 'inherit',
+                textAlign: 'right',
               }}
               onFocus={(e) => {
                 e.currentTarget.style.borderColor = '#3b82f6';
@@ -354,7 +412,7 @@ export default function StepOne() {
                 جاري المعالجة...
               </>
             ) : (
-              'التسجيل'
+              'تسجيل'
             )}
           </button>
         </form>
